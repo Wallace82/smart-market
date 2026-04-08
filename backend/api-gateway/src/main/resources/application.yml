@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/users/**
+        - id: supermarket-service
+          uri: ${SUPERMARKET_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v1/supermarkets/**,/api/v1/plans/**
+        - id: product-service
+          uri: ${PRODUCT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/v1/products/**,/api/v1/categories/**,/api/v1/promotions/**,/api/v1/flyers/**
+        - id: client-service
+          uri: ${CLIENT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/v1/clients/**,/api/v1/favorites/**,/api/v1/shopping-lists/**,/api/v1/visualizations/**,/api/v1/nearby-supermarkets/**
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/campaigns/**,/api/v1/geofence/**,/api/v1/notifications/**
+        - id: recommendation-service
+          uri: ${RECOMMENDATION_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/recommendations/**
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

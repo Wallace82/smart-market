@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Recommendation Service API
+  version: 1.0.0
+  description: Contrato inicial do recommendation-service para o MVP do SmartMarket.
+servers:
+  - url: /api/v1
+tags:
+  - name: Recommendations
+paths:
+  /recommendations/me:
+    get:
+      tags: [Recommendations]
+      summary: Obter recomendacoes para cliente autenticado
+      operationId: getRecommendationsForMe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Lista de recomendacoes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecommendationResponse'
+  /recommendations/supermarkets/{id}:
+    get:
+      tags: [Recommendations]
+      summary: Obter recomendacoes por supermercado
+      operationId: getRecommendationsBySupermarket
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SupermarketIdPath'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Lista de recomendacoes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecommendationResponse'
+  /recommendations/rebuild:
+    post:
+      tags: [Recommendations]
+      summary: Reprocessar base de recomendacoes
+      operationId: rebuildRecommendations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RebuildRequest'
+      responses:
+        '202':
+          description: Reprocessamento iniciado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RebuildResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    SupermarketIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    RecommendationReason:
+      type: string
+      enum:
+        - VIEW_HISTORY
+        - FAVORITE_SIMILARITY
+        - CATEGORY_PREFERENCE
+        - COLLABORATIVE_SIGNAL
+    RecommendationResponse:
+      type: object
+      required: [productId, supermarketId, score, reason]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        score:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        reason:
+          $ref: '#/components/schemas/RecommendationReason'
+        generatedAt:
+          type: string
+          format: date-time
+    RebuildRequest:
+      type: object
+      properties:
+        fullRebuild:
+          type: boolean
+          default: false
+        supermarketId:
+          type: string
+          format: uuid
+        since:
+          type: string
+          format: date-time
+    RebuildResponse:
+      type: object
+      required: [accepted, jobId]
+      properties:
+        accepted:
+          type: boolean
+        jobId:
+          type: string
+        estimatedCompletionSeconds:
+          type: integer
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

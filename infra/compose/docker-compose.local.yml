@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: smartmarket-postgres
+    environment:
+      POSTGRES_DB: smartmarket
+      POSTGRES_USER: smartmarket
+      POSTGRES_PASSWORD: smartmarket
+    ports:
+      - "5432:5432"
+    volumes:
+      - smartmarket_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartmarket -d smartmarket"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api-gateway:
+    build:
+      context: ../../backend/api-gateway
+    container_name: smartmarket-api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - supermarket-service
+      - product-service
+      - client-service
+      - notification-service
+      - recommendation-service
+
+  auth-service:
+    build:
+      context: ../../backend/services/auth-service
+    container_name: smartmarket-auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  supermarket-service:
+    build:
+      context: ../../backend/services/supermarket-service
+    container_name: smartmarket-supermarket-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  product-service:
+    build:
+      context: ../../backend/services/product-service
+    container_name: smartmarket-product-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  client-service:
+    build:
+      context: ../../backend/services/client-service
+    container_name: smartmarket-client-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: ../../backend/services/notification-service
+    container_name: smartmarket-notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  recommendation-service:
+    build:
+      context: ../../backend/services/recommendation-service
+    container_name: smartmarket-recommendation-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  smartmarket_postgres_data:

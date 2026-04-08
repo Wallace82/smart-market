@@ -1,0 +1,540 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Product Service API
+  version: 1.0.0
+  description: Contrato inicial do product-service para o MVP do SmartMarket.
+servers:
+  - url: /api/v1
+tags:
+  - name: Categories
+  - name: Products
+  - name: Promotions
+  - name: Flyers
+paths:
+  /categories:
+    get:
+      tags: [Categories]
+      summary: Listar categorias
+      operationId: listCategories
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de categorias
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedCategoryResponse'
+    post:
+      tags: [Categories]
+      summary: Criar categoria
+      operationId: createCategory
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Categoria criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+  /products:
+    get:
+      tags: [Products]
+      summary: Buscar produtos
+      operationId: listProducts
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 120
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista de produtos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedProductResponse'
+    post:
+      tags: [Products]
+      summary: Criar produto
+      operationId: createProduct
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Produto criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+  /products/{id}:
+    put:
+      tags: [Products]
+      summary: Atualizar produto
+      operationId: updateProduct
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Produto atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Produto nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{id}/status:
+    patch:
+      tags: [Products]
+      summary: Atualizar status do produto
+      operationId: updateProductStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ProductIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductStatusRequest'
+      responses:
+        '200':
+          description: Status atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+  /promotions:
+    post:
+      tags: [Promotions]
+      summary: Criar promocao
+      operationId: createPromotion
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePromotionRequest'
+      responses:
+        '201':
+          description: Promocao criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromotionResponse'
+        '422':
+          description: Regra de negocio violada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /promotions/active:
+    get:
+      tags: [Promotions]
+      summary: Listar promocoes ativas
+      operationId: listActivePromotions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de promocoes ativas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPromotionResponse'
+  /flyers:
+    post:
+      tags: [Flyers]
+      summary: Criar encarte digital
+      operationId: createFlyer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFlyerRequest'
+      responses:
+        '201':
+          description: Encarte criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlyerResponse'
+  /flyers/{id}/publish:
+    post:
+      tags: [Flyers]
+      summary: Publicar encarte
+      operationId: publishFlyer
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FlyerIdPath'
+      responses:
+        '200':
+          description: Encarte publicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlyerResponse'
+        '422':
+          description: Encarte sem promocoes validas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /flyers/{id}/duplicate:
+    post:
+      tags: [Flyers]
+      summary: Duplicar encarte
+      operationId: duplicateFlyer
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FlyerIdPath'
+      responses:
+        '201':
+          description: Encarte duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlyerResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ProductIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    FlyerIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    ProductStatus:
+      type: string
+      enum: [ATIVO, INATIVO, ESGOTADO]
+    PromotionStatus:
+      type: string
+      enum: [RASCUNHO, AGENDADA, ATIVA, EXPIRADA, CANCELADA]
+    FlyerStatus:
+      type: string
+      enum: [RASCUNHO, PUBLICADO, EXPIRADO, ARQUIVADO]
+    CreateCategoryRequest:
+      type: object
+      required: [supermarketId, name]
+      properties:
+        supermarketId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 2
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 255
+    CategoryResponse:
+      type: object
+      required: [id, supermarketId, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        active:
+          type: boolean
+    CreateProductRequest:
+      type: object
+      required: [supermarketId, categoryId, name, unitMeasure, basePrice]
+      properties:
+        supermarketId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+        brand:
+          type: string
+          maxLength: 80
+        unitMeasure:
+          type: string
+          example: UN
+        basePrice:
+          type: number
+          format: double
+          minimum: 0.01
+    UpdateProductRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateProductRequest'
+    UpdateProductStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+    ProductResponse:
+      type: object
+      required: [id, supermarketId, categoryId, name, unitMeasure, basePrice, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        brand:
+          type: string
+        unitMeasure:
+          type: string
+        basePrice:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+    CreatePromotionRequest:
+      type: object
+      required: [productId, promotionalPrice, startAt, endAt]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        promotionalPrice:
+          type: number
+          format: double
+          minimum: 0.01
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        highlight:
+          type: boolean
+          default: false
+    PromotionResponse:
+      type: object
+      required: [id, productId, promotionalPrice, startAt, endAt, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        promotionalPrice:
+          type: number
+          format: double
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/PromotionStatus'
+        highlight:
+          type: boolean
+    CreateFlyerRequest:
+      type: object
+      required: [supermarketId, title, promotionIds]
+      properties:
+        supermarketId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+        promotionIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+    FlyerResponse:
+      type: object
+      required: [id, supermarketId, title, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/FlyerStatus'
+        promotionIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    PageMetadata:
+      type: object
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+    PagedCategoryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    PagedProductResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    PagedPromotionResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromotionResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

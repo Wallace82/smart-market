@@ -1,0 +1,493 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Client Service API
+  version: 1.0.0
+  description: Contrato inicial do client-service para o MVP do SmartMarket.
+servers:
+  - url: /api/v1
+tags:
+  - name: ClientProfile
+  - name: Favorites
+  - name: ShoppingLists
+  - name: Visualizations
+  - name: Nearby
+paths:
+  /clients/me:
+    get:
+      tags: [ClientProfile]
+      summary: Obter perfil do cliente autenticado
+      operationId: getMyProfile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfileResponse'
+    put:
+      tags: [ClientProfile]
+      summary: Atualizar perfil e preferencias do cliente
+      operationId: updateMyProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClientProfileRequest'
+      responses:
+        '200':
+          description: Perfil atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfileResponse'
+  /clients/me/consents:
+    patch:
+      tags: [ClientProfile]
+      summary: Atualizar consentimentos LGPD, geo e push
+      operationId: updateMyConsents
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConsentsRequest'
+      responses:
+        '200':
+          description: Consentimentos atualizados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfileResponse'
+  /favorites:
+    get:
+      tags: [Favorites]
+      summary: Listar favoritos do cliente
+      operationId: listFavorites
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista paginada de favoritos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedFavoriteResponse'
+    post:
+      tags: [Favorites]
+      summary: Adicionar favorito
+      operationId: addFavorite
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFavoriteRequest'
+      responses:
+        '201':
+          description: Favorito criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoriteResponse'
+        '409':
+          description: Favorito ja existente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /favorites/{id}:
+    delete:
+      tags: [Favorites]
+      summary: Remover favorito
+      operationId: removeFavorite
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FavoriteIdPath'
+      responses:
+        '204':
+          description: Favorito removido
+  /shopping-lists:
+    get:
+      tags: [ShoppingLists]
+      summary: Listar listas de compras
+      operationId: listShoppingLists
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista paginada de listas de compras
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedShoppingListResponse'
+    post:
+      tags: [ShoppingLists]
+      summary: Criar lista de compras
+      operationId: createShoppingList
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShoppingListRequest'
+      responses:
+        '201':
+          description: Lista criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingListResponse'
+  /shopping-lists/{id}/items:
+    post:
+      tags: [ShoppingLists]
+      summary: Adicionar item na lista
+      operationId: addShoppingListItem
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShoppingListIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShoppingListItemRequest'
+      responses:
+        '201':
+          description: Item adicionado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingListResponse'
+  /shopping-lists/{id}/finalize:
+    patch:
+      tags: [ShoppingLists]
+      summary: Finalizar lista de compras
+      operationId: finalizeShoppingList
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShoppingListIdPath'
+      responses:
+        '200':
+          description: Lista finalizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingListResponse'
+        '422':
+          description: Lista sem itens ou ja finalizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /visualizations:
+    post:
+      tags: [Visualizations]
+      summary: Registrar visualizacao de produto
+      operationId: registerVisualization
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVisualizationRequest'
+      responses:
+        '202':
+          description: Evento de visualizacao registrado
+  /nearby-supermarkets:
+    get:
+      tags: [Nearby]
+      summary: Buscar supermercados proximos
+      operationId: listNearbySupermarkets
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: radiusMeters
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 50000
+            default: 5000
+      responses:
+        '200':
+          description: Supermercados proximos encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NearbySupermarketResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    FavoriteIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ShoppingListIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    FavoriteType:
+      type: string
+      enum: [PRODUCT, SUPERMARKET]
+    ShoppingListStatus:
+      type: string
+      enum: [ABERTA, FINALIZADA, ARQUIVADA]
+    ClientProfileResponse:
+      type: object
+      required: [id, userId, displayName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        consentLgpd:
+          type: boolean
+        consentGeo:
+          type: boolean
+        consentPush:
+          type: boolean
+    UpdateClientProfileRequest:
+      type: object
+      required: [displayName]
+      properties:
+        displayName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        birthDate:
+          type: string
+          format: date
+    UpdateConsentsRequest:
+      type: object
+      properties:
+        consentLgpd:
+          type: boolean
+        consentGeo:
+          type: boolean
+        consentPush:
+          type: boolean
+    CreateFavoriteRequest:
+      type: object
+      required: [type, referenceId]
+      properties:
+        type:
+          $ref: '#/components/schemas/FavoriteType'
+        referenceId:
+          type: string
+          format: uuid
+    FavoriteResponse:
+      type: object
+      required: [id, type, referenceId, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/FavoriteType'
+        referenceId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+    CreateShoppingListRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+    CreateShoppingListItemRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: number
+          format: double
+          minimum: 0.1
+        referencePrice:
+          type: number
+          format: double
+          minimum: 0
+    ShoppingListItemResponse:
+      type: object
+      required: [id, productId, quantity]
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: number
+          format: double
+        referencePrice:
+          type: number
+          format: double
+    ShoppingListResponse:
+      type: object
+      required: [id, name, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/ShoppingListStatus'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShoppingListItemResponse'
+    CreateVisualizationRequest:
+      type: object
+      required: [productId, supermarketId]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        visualizedAt:
+          type: string
+          format: date-time
+    NearbySupermarketResponse:
+      type: object
+      required: [id, tradeName, distanceMeters]
+      properties:
+        id:
+          type: string
+          format: uuid
+        tradeName:
+          type: string
+        distanceMeters:
+          type: integer
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+    PageMetadata:
+      type: object
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+    PagedFavoriteResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    PagedShoppingListResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShoppingListResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

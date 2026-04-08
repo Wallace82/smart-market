@@ -1,0 +1,380 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Supermarket Service API
+  version: 1.0.0
+  description: Contrato inicial do supermarket-service para o MVP do SmartMarket.
+servers:
+  - url: /api/v1
+tags:
+  - name: Supermarkets
+  - name: Plans
+  - name: Subscriptions
+paths:
+  /supermarkets:
+    get:
+      tags: [Supermarkets]
+      summary: Listar supermercados
+      operationId: listSupermarkets
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista paginada de supermercados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedSupermarketResponse'
+    post:
+      tags: [Supermarkets]
+      summary: Criar supermercado
+      operationId: createSupermarket
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupermarketRequest'
+      responses:
+        '201':
+          description: Supermercado criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermarketResponse'
+  /supermarkets/{id}:
+    get:
+      tags: [Supermarkets]
+      summary: Consultar supermercado por ID
+      operationId: getSupermarketById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SupermarketIdPath'
+      responses:
+        '200':
+          description: Supermercado encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermarketResponse'
+        '404':
+          description: Supermercado nao encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /supermarkets/{id}/status:
+    patch:
+      tags: [Supermarkets]
+      summary: Atualizar status do supermercado
+      operationId: updateSupermarketStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SupermarketIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupermarketStatusRequest'
+      responses:
+        '200':
+          description: Status atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermarketResponse'
+  /plans:
+    get:
+      tags: [Plans]
+      summary: Listar planos
+      operationId: listPlans
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de planos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlanResponse'
+    post:
+      tags: [Plans]
+      summary: Criar plano
+      operationId: createPlan
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlanRequest'
+      responses:
+        '201':
+          description: Plano criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanResponse'
+  /supermarkets/{id}/subscriptions:
+    post:
+      tags: [Subscriptions]
+      summary: Contratar ou alterar assinatura do supermercado
+      operationId: createOrChangeSubscription
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SupermarketIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Assinatura criada ou atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+  /supermarkets/{id}/subscriptions/current:
+    get:
+      tags: [Subscriptions]
+      summary: Obter assinatura vigente do supermercado
+      operationId: getCurrentSubscription
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SupermarketIdPath'
+      responses:
+        '200':
+          description: Assinatura encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionResponse'
+        '404':
+          description: Assinatura nao encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    SupermarketIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    SupermarketStatus:
+      type: string
+      enum: [PENDENTE, ATIVO, INATIVO, BLOQUEADO]
+    SubscriptionStatus:
+      type: string
+      enum: [TRIAL, ATIVA, SUSPENSA, VENCIDA, CANCELADA]
+    CreateSupermarketRequest:
+      type: object
+      required: [tradeName, cnpj, address, latitude, longitude]
+      properties:
+        tradeName:
+          type: string
+          minLength: 3
+          maxLength: 120
+        cnpj:
+          type: string
+          minLength: 14
+          maxLength: 18
+        address:
+          type: string
+          maxLength: 255
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        operationRadiusMeters:
+          type: integer
+          minimum: 100
+          maximum: 50000
+          default: 3000
+    UpdateSupermarketStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/SupermarketStatus'
+        reason:
+          type: string
+          maxLength: 255
+    SupermarketResponse:
+      type: object
+      required: [id, tradeName, cnpj, status, address]
+      properties:
+        id:
+          type: string
+          format: uuid
+        tradeName:
+          type: string
+        cnpj:
+          type: string
+        status:
+          $ref: '#/components/schemas/SupermarketStatus'
+        address:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        operationRadiusMeters:
+          type: integer
+    CreatePlanRequest:
+      type: object
+      required: [name, monthlyPrice, productLimit, managerLimit, publicationLimit]
+      properties:
+        name:
+          type: string
+          enum: [FREE, BASIC, PREMIUM]
+        monthlyPrice:
+          type: number
+          format: double
+          minimum: 0
+        productLimit:
+          type: integer
+          minimum: 1
+        managerLimit:
+          type: integer
+          minimum: 1
+        publicationLimit:
+          type: integer
+          minimum: 1
+    PlanResponse:
+      type: object
+      required: [id, name, monthlyPrice, productLimit, managerLimit, publicationLimit]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        monthlyPrice:
+          type: number
+          format: double
+        productLimit:
+          type: integer
+        managerLimit:
+          type: integer
+        publicationLimit:
+          type: integer
+    CreateSubscriptionRequest:
+      type: object
+      required: [planId, startAt]
+      properties:
+        planId:
+          type: string
+          format: uuid
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        autoRenew:
+          type: boolean
+          default: true
+    SubscriptionResponse:
+      type: object
+      required: [id, supermarketId, planId, status, startAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        planId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/SubscriptionStatus'
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        autoRenew:
+          type: boolean
+    PageMetadata:
+      type: object
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+    PagedSupermarketResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupermarketResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

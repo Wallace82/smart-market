@@ -1,0 +1,309 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Notification Service API
+  version: 1.0.0
+  description: Contrato inicial do notification-service para o MVP do SmartMarket.
+servers:
+  - url: /api/v1
+tags:
+  - name: Campaigns
+  - name: Geofence
+  - name: Notifications
+paths:
+  /campaigns:
+    post:
+      tags: [Campaigns]
+      summary: Criar campanha de notificacao
+      operationId: createCampaign
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCampaignRequest'
+      responses:
+        '201':
+          description: Campanha criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+    get:
+      tags: [Campaigns]
+      summary: Listar campanhas por supermercado
+      operationId: listCampaigns
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista paginada de campanhas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedCampaignResponse'
+  /campaigns/{id}/status:
+    patch:
+      tags: [Campaigns]
+      summary: Ativar ou pausar campanha
+      operationId: updateCampaignStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CampaignIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCampaignStatusRequest'
+      responses:
+        '200':
+          description: Status atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+  /geofence/evaluate:
+    post:
+      tags: [Geofence]
+      summary: Avaliar disparo de notificacao por geofencing
+      operationId: evaluateGeofence
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeofenceEvaluateRequest'
+      responses:
+        '202':
+          description: Avaliacao recebida; entrega processada assincronamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeofenceEvaluateResponse'
+  /notifications/history:
+    get:
+      tags: [Notifications]
+      summary: Historico de notificacoes
+      operationId: listNotificationHistory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: campaignId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/NotificationDeliveryStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista paginada de entregas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedDeliveryResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    CampaignIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    CampaignStatus:
+      type: string
+      enum: [ATIVA, PAUSADA]
+    NotificationDeliveryStatus:
+      type: string
+      enum: [PENDENTE, ENVIADA, FALHA, BLOQUEADA]
+    CreateCampaignRequest:
+      type: object
+      required: [supermarketId, title, message, radiusMeters, dailyLimitPerClient]
+      properties:
+        supermarketId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+          maxLength: 120
+        message:
+          type: string
+          minLength: 3
+          maxLength: 500
+        radiusMeters:
+          type: integer
+          minimum: 100
+          maximum: 50000
+        dailyLimitPerClient:
+          type: integer
+          minimum: 1
+          maximum: 20
+    UpdateCampaignStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/CampaignStatus'
+    CampaignResponse:
+      type: object
+      required: [id, supermarketId, title, message, radiusMeters, dailyLimitPerClient, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        message:
+          type: string
+        radiusMeters:
+          type: integer
+        dailyLimitPerClient:
+          type: integer
+        status:
+          $ref: '#/components/schemas/CampaignStatus'
+        createdAt:
+          type: string
+          format: date-time
+    GeofenceEvaluateRequest:
+      type: object
+      required: [clientId, latitude, longitude, eventAt]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        eventAt:
+          type: string
+          format: date-time
+    GeofenceEvaluateResponse:
+      type: object
+      required: [accepted]
+      properties:
+        accepted:
+          type: boolean
+        traceId:
+          type: string
+    NotificationDeliveryResponse:
+      type: object
+      required: [id, campaignId, clientId, status, sentAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        campaignId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/NotificationDeliveryStatus'
+        sentAt:
+          type: string
+          format: date-time
+        blockReason:
+          type: string
+    PageMetadata:
+      type: object
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+    PagedCampaignResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    PagedDeliveryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationDeliveryResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

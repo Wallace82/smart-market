@@ -14,6 +14,12 @@ public class Supermercado {
     private Double longitude;
     private Integer raioAtuacao; // em metros
     private UUID gestorId;
+    
+    // Novas propriedades de Customização / Whitelabel (Tabloide Digital)
+    private String urlLogomarca;
+    private String corPrimariaHex;
+    private String corSecundariaHex;
+
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
 
@@ -51,6 +57,14 @@ public class Supermercado {
     public void setRaioAtuacao(Integer raioAtuacao) { this.raioAtuacao = raioAtuacao; }
     public UUID getGestorId() { return gestorId; }
     public void setGestorId(UUID gestorId) { this.gestorId = gestorId; }
+    
+    public String getUrlLogomarca() { return urlLogomarca; }
+    public void setUrlLogomarca(String urlLogomarca) { this.urlLogomarca = urlLogomarca; }
+    public String getCorPrimariaHex() { return corPrimariaHex; }
+    public void setCorPrimariaHex(String corPrimariaHex) { this.corPrimariaHex = corPrimariaHex; }
+    public String getCorSecundariaHex() { return corSecundariaHex; }
+    public void setCorSecundariaHex(String corSecundariaHex) { this.corSecundariaHex = corSecundariaHex; }
+
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }

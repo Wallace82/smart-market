@@ -21,6 +21,11 @@ public class SupermercadoMapper {
         domain.setLongitude(entity.getLongitude());
         domain.setRaioAtuacao(entity.getRaioAtuacao());
         domain.setGestorId(entity.getGestorId());
+        
+        domain.setUrlLogomarca(entity.getUrlLogomarca());
+        domain.setCorPrimariaHex(entity.getCorPrimariaHex());
+        domain.setCorSecundariaHex(entity.getCorSecundariaHex());
+        
         domain.setCriadoEm(entity.getCriadoEm());
         domain.setAtualizadoEm(entity.getAtualizadoEm());
         return domain;
@@ -40,6 +45,11 @@ public class SupermercadoMapper {
         entity.setLongitude(domain.getLongitude());
         entity.setRaioAtuacao(domain.getRaioAtuacao());
         entity.setGestorId(domain.getGestorId());
+        
+        entity.setUrlLogomarca(domain.getUrlLogomarca());
+        entity.setCorPrimariaHex(domain.getCorPrimariaHex());
+        entity.setCorSecundariaHex(domain.getCorSecundariaHex());
+
         entity.setCriadoEm(domain.getCriadoEm());
         entity.setAtualizadoEm(domain.getAtualizadoEm());
         return entity;

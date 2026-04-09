@@ -37,6 +37,15 @@ public class SupermercadoEntity {
     @Column(name = "gestor_id", nullable = false)
     private UUID gestorId;
 
+    @Column(name = "url_logomarca")
+    private String urlLogomarca;
+
+    @Column(name = "cor_primaria_hex", length = 7)
+    private String corPrimariaHex;
+
+    @Column(name = "cor_secundaria_hex", length = 7)
+    private String corSecundariaHex;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -74,6 +83,14 @@ public class SupermercadoEntity {
     public void setRaioAtuacao(Integer raioAtuacao) { this.raioAtuacao = raioAtuacao; }
     public UUID getGestorId() { return gestorId; }
     public void setGestorId(UUID gestorId) { this.gestorId = gestorId; }
+    
+    public String getUrlLogomarca() { return urlLogomarca; }
+    public void setUrlLogomarca(String urlLogomarca) { this.urlLogomarca = urlLogomarca; }
+    public String getCorPrimariaHex() { return corPrimariaHex; }
+    public void setCorPrimariaHex(String corPrimariaHex) { this.corPrimariaHex = corPrimariaHex; }
+    public String getCorSecundariaHex() { return corSecundariaHex; }
+    public void setCorSecundariaHex(String corSecundariaHex) { this.corSecundariaHex = corSecundariaHex; }
+
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }

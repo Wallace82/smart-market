@@ -43,5 +43,7 @@ app:
     secret-key: ${MINIO_SECRET_KEY:password}
     bucket-name: ${MINIO_BUCKET_NAME:smartmarket-products}
     public-url-prefix: ${MINIO_PUBLIC_URL_PREFIX:http://localhost:9000/smartmarket-products/}
+    bucket-name-themes: ${MINIO_BUCKET_NAME_THEMES:smartmarket-themes}
+    public-url-prefix-themes: ${MINIO_PUBLIC_URL_PREFIX_THEMES:http://localhost:9000/smartmarket-themes/}
   jwt:
     secret: ${JWT_SECRET:dGhpcy1pcy1hLXZlcnktbG9uZy1hbmQtc2VjdXJlLWp3dC1zZWNyZXQta2V5LWZvci1zbWFydG1hcmtldA==}

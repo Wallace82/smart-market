@@ -1,6 +1,6 @@
 ﻿# 📋 SmartMarket — Documento de Requisitos
 
-> **Versão:** 1.2.0
+> **Versão:** 1.4.0
 > **Data:** 2025
 > **Status:** Em desenvolvimento
 > **Equipe:** 3 desenvolvedores
@@ -27,7 +27,7 @@
 
 ### 1.1 Descrição
 
-O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que conecta supermercados a seus clientes por meio de encartes digitais, promoções personalizadas e notificações por geolocalização. O sistema opera com um catálogo base unificado de produtos.
+O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que conecta supermercados a seus clientes por meio de encartes digitais, promoções personalizadas e notificações por geolocalização. O sistema opera com um catálogo base unificado de produtos e permite a personalização visual da loja virtual do supermercado, incluindo temas para encartes sazonais.
 
 ### 1.2 Problema que Resolve
 
@@ -37,11 +37,13 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | Dificuldade de divulgação dos supermercados | Perda de clientes e oportunidades |
 | Trabalho manual e duplicado no cadastro de produtos | Perda de tempo dos gestores de supermercado |
 | Falta de flexibilidade para o cliente final | Dificuldade em montar lista de compras mais barata |
+| Descaracterização da marca do supermercado no app | Sensação de distanciamento e falta de confiança pelo cliente |
+| Baixo engajamento em datas comemorativas | Dificuldade em criar campanhas temáticas rapidamente |
 
 ### 1.3 Proposta de Valor
 
 *   **Para CLIENTES:** Promoções do supermercado mais próximo + recomendações personalizadas.
-*   **Para SUPERMERCADOS:** Catálogo de produtos pronto (basta colocar o preço) + atração de clientes próximos.
+*   **Para SUPERMERCADOS:** Catálogo de produtos pronto + atração de clientes + **Tabloide Digital Temático e Whitelabel (Identidade Visual Própria e Temas Sazonais)**.
 *   **Para o NEGÓCIO:** SaaS com modelo de assinatura por supermercado + catálogo padronizado e limpo.
 
 ### 1.4 Identificação do Produto
@@ -63,122 +65,86 @@ A plataforma atende a três papéis distintos, cada um com sua visão e acesso e
 
 | Perfil | Descrição | Acesso Principal |
 |---|---|---|
-| **Admin** (ROLE_ADMIN) | Gestor total da plataforma SmartMarket. Responsável pelo negócio SaaS e pelo **Catálogo Global de Produtos**. | Painel administrativo global (Backoffice). |
-| **Gestor Supermercado** (ROLE_GESTOR) | Responsável pela operação comercial de um ou mais supermercados. Apenas consulta o catálogo para adicionar seu próprio preço/oferta. | Painel do estabelecimento (Dashboard Loja). |
+| **Admin** (ROLE_ADMIN) | Gestor total da plataforma SmartMarket. Responsável pelo negócio SaaS, pelo Catálogo Global e pelos **Temas Base**. | Painel administrativo global (Backoffice). |
+| **Gestor Supermercado** (ROLE_GESTOR) | Responsável pela operação comercial de um ou mais supermercados. Adiciona ofertas e cria encartes usando sua marca e **temas**. | Painel do estabelecimento (Dashboard Loja). |
 | **Cliente** (ROLE_CLIENTE) | Usuário final (consumidor) das promoções. | App web responsivo / Mobile-first. |
 
 ### 2.2 Especificação dos Dashboards
 
-A interface de cada usuário será adaptada para suas necessidades operacionais:
-
 #### 1. Dashboard Admin (Visão Global da Plataforma)
-*   **Métricas Principais:**
-    *   Total de Produtos no Catálogo Global.
-    *   Total de Supermercados Ativos vs Inativos.
-    *   MRR (Monthly Recurring Revenue) estimado baseado nos planos ativos.
+*   **Métricas Principais:** Total de Produtos, Supermercados Ativos, MRR.
 *   **Ações e Gráficos:**
-    *   **Gestão de Catálogo:** Aprovar e incluir novos produtos com suas imagens padrão no MinIO.
-    *   Gráfico de crescimento de novas assinaturas (Mês a Mês).
-    *   Tabela de supermercados com plano vencendo nos próximos 7 dias.
+    *   Gestão de Catálogo (Aprovação e imagens).
+    *   **Gestão de Temas Sazonais (NOVO):** Criar e disponibilizar temas globais (ex: Natal, Black Friday, Dia das Mães) para os supermercados utilizarem nos seus encartes.
+    *   Métricas financeiras e logs.
 
 #### 2. Dashboard Gestor Supermercado (Visão da Loja)
-*   **Métricas Principais:**
-    *   Total de produtos do catálogo vinculados à sua loja (Produtos Ofertados).
-    *   Visitas ao encarte ativo atual.
-    *   Total de vezes que produtos da loja foram adicionados em listas de compras.
+*   **Métricas Principais:** Produtos Ofertados, Visitas ao encarte, Listas de Compras.
 *   **Ações e Gráficos:**
-    *   Ranking: "Top 5 Produtos mais Favoritados/Visualizados".
-    *   Gráfico "Horários de Pico".
-    *   Mapa de calor de acessos por bairro.
+    *   **Personalização de Loja:** Logomarca, Cor Primária e Secundária.
+    *   **Criação de Encarte com Tema (NOVO):** Ao criar um encarte, o gestor escolhe um "Tema" (ex: "Semana do Consumidor" ou "Padrão"). O tabloide herda o fundo, assets decorativos do tema, mas mantém as cores/logo do supermercado.
+    *   **Preview do Tabloide:** Ver a composição do Tema + Produtos + Cores do Mercado antes de publicar.
+    *   Analytics de acesso.
 
 #### 3. Visão do Cliente (App)
-*   **Home Personalizada:** Banners de mercados próximos, carrossel de recomendações e botão de lista de compras.
+*   **Home Personalizada:** Banners, recomendações.
+*   **Visão de Tabloide:** Visualização do encarte mesclando o "Tema Sazonal" (elementos gráficos festivos) com a identidade do Supermercado (Logo e paleta).
 
 ---
 
 ## 3. Requisitos Funcionais
 
-### RF-01 — Autenticação e Autorização
-| ID | Descrição | Perfil | Prioridade |
-|---|---|---|---|
-| RF-01.1 | Login com e-mail e senha via JWT | Todos | Alta |
-| RF-01.2 | Refresh token com expiração configurável | Todos | Alta |
-| RF-01.3 | Controle de acesso por perfil (RBAC) | Todos | Alta |
+### RF-01 a RF-03
+*(... Autenticação, Gestão de Mercados e Catálogo Base mantidos conforme v1.3 ...)*
 
-### RF-02 — Gestão de Supermercados (Admin)
-| ID | Descrição | Prioridade |
-|---|---|---|
-| RF-02.1 | CRUD completo de supermercados | Alta |
-| RF-02.2 | Ativação e inativação de supermercados | Alta |
-
-### RF-03 — Catálogo Base Global (Admin) — *Nova Regra Core*
+### RF-04 — Ofertas e Encartes Virtuais Temáticos
 
 | ID | Descrição | Prioridade |
 |---|---|---|
-| RF-03.1 | **CRUD de Produtos Base:** Admin cadastra os produtos globais (Nome, Marca, Unidade de Medida, Peso/Volume, Categoria). | Alta |
-| RF-03.2 | **Upload de Imagens para o MinIO:** O Admin faz o upload da imagem padrão do produto, que será salva em um bucket no MinIO. | Alta |
-| RF-03.3 | Gestão de Categorias base (Hortifruti, Limpeza, Açougue, etc). | Alta |
-| RF-03.4 | O Gestor de Supermercado **não pode** criar novos produtos livremente, ele deve solicitar ao Admin caso falte no catálogo base. | Média |
-
-### RF-04 — Ofertas e Encartes (Gestor Supermercado)
-
-| ID | Descrição | Prioridade |
-|---|---|---|
-| RF-04.1 | **Associação de Preço (Oferta):** O Gestor busca um Produto Base no catálogo global e cria uma Oferta vinculando o seu preço (Preço Normal ou Promocional) a ele. | Alta |
-| RF-04.2 | Publicação de encarte digital (conjunto de Ofertas). | Alta |
-| RF-04.3 | Histórico de publicações anteriores e agendamento futuro. | Média |
+| RF-04.1 | **Associação de Preço:** Gestor busca um Produto Base e cria uma Oferta vinculando seu preço. | Alta |
+| RF-04.2 | **Gestão de Temas Base (Admin):** O Administrador cadastra temas globais (Nome, Cor de Fundo do Tema, URL de Background Decorativo, URL de Banners/Enfeites). | Alta |
+| RF-04.3 | **Criação do Encarte com Tema:** O Gestor cria um encarte, seleciona as ofertas ativas e escolhe um Tema Base disponibilizado pelo Admin (ou "Sem Tema/Padrão"). | Alta |
+| RF-04.4 | **Preview Temático:** A prévia do tabloide renderiza os elementos do tema sazonal por baixo/junto da identidade visual do supermercado (Logo e Cores primárias). | Alta |
+| RF-04.5 | Publicação de encarte digital para os clientes. | Alta |
 
 ### RF-05 — Push Notifications por Geolocalização e Campanhas
-
 *(... Ver fluxo detalhado de Geofencing documentado na versão 1.1 ...)*
 
 ---
 
 ## 4. Requisitos Não Funcionais
 
-*(... Requisitos gerais de Performance e Segurança da V1 mantidos ...)*
-
 ### RNF-08 — Armazenamento de Arquivos
 | ID | Descrição |
 |---|---|
-| RNF-08.1 | As imagens dos produtos do Catálogo Global devem ser obrigatoriamente armazenadas no **MinIO** (Object Storage compatível com S3 API). |
-| RNF-08.2 | As URLs das imagens salvas no MinIO devem ser públicas para leitura no Frontend. |
+| RNF-08.1 | Imagens dos produtos armazenadas no MinIO (`smartmarket-products`). |
+| RNF-08.2 | Logomarcas dos supermercados armazenadas no MinIO (`smartmarket-brands`). |
+| RNF-08.3 | **Assets de Temas** (Fundos de tela de Natal, banners temáticos) armazenados no MinIO (`smartmarket-themes`). |
+| RNF-08.4 | URLs públicas para leitura no Frontend. |
 
 ---
 
-## 5. Modelagem de Domínio (Revisada V1.2)
+## 5. Modelagem de Domínio (Revisada V1.4)
 
 ### 5.1 Entidades Críticas Atualizadas
 
-Para acomodar a regra do Catálogo Global vs. Oferta do Supermercado:
-
 | Entidade | Descrição de Negócio | Atributos Principais |
 |---|---|---|
-| **ProdutoBase (Catálogo Global)** | Produto único gerenciado pelo Admin (fica no `product-service`). | id, nome, descricao, marca, unidadeMedida (kg, L, un), pesoVolume, urlImagem (MinIO), categoriaId, ativo |
-| **OfertaSupermercado** | Preço atribuído pelo Supermercado a um Produto Base. | id, supermercadoId, produtoBaseId, precoAtual, precoPromocional, validadePromocao, ativo |
-| **EncarteItem** | Associação entre o encarte digital e uma OfertaSupermercado. | id, encarteId, ofertaId, destaque |
+| **TemaEncarte (NOVO)** | Tema sazonal ou promocional criado pelo Admin. | id, nome (ex: Natal 2025), urlBackgroundDecorativo, corFundoHex, ativo |
+| **Supermercado** | Unidade de negócio (Whitelabel). | id, nomeFantasia, cnpj, status, ..., **urlLogomarca**, **corPrimariaHex**, **corSecundariaHex** |
+| **ProdutoBase** | Produto do catálogo global. | id, nome, urlImagem, ... |
+| **OfertaSupermercado** | Preço da loja para o produto. | id, supermercadoId, produtoBaseId, precoAtual... |
+| **EncarteDigital** | O tabloide publicado. Agora possui um Tema. | id, supermercadoId, **temaId**, titulo, dataInicio, dataFim, status |
+| **EncarteItem** | Associação encarte-oferta. | id, encarteId, ofertaId, ordemExibicao, destaque |
 
 ### 5.2 Regras de Negócio Revisadas
 
 | ID | Regra |
 |---|---|
-| RN-06 | *Removida/Alterada* |
-| RN-06.1 | O **ProdutoBase** pertence à Plataforma (Admin). Supermercados apenas consomem esse catálogo. |
-| RN-06.2 | A URL da imagem do produto deve apontar para o bucket do MinIO do `product-service`. |
-| RN-06.3 | Um Supermercado não pode ter mais de uma **OfertaSupermercado** ativa para o mesmo **ProdutoBase** ao mesmo tempo sem sobreposição de datas. |
+| RN-18 | A renderização do Encarte no Frontend deve priorizar o CSS do Supermercado (Logo/Cores). Caso um `TemaEncarte` esteja selecionado, ele fornece os assets gráficos de fundo (background images) da campanha. |
 
 ---
 
 ## 6. Stack Tecnológica Atualizada
 
-| Camada | Tecnologia |
-|---|---|
-| Backend | Java 21 LTS + Spring Boot 3.x |
-| Frontend | Angular 18+ + Angular Material |
-| Armazenamento de Arquivos | **MinIO (S3 Compatible)** *(Adicionado)* |
-| Banco de Dados | PostgreSQL 16+ |
-| Comunicação | RabbitMQ (Assíncrono) + Feign (Síncrono) |
-| Containerização | Docker + Docker Compose |
-
----
-*(O restante das seções — Arquitetura, Microserviços, Estrutura de Pastas — permanece conforme as versões anteriores).*
+*(... Mantida conforme v1.3 ...)*

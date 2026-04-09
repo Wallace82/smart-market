@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+:host {
+  display: block;
+  font-family: 'Inter', sans-serif;
+}
+
+header {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-size: cover;
+  background-position: center;
+  transition: all 0.3s ease;
+
+  img {
+    max-height: 80px;
+    max-width: 150px;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.offer-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  background-color: #fff;
+  border-radius: 2rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.price-container {
+  font-weight: 900;
+  color: #ef4444;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-top: 0.5rem;
+
+  .currency {
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
+  }
+
+  .value {
+    font-size: 2.25rem;
+    line-height: 1;
+  }
+
+  .cents {
+    font-size: 1.25rem;
+    line-height: 1;
+    margin-left: 0.125rem;
+  }
+}
+
+main {
+  padding: 2rem 1.5rem;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

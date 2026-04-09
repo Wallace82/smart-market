@@ -1,0 +1,131 @@
+<div class="flex flex-col lg:flex-row gap-8 p-6">
+  <!-- Formulário de Criação do Encarte -->
+  <div class="flex-1 space-y-6">
+    <mat-card class="p-6 shadow-lg rounded-lg">
+      <mat-card-title class="text-2xl font-bold mb-6 text-gray-800">Criar Novo Encarte Digital</mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="salvar()" class="space-y-6">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Título do Encarte</mat-label>
+            <input matInput formControlName="titulo" placeholder="Ex: Ofertas de Natal">
+            <mat-error *ngIf="form.get('titulo')?.invalid && form.get('titulo')?.touched">
+              Título é obrigatório.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Tema Sazonal</mat-label>
+            <mat-select formControlName="temaId">
+              <mat-option [value]="null">Nenhum Tema (Padrão)</mat-option>
+              <mat-option *ngFor="let tema of temas()" [value]="tema.id">
+                {{ tema.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Data de Início</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" formControlName="dataInicio">
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+              <mat-error *ngIf="form.get('dataInicio')?.invalid && form.get('dataInicio')?.touched">
+                Data de Início é obrigatória.
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Data de Fim</mat-label>
+              <input matInput [matDatepicker]="pickerFim" formControlName="dataFim">
+              <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFim></mat-datepicker>
+              <mat-error *ngIf="form.get('dataFim')?.invalid && form.get('dataFim')?.touched">
+                Data de Fim é obrigatória.
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Seleção de Ofertas -->
+    <mat-card class="p-6 shadow-lg rounded-lg">
+      <mat-card-title class="text-xl font-bold mb-4 text-gray-800">Selecionar Ofertas</mat-card-title>
+      <mat-card-content>
+        <div class="max-h-96 overflow-y-auto border rounded-md p-2">
+          <mat-list>
+            <mat-list-item *ngFor="let oferta of ofertasDisponiveis()" class="border-b last:border-b-0 hover:bg-gray-50 transition">
+              <div class="flex items-center w-full">
+                <mat-checkbox (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="mr-4"></mat-checkbox>
+                <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="h-10 w-10 object-cover rounded-md mr-4 shadow-sm">
+                <div class="flex-grow">
+                  <h4 class="font-medium text-gray-800">{{ oferta.nomeProduto }}</h4>
+                  <p class="text-sm text-gray-600">Preço: {{ oferta.preco | currency:'BRL' }} / {{ oferta.unidadeMedida }}</p>
+                </div>
+              </div>
+            </mat-list-item>
+          </mat-list>
+          <div *ngIf="ofertasDisponiveis().length === 0" class="text-center text-gray-500 py-4">
+            Nenhuma oferta disponível para seleção.
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="flex justify-end mt-6">
+      <button mat-flat-button color="primary" type="button" (click)="salvar()" [disabled]="form.invalid || loading() || ofertasSelecionadas().length === 0" class="px-8 py-3 text-lg">
+        <mat-icon *ngIf="loading()" class="animate-spin">loop</mat-icon>
+        {{ loading() ? 'Criando Encarte...' : 'Publicar Encarte' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Preview do Encarte -->
+  <div class="lg:w-96 flex-shrink-0">
+    <mat-card class="p-6 shadow-lg rounded-lg sticky top-6">
+      <mat-card-title class="text-xl font-bold mb-6 text-gray-800 text-center">Prévia do Encarte</mat-card-title>
+      <mat-card-content>
+        <div class="w-full min-h-[500px] border rounded-lg overflow-hidden flex flex-col shadow-inner" [ngStyle]="previewStyle">
+          <!-- Header da Prévia (Logo e Cores) -->
+          <div class="p-4 flex flex-col items-center justify-center text-center shadow-md"
+               [style.background-color]="supermarket()?.corPrimariaHex || '#f0f0f0'"
+               [style.color]="supermarket()?.corSecundariaHex || '#333'">
+            <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="max-h-16 object-contain mb-2">
+            <h2 class="text-lg font-bold uppercase tracking-wider">{{ form.get('titulo')?.value || 'Novo Encarte' }}</h2>
+          </div>
+
+          <!-- Conteúdo da Prévia (Ofertas) -->
+          <div class="flex-1 p-4 overflow-y-auto space-y-4">
+            <div class="text-center text-xs font-medium uppercase text-gray-600 mb-4 bg-white/70 py-1 rounded-full">
+              Válido: {{ form.get('dataInicio')?.value | date:'shortDate' }} - {{ form.get('dataFim')?.value | date:'shortDate' }}
+            </div>
+
+            <div *ngFor="let oferta of ofertasSelecionadas()" class="bg-white p-3 rounded-lg shadow-sm border-l-4"
+                 [style.border-color]="supermarket()?.corPrimariaHex || '#ccc'">
+              <div class="flex gap-3">
+                <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="h-12 w-12 object-cover rounded shadow-sm">
+                <div class="flex-grow">
+                  <h4 class="text-sm font-bold text-gray-800 leading-tight">{{ oferta.nomeProduto }}</h4>
+                  <div class="flex items-baseline gap-1 mt-1">
+                    <span class="text-xs text-gray-500">R$</span>
+                    <span class="text-lg font-black text-red-600 leading-none">{{ oferta.preco | number:'1.2-2' }}</span>
+                    <span class="text-[10px] text-gray-400 uppercase">/ {{ oferta.unidadeMedida }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="ofertasSelecionadas().length === 0" class="text-center text-gray-400 py-12 px-6 bg-white/50 rounded-lg border-2 border-dashed">
+              Selecione ofertas para ver o preview aqui.
+            </div>
+          </div>
+
+          <!-- Footer da Prévia -->
+          <div class="p-2 text-[10px] text-center bg-black/5 backdrop-blur-sm text-gray-600">
+            Powered by SmartMarket
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

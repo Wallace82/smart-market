@@ -1,0 +1,86 @@
+<div class="p-6">
+  <mat-card class="p-6 shadow-lg rounded-lg">
+    <mat-card-title class="flex justify-between items-center mb-6">
+      <span class="text-2xl font-bold text-gray-800">Meus Encartes Digitais</span>
+      <button mat-flat-button color="primary" routerLink="/manager/flyers/create">
+        <mat-icon>add</mat-icon> Novo Encarte
+      </button>
+    </mat-card-title>
+    <mat-card-content>
+      <div *ngIf="loading()" class="flex justify-center items-center h-48">
+        <mat-spinner></mat-spinner>
+      </div>
+
+      <div *ngIf="error()" class="text-center text-red-500 mt-8">
+        <p>{{ error() }}</p>
+      </div>
+
+      <div *ngIf="!loading() && !error()">
+        <div *ngIf="encartes().length === 0" class="text-center text-gray-500 py-8">
+          <p>Você ainda não possui encartes digitais.</p>
+          <p>Clique em "Novo Encarte" para começar!</p>
+        </div>
+
+        <div *ngIf="encartes().length > 0" class="overflow-x-auto">
+          <table mat-table [dataSource]="encartes()" class="w-full min-w-[700px]">
+
+            <!-- Coluna Título -->
+            <ng-container matColumnDef="titulo">
+              <th mat-header-cell *matHeaderCellDef> Título </th>
+              <td mat-cell *matCellDef="let encarte"> {{ encarte.titulo }} </td>
+            </ng-container>
+
+            <!-- Coluna Data Início -->
+            <ng-container matColumnDef="dataInicio">
+              <th mat-header-cell *matHeaderCellDef> Início </th>
+              <td mat-cell *matCellDef="let encarte"> {{ encarte.dataInicio | date:'shortDate' }} </td>
+            </ng-container>
+
+            <!-- Coluna Data Fim -->
+            <ng-container matColumnDef="dataFim">
+              <th mat-header-cell *matHeaderCellDef> Fim </th>
+              <td mat-cell *matCellDef="let encarte"> {{ encarte.dataFim | date:'shortDate' }} </td>
+            </ng-container>
+
+            <!-- Coluna Status -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> Status </th>
+              <td mat-cell *matCellDef="let encarte"> {{ encarte.status }} </td>
+            </ng-container>
+
+            <!-- Coluna Ações -->
+            <ng-container matColumnDef="acoes">
+              <th mat-header-cell *matHeaderCellDef> Ações </th>
+              <td mat-cell *matCellDef="let encarte">
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Ações">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="visualizarEncarte(encarte.id)">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Visualizar</span>
+                  </button>
+                  <button mat-menu-item (click)="editarEncarte(encarte.id)">
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar</span>
+                  </button>
+                  <button mat-menu-item (click)="alterarStatus(encarte.id, 'PUBLICADO')" [disabled]="encarte.status === 'PUBLICADO'">
+                    <mat-icon>publish</mat-icon>
+                    <span>Publicar</span>
+                  </button>
+                  <button mat-menu-item (click)="alterarStatus(encarte.id, 'ARQUIVADO')" [disabled]="encarte.status === 'ARQUIVADO'">
+                    <mat-icon>archive</mat-icon>
+                    <span>Arquivar</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

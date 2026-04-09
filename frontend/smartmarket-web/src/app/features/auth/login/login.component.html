@@ -1,0 +1,29 @@
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <mat-card class="w-full max-w-md p-6 shadow-lg rounded-lg">
+    <mat-card-title class="text-3xl font-bold mb-6 text-center text-gray-800">Login</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>E-mail</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="seu@email.com">
+          <mat-error *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+            Por favor, insira um e-mail válido.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Senha</mat-label>
+          <input matInput type="password" formControlName="password" placeholder="********">
+          <mat-error *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+            A senha deve ter no mínimo 6 caracteres.
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()" class="w-full py-3 text-lg">
+          <mat-icon *ngIf="loading()">loop</mat-icon>
+          {{ loading() ? 'Entrando...' : 'Entrar' }}
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

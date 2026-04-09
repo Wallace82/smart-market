@@ -1,0 +1,59 @@
+<mat-card class="p-6 max-w-4xl mx-auto mt-8 shadow-lg rounded-lg">
+  <mat-card-title class="text-2xl font-bold mb-6 text-gray-800">Configurações de Identidade Visual</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="space-y-6">
+      <!-- Upload de Logomarca -->
+      <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50">
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden" #fileInput>
+        <button mat-flat-button color="primary" type="button" (click)="fileInput.click()" class="mb-3">
+          <mat-icon>cloud_upload</mat-icon> Upload Logomarca
+        </button>
+        <div *ngIf="logoPreview()" class="mt-4">
+          <img [src]="logoPreview()" alt="Prévia da Logomarca" class="max-w-xs max-h-32 object-contain border rounded-md shadow-sm">
+        </div>
+        <p *ngIf="!logoPreview()" class="text-sm text-gray-500 mt-2">Nenhuma logomarca selecionada</p>
+      </div>
+
+      <!-- Seleção de Cores -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Cor Primária (Hex)</mat-label>
+          <input matInput type="color" formControlName="corPrimariaHex" class="h-10 p-1">
+          <input matInput type="text" formControlName="corPrimariaHex" class="ml-2">
+          <mat-error *ngIf="form.get('corPrimariaHex')?.invalid && form.get('corPrimariaHex')?.touched">
+            Cor primária inválida. Use formato HEX (#RRGGBB).
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Cor Secundária (Hex)</mat-label>
+          <input matInput type="color" formControlName="corSecundariaHex" class="h-10 p-1">
+          <input matInput type="text" formControlName="corSecundariaHex" class="ml-2">
+          <mat-error *ngIf="form.get('corSecundariaHex')?.invalid && form.get('corSecundariaHex')?.touched">
+            Cor secundária inválida. Use formato HEX (#RRGGBB).
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Prévia da Aplicação (Simples) -->
+      <div class="p-4 border rounded-md bg-white shadow-sm">
+        <h3 class="text-lg font-semibold mb-3 text-gray-700">Prévia da Aplicação</h3>
+        <div class="w-full h-32 flex items-center justify-center rounded-md"
+             [style.background-color]="form.get('corPrimariaHex')?.value || '#000000'"
+             [style.color]="form.get('corSecundariaHex')?.value || '#ffffff'">
+          <img *ngIf="logoPreview()" [src]="logoPreview()" alt="Logo" class="max-h-24 object-contain"
+               [style.filter]="(form.get('corPrimariaHex')?.value === '#000000' || form.get('corPrimariaHex')?.value === '#000') ? 'invert(1)' : 'none'">
+          <span *ngIf="!logoPreview()" class="text-xl font-medium">Seu Supermercado</span>
+        </div>
+        <p class="text-sm text-gray-600 mt-2">Esta é uma prévia de como sua marca aparecerá.</p>
+      </div>
+
+      <div class="flex justify-end">
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()" class="px-6 py-3">
+          <mat-icon *ngIf="loading()">loop</mat-icon>
+          {{ loading() ? 'Salvando...' : 'Salvar Configurações' }}
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

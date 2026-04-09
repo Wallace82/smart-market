@@ -106,8 +106,8 @@ public class SupermercadoController {
                 return ResponseEntity.badRequest().body("O arquivo da logomarca não pode ser vazio.");
             }
 
-            Supermercado supermercadoExistente = listarSupermercadoUseCase.buscarPorId(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Supermercado não encontrado com ID: " + id));
+            // O método buscarPorId já lança IllegalArgumentException se não encontrado
+            Supermercado supermercadoExistente = listarSupermercadoUseCase.buscarPorId(id);
 
             // Deleta a logomarca antiga, se existir
             if (supermercadoExistente.getUrlLogomarca() != null && !supermercadoExistente.getUrlLogomarca().isEmpty()) {
@@ -148,10 +148,9 @@ public class SupermercadoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable UUID id) {
         try {
-            return listarSupermercadoUseCase.buscarPorId(id)
-                    .map(this::fromDomain)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+            // O método buscarPorId já lança IllegalArgumentException se não encontrado
+            Supermercado supermercado = listarSupermercadoUseCase.buscarPorId(id);
+            return ResponseEntity.ok(fromDomain(supermercado));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }

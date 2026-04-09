@@ -18,6 +18,39 @@ services:
       timeout: 5s
       retries: 10
 
+  minio:
+    image: minio/minio:latest
+    container_name: smartmarket-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    command: server /data --console-address ":9001"
+    volumes:
+      - smartmarket_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Cria o bucket no MinIO automaticamente ao iniciar
+  create-bucket:
+    image: minio/mc
+    container_name: smartmarket-mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 admin password;
+      /usr/bin/mc mb myminio/smartmarket-products --ignore-existing;
+      /usr/bin/mc anonymous set public myminio/smartmarket-products;
+      exit 0;
+      "
+
   api-gateway:
     build:
       context: ../../backend/api-gateway
@@ -61,6 +94,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      minio:
+        condition: service_healthy
 
   client-service:
     build:
@@ -94,3 +129,4 @@ services:
 
 volumes:
   smartmarket_postgres_data:
+  smartmarket_minio_data:

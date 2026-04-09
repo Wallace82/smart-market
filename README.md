@@ -19,11 +19,13 @@ smartmarket/
 
 | Camada | Tecnologia |
 |---|---|
-| Backend | Java 21 LTS + Spring Boot 3.x |
-| Frontend | Angular 18+ + Angular Material |
-| Banco de Dados | PostgreSQL 16+ |
+| Backend | Java 21 LTS + Spring Boot 3.x, Spring Cloud, Spring Security, JWT |
+| Frontend | Angular 18+ + Angular Material + Tailwind CSS + Signals |
+| Mensageria | RabbitMQ (Comunicação Assíncrona entre Microserviços) |
+| Banco de Dados | PostgreSQL 16+ (Database-per-service) |
+| Migração de BD | Flyway |
 | Containerização | Docker + Docker Compose |
-| Testes | JUnit 5 |
+| Testes | JUnit 5 + Mockito + Testcontainers |
 | CI/CD | GitHub Actions |
 
 ## Perfis de Usuário
@@ -32,13 +34,15 @@ smartmarket/
 - **Gestor Supermercado** — Gerencia produtos, promoções e dashboards
 - **Cliente** — Consome promoções e monta lista de compras
 
-## Documentação
+## Documentação Técnica
 
-- [Requisitos Funcionais e Não Funcionais](./docs/REQUIREMENTS.md)
+* 📄 [Requisitos Funcionais e Não Funcionais](./docs/REQUIREMENTS.md)
+* 🏛️ [Arquitetura e Fluxo de Comunicação](./docs/architecture/ARCHITECTURE.md) *(Novo!)*
 
 ## Status do Projeto
 
-MVP em definição — Startup / Projeto Pessoal
+Desenvolvimento Ativo - MVP:
+- `auth-service`: Domínio, Persistência e Casos de Uso Core (Security, JWT) implementados.
 
 ## Ambiente Local (Docker Compose)
 

@@ -24,25 +24,28 @@ smartmarket/
 | Mensageria | RabbitMQ (Comunicação Assíncrona entre Microserviços) |
 | Banco de Dados | PostgreSQL 16+ (Database-per-service) |
 | Migração de BD | Flyway |
+| Object Storage | MinIO (Imagens de Produtos, Logos e Temas) |
 | Containerização | Docker + Docker Compose |
 | Testes | JUnit 5 + Mockito + Testcontainers |
 | CI/CD | GitHub Actions |
 
 ## Perfis de Usuário
 
-- **Admin** — Gestor total da plataforma
-- **Gestor Supermercado** — Gerencia produtos, promoções e dashboards
-- **Cliente** — Consome promoções e monta lista de compras
+- **Admin** — Gestor total da plataforma. Gerencia Temas Sazonais e Catálogo Global.
+- **Gestor Supermercado** — Gerencia identidade visual (Whitelabel), produtos, promoções e Encartes Digitais.
+- **Cliente** — Consome promoções e monta lista de compras.
 
 ## Documentação Técnica
 
 * 📄 [Requisitos Funcionais e Não Funcionais](./docs/REQUIREMENTS.md)
-* 🏛️ [Arquitetura e Fluxo de Comunicação](./docs/architecture/ARCHITECTURE.md) *(Novo!)*
+* 🏛️ [Arquitetura e Fluxo de Comunicação](./docs/architecture/ARCHITECTURE.md)
 
 ## Status do Projeto
 
 Desenvolvimento Ativo - MVP:
-- `auth-service`: Domínio, Persistência e Casos de Uso Core (Security, JWT) implementados.
+- `auth-service`: Autenticação JWT e Security implementados.
+- `supermarket-service`: Gestão de Supermercados com suporte a Whitelabel (Logos e Cores) e Integração MinIO concluída.
+- `product-service`: Gestão de Produtos, Ofertas e Encartes Digitais Temáticos (Sazonais) com Integração MinIO concluída.
 
 ## Ambiente Local (Docker Compose)
 

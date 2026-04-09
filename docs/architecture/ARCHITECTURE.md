@@ -86,9 +86,6 @@ Utilizada para comandos de **Escrita** ou processos que não exigem resposta em 
 * **Exemplo 1 (Notificações):** Quando uma oferta é ativada pelo supermercado, um evento `OfferActivatedEvent` é publicado. O `notification-service` consome esse evento e inicia o disparo de Pushes para clientes na região (Geofencing).
 * **Exemplo 2 (Auditoria e Analytics):** O `client-service` publica um evento `ProductVisualizedEvent` quando um cliente abre um produto. O `recommendation-service` consome isso em background para treinar seu algoritmo de recomendações.
 
-**Garantias:**
-* **Dead Letter Queues (DLQ):** Mensagens com falha no processamento vão para uma fila de análise para *re-drive* manual ou automático.
-
 ---
 
 ## 6. Diagrama de Comunicação (Macro)
@@ -112,6 +109,7 @@ graph TD
     RabbitMQ -->|Consome Evento| Recommendation(Recommendation Service)
     
     Product -->|Upload/Leitura de Imagens| MinIO[(MinIO Object Storage)]
+    Supermarket -->|Upload/Leitura de Logos| MinIO
     
     Auth --- DB_Auth[(PostgreSQL Auth)]
     Supermarket --- DB_Sup[(PostgreSQL Supermarket)]
@@ -123,30 +121,44 @@ graph TD
 
 ---
 
-## 7. Gestão de Imagens (MinIO)
+## 7. Gestão de Arquivos e Imagens (MinIO)
 
-Como a plataforma exige um Catálogo Global centralizado, gerido pelo administrador, as imagens dos produtos (e futuramente logotipos de supermercados) não são salvas no banco de dados.
+A plataforma utiliza o MinIO para armazenar assets binários, organizados em buckets específicos para garantir isolamento e performance.
 
-* **Upload:** O upload é feito via `product-service`, que recebe a imagem (multipart/form-data) e a envia para um bucket específico no MinIO (ex: `smartmarket-products`).
-* **Leitura:** O MinIO gera uma URL pública para o bucket. O banco de dados salva apenas o caminho ou a chave dessa URL, e a imagem é renderizada diretamente pelo frontend Angular acessando o endpoint do MinIO, aliviando a carga no servidor da API.
+### 7.1 Organização de Buckets
+*   `smartmarket-products`: Imagens do catálogo global de produtos (gerido pelo Admin).
+*   `smartmarket-brands`: Logomarcas dos supermercados (Whitelabel).
+*   `smartmarket-themes`: Assets visuais de temas sazonais (Natal, Páscoa, etc).
+
+### 7.2 Fluxo de Upload e Leitura
+* **Upload:** O microserviço responsável (ex: `supermarket-service` para logos) recebe o arquivo via `MultipartFile`, gera um UUID único e o armazena no bucket correspondente.
+* **Leitura:** O microserviço retorna a URL pública do asset. O Frontend Angular consome essa URL diretamente para renderização, reduzindo o tráfego nos microserviços.
 
 ---
 
-## 8. Fluxo de Segurança (Autenticação e Autorização)
+## 8. Customização Visual (Whitelabel e Temas)
+
+O sistema foi desenhado para permitir que cada supermercado mantenha sua identidade visual enquanto aproveita campanhas globais.
+
+1.  **Identidade da Loja:** O `supermarket-service` armazena a `urlLogomarca`, `corPrimariaHex` e `corSecundariaHex`.
+2.  **Temas Sazonais:** O `product-service` gerencia a entidade `TemaEncarte`. Um tema define backgrounds e cores decorativas.
+3.  **Composição do Encarte:** Ao criar um `EncarteDigital`, o gestor associa a sua loja, escolhe um tema e seleciona as ofertas. O Frontend mescla as cores da loja com os elementos visuais do tema.
+
+---
+
+## 9. Fluxo de Segurança (Autenticação e Autorização)
 
 1. O Cliente faz o Login (`POST /api/v1/auth/login`) enviando credenciais pelo API Gateway.
 2. O API Gateway roteia para o `auth-service`.
-3. O `auth-service` valida o hash da senha no banco e gera um token JWT contendo `userId`, `email` e `roles` (Ex: `ROLE_ADMIN`, `ROLE_GESTOR`, `ROLE_CLIENTE`). O token tem uma assinatura criptográfica com HMAC SHA-256.
+3. O `auth-service` valida o hash da senha no banco e gera um token JWT contendo `userId`, `email` e `roles` (Ex: `ROLE_ADMIN`, `ROLE_GESTOR`, `ROLE_CLIENTE`).
 4. O Cliente recebe o JWT e o armazena no frontend.
 5. Nas próximas requisições, o Cliente envia o cabeçalho `Authorization: Bearer <token>`.
-6. O API Gateway (ou o próprio filtro de segurança em cada microserviço) valida a assinatura do JWT **localmente**, sem precisar consultar o `auth-service` novamente (Stateless). Se for válido, a requisição é processada com as permissões do *Role* associado.
+6. O API Gateway valida a assinatura do JWT localmente. Se for válido, a requisição é processada com as permissões do *Role* associado.
 
 ---
 
-## 9. Observabilidade e Monitoramento (Day 2)
+## 10. Observabilidade e Monitoramento
 
-Para garantir que o ambiente distribuído seja gerenciável, a plataforma utilizará:
-
-* **Logs Centralizados:** Todos os serviços exportam logs estruturados em JSON para o ELK Stack ou Grafana Loki.
-* **Métricas de Saúde:** Cada Spring Boot expõe endpoints do Actuator (`/actuator/prometheus`). O Prometheus faz o *scrape* dessas métricas e exibe em dashboards do Grafana (consumo de CPU, memória, requisições por segundo).
-* **Distributed Tracing:** Headers como `X-B3-TraceId` (ou equivalentes OpenTelemetry) acompanham cada requisição desde a entrada no Gateway até o último consumidor no RabbitMQ, permitindo visualizar a latência em plataformas como Jaeger.
+* **Logs Centralizados:** Exportação de logs estruturados para o ELK Stack ou Grafana Loki.
+* **Métricas de Saúde:** Endpoints do Actuator (`/actuator/prometheus`) para consumo pelo Prometheus/Grafana.
+* **Distributed Tracing:** OpenTelemetry para rastreio de requisições entre microserviços.

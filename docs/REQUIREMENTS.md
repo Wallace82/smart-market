@@ -1,8 +1,8 @@
 ﻿# 📋 SmartMarket — Documento de Requisitos
 
-> **Versão:** 1.4.0
-> **Data:** 2025
-> **Status:** Em desenvolvimento
+> **Versão:** 1.5.0
+> **Data:** 2025-07-29
+> **Status:** MVP - Backend Implementado (Whitelabel e Temas concluídos)
 > **Equipe:** 3 desenvolvedores
 
 ---
@@ -53,15 +53,13 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | **Nome** | SmartMarket |
 | **Tipo** | Web Responsiva + APIs REST |
 | **Modelo de Negócio** | SaaS B2B2C |
-| **Fase Atual** | MVP — Em desenvolvimento |
+| **Fase Atual** | MVP — Backend Implementado |
 
 ---
 
 ## 2. Perfis de Usuário e Dashboards
 
 ### 2.1 Detalhamento dos Perfis
-
-A plataforma atende a três papéis distintos, cada um com sua visão e acesso específico.
 
 | Perfil | Descrição | Acesso Principal |
 |---|---|---|
@@ -71,80 +69,119 @@ A plataforma atende a três papéis distintos, cada um com sua visão e acesso e
 
 ### 2.2 Especificação dos Dashboards
 
-#### 1. Dashboard Admin (Visão Global da Plataforma)
-*   **Métricas Principais:** Total de Produtos, Supermercados Ativos, MRR.
-*   **Ações e Gráficos:**
-    *   Gestão de Catálogo (Aprovação e imagens).
-    *   **Gestão de Temas Sazonais (NOVO):** Criar e disponibilizar temas globais (ex: Natal, Black Friday, Dia das Mães) para os supermercados utilizarem nos seus encartes.
-    *   Métricas financeiras e logs.
+#### 1. Dashboard Admin (Visão Global)
+*   Gestão de Catálogo (Aprovação de produtos e imagens).
+*   Gestão de Supermercados (Aprovação de novos parceiros).
+*   **Gestão de Temas Sazonais:** Criar temas globais (ex: Natal, Black Friday) com backgrounds e cores.
 
 #### 2. Dashboard Gestor Supermercado (Visão da Loja)
-*   **Métricas Principais:** Produtos Ofertados, Visitas ao encarte, Listas de Compras.
-*   **Ações e Gráficos:**
-    *   **Personalização de Loja:** Logomarca, Cor Primária e Secundária.
-    *   **Criação de Encarte com Tema (NOVO):** Ao criar um encarte, o gestor escolhe um "Tema" (ex: "Semana do Consumidor" ou "Padrão"). O tabloide herda o fundo, assets decorativos do tema, mas mantém as cores/logo do supermercado.
-    *   **Preview do Tabloide:** Ver a composição do Tema + Produtos + Cores do Mercado antes de publicar.
-    *   Analytics de acesso.
+*   **Personalização de Loja:** Configuração de Logomarca, Cor Primária e Secundária.
+*   Gestão de Ofertas (Preços dos produtos na sua loja).
+*   **Criação de Encarte com Tema:** Criação de tabloides digitais escolhendo um Tema Sazonal.
 
 #### 3. Visão do Cliente (App)
-*   **Home Personalizada:** Banners, recomendações.
-*   **Visão de Tabloide:** Visualização do encarte mesclando o "Tema Sazonal" (elementos gráficos festivos) com a identidade do Supermercado (Logo e paleta).
+*   Home com promoções geolocalizadas.
+*   **Visualização de Tabloide:** Renderização do encarte com as cores da loja + elementos gráficos do tema sazonal.
 
 ---
 
 ## 3. Requisitos Funcionais
 
-### RF-01 a RF-03
-*(... Autenticação, Gestão de Mercados e Catálogo Base mantidos conforme v1.3 ...)*
+### 3.1 RF-01 — Autenticação e Segurança
+*   **RF-01.1:** O sistema deve permitir login via E-mail/Senha para os três perfis.
+*   **RF-01.2:** Uso de JWT para sessões stateless.
+*   **RF-01.3:** Recuperação de senha via e-mail.
 
-### RF-04 — Ofertas e Encartes Virtuais Temáticos
+### 3.2 RF-02 — Gestão de Supermercados (Whitelabel)
+*   **RF-02.1:** O Admin deve cadastrar/aprovar supermercados.
+*   **RF-02.2:** O Gestor deve poder fazer upload da **Logomarca** (MinIO).
+*   **RF-02.3:** O Gestor deve definir a **Paleta de Cores** (Primária e Secundária).
 
-| ID | Descrição | Prioridade |
-|---|---|---|
-| RF-04.1 | **Associação de Preço:** Gestor busca um Produto Base e cria uma Oferta vinculando seu preço. | Alta |
-| RF-04.2 | **Gestão de Temas Base (Admin):** O Administrador cadastra temas globais (Nome, Cor de Fundo do Tema, URL de Background Decorativo, URL de Banners/Enfeites). | Alta |
-| RF-04.3 | **Criação do Encarte com Tema:** O Gestor cria um encarte, seleciona as ofertas ativas e escolhe um Tema Base disponibilizado pelo Admin (ou "Sem Tema/Padrão"). | Alta |
-| RF-04.4 | **Preview Temático:** A prévia do tabloide renderiza os elementos do tema sazonal por baixo/junto da identidade visual do supermercado (Logo e Cores primárias). | Alta |
-| RF-04.5 | Publicação de encarte digital para os clientes. | Alta |
+### 3.3 RF-03 — Catálogo e Ofertas
+*   **RF-03.1:** O Admin mantém o Catálogo Global de Produtos.
+*   **RF-03.2:** O Gestor seleciona produtos do catálogo e define o preço de oferta para sua loja.
 
-### RF-05 — Push Notifications por Geolocalização e Campanhas
-*(... Ver fluxo detalhado de Geofencing documentado na versão 1.1 ...)*
+### 3.4 RF-04 — Encartes Virtuais Temáticos
+*   **RF-04.1:** O Admin cadastra **Temas Sazonais** (Assets gráficos e cores de fundo).
+*   **RF-04.2:** O Gestor cria um **Encarte Digital** associando um Tema e uma lista de Ofertas.
+*   **RF-04.3:** O sistema gera um preview do encarte mesclando Whitelabel (Loja) + Tema (Sazonal).
+
+### 3.5 RF-05 — Notificações e Geolocalização
+*   **RF-05.1:** O sistema deve identificar a localização do Cliente.
+*   **RF-05.2:** Disparo de notificações push (RabbitMQ) quando o cliente entra no raio de atuação de um supermercado com ofertas ativas.
 
 ---
 
 ## 4. Requisitos Não Funcionais
 
-### RNF-08 — Armazenamento de Arquivos
-| ID | Descrição |
-|---|---|
-| RNF-08.1 | Imagens dos produtos armazenadas no MinIO (`smartmarket-products`). |
-| RNF-08.2 | Logomarcas dos supermercados armazenadas no MinIO (`smartmarket-brands`). |
-| RNF-08.3 | **Assets de Temas** (Fundos de tela de Natal, banners temáticos) armazenados no MinIO (`smartmarket-themes`). |
-| RNF-08.4 | URLs públicas para leitura no Frontend. |
+### 4.1 RNF-01 — Performance
+*   Tempo de resposta das APIs < 200ms para 95% das requisições.
+*   Carregamento do encarte no mobile em < 2 segundos.
+
+### 4.2 RNF-02 — Escalabilidade
+*   Arquitetura de Microserviços para escala independente.
+*   Uso de Cache (Redis) para catálogo e ofertas frequentes.
+
+### 4.3 RNF-03 — Armazenamento de Arquivos (MinIO)
+*   `smartmarket-products`: Imagens de produtos.
+*   `smartmarket-brands`: Logomarcas dos supermercados.
+*   `smartmarket-themes`: Assets decorativos de campanhas sazonais.
 
 ---
 
-## 5. Modelagem de Domínio (Revisada V1.4)
+## 5. Modelagem de Domínio (V1.5)
 
-### 5.1 Entidades Críticas Atualizadas
-
-| Entidade | Descrição de Negócio | Atributos Principais |
-|---|---|---|
-| **TemaEncarte (NOVO)** | Tema sazonal ou promocional criado pelo Admin. | id, nome (ex: Natal 2025), urlBackgroundDecorativo, corFundoHex, ativo |
-| **Supermercado** | Unidade de negócio (Whitelabel). | id, nomeFantasia, cnpj, status, ..., **urlLogomarca**, **corPrimariaHex**, **corSecundariaHex** |
-| **ProdutoBase** | Produto do catálogo global. | id, nome, urlImagem, ... |
-| **OfertaSupermercado** | Preço da loja para o produto. | id, supermercadoId, produtoBaseId, precoAtual... |
-| **EncarteDigital** | O tabloide publicado. Agora possui um Tema. | id, supermercadoId, **temaId**, titulo, dataInicio, dataFim, status |
-| **EncarteItem** | Associação encarte-oferta. | id, encarteId, ofertaId, ordemExibicao, destaque |
-
-### 5.2 Regras de Negócio Revisadas
-
-| ID | Regra |
+| Entidade | Atributos Principais |
 |---|---|
-| RN-18 | A renderização do Encarte no Frontend deve priorizar o CSS do Supermercado (Logo/Cores). Caso um `TemaEncarte` esteja selecionado, ele fornece os assets gráficos de fundo (background images) da campanha. |
+| **Supermercado** | id, nome, cnpj, status, urlLogomarca, corPrimariaHex, corSecundariaHex |
+| **TemaEncarte** | id, nome, urlBackgroundDecorativo, corFundoHex, ativo |
+| **EncarteDigital** | id, supermercadoId, temaId, titulo, dataInicio, dataFim, status |
+| **ProdutoBase** | id, nome, urlImagem, categoriaId |
+| **Oferta** | id, supermercadoId, produtoBaseId, preco |
 
 ---
 
-## 6. Stack Tecnológica Atualizada
+## 6. Stack Tecnológica
 
-*(... Mantida conforme v1.3 ...)*
+| Camada | Tecnologia |
+|---|---|
+| **Backend** | Java 21 LTS + Spring Boot 3.4.x |
+| **Frontend** | Angular 18+ + Tailwind CSS + Signals |
+| **API Gateway** | Spring Cloud Gateway |
+| **Segurança** | Spring Security + JWT |
+| **Banco de Dados** | PostgreSQL 16 (Database-per-service) |
+| **Object Storage** | MinIO (Object Storage compatível com S3) |
+| **Mensageria** | RabbitMQ (Comunicação Assíncrona e Eventos) |
+| **Migração de BD** | Flyway |
+| **Observabilidade** | Prometheus + Grafana + Spring Boot Actuator |
+| **Containerização** | Docker + Docker Compose |
+
+---
+
+## 7. Roadmap Macro
+
+1.  **Fase 1 (Concluída):** Fundamentos de Segurança e Auth-Service.
+2.  **Fase 2 (Concluída):** Supermarket-Service com Whitelabel e Product-Service com Encartes Temáticos.
+3.  **Fase 3 (Em andamento):** Frontend Angular (Portal Admin e Gestor).
+4.  **Fase 4:** App Cliente (Mobile First) e Geolocalização.
+5.  **Fase 5:** Notificações Push e Analytics.
+
+---
+
+## 8. Glossário
+
+*   **Whitelabel:** Capacidade do sistema de assumir a identidade visual do cliente (supermercado).
+*   **Sazonal:** Relativo a épocas específicas do ano (Natal, Páscoa, etc).
+*   **Encarte Digital:** Tabloide de ofertas visualizado em dispositivos digitais.
+*   **MinIO:** Servidor de armazenamento de objetos de alta performance.
+
+---
+
+## 10. Definição dos Microserviços
+
+*   **auth-service:** Centraliza usuários e permissões.
+*   **supermarket-service:** Cadastro de lojas e dados de Whitelabel.
+*   **product-service:** Catálogo global, Ofertas, Temas e Encartes.
+*   **client-service:** Perfil do consumidor e listas de compras.
+*   **notification-service:** Orquestração de Pushes e E-mails.
+*   **recommendation-service:** IA para sugestão de ofertas baseadas no perfil.

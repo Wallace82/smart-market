@@ -7,41 +7,41 @@ Plataforma SaaS B2B2C que conecta supermercados a clientes via encartes digitais
 ```
 smartmarket/
 ├── backend/              # Microserviços Spring Boot (Java 21)
-├── frontend/             # Aplicação Angular 18+
+├── frontend/             # Aplicação Angular 18+ (Signals, Tailwind, Material)
 ├── infra/                # Docker, Docker Compose, CI/CD
 └── docs/
     ├── REQUIREMENTS.md   # Requisitos funcionais e não funcionais
     ├── architecture/     # Diagramas e decisões arquiteturais
-    └── images/           # Assets de marca e logos
+    └── prompts/          # Prompts de geração de código por módulo
 ```
-
-## Stack
-
-| Camada | Tecnologia |
-|---|---|
-| Backend | Java 21 LTS + Spring Boot 3.4.x, Spring Cloud, Spring Security, JWT |
-| Frontend | Angular 18+ + Angular Material + Tailwind CSS + Signals |
-| Mensageria | RabbitMQ (Comunicação Assíncrona entre Microserviços) |
-| Banco de Dados | PostgreSQL 16+ (Database-per-service) |
-| Migração de BD | Flyway |
-| Object Storage | MinIO (Imagens de Produtos, Logos e Temas) |
-| Containerização | Docker + Docker Compose |
 
 ## Status do Projeto (MVP)
 
-### Backend ✅
-- `auth-service`: Autenticação JWT e Security.
-- `supermarket-service`: Gestão de Supermercados com suporte a Whitelabel (Logos e Cores).
-- `product-service`: Gestão de Produtos, Ofertas e Encartes Digitais Temáticos.
+### ✅ Backend (Implementado)
+- **auth-service**: Segurança JWT e Autenticação.
+- **supermarket-service**: Gestão Whitelabel (Logos/Cores) e Integração MinIO.
+- **product-service**: Catálogo Global, Ofertas e Encartes Digitais Temáticos.
 
-### Frontend 🔄 (Em progresso avançado)
-- **Autenticação:** Login e gerenciamento de estado com Signals concluído.
-- **Portal do Gestor:** 
-    - Gestão de Identidade Visual (Cores e Logo) concluída.
-    - Listagem e Edição de Encartes concluídas.
-    - Criação de Encarte com temas sazonais e seleção de ofertas concluída.
-- **Visão do Cliente:** 
-    - Visualizador de Tabloide Imersivo (Whitelabel + Temas) concluído.
+### ✅ Frontend (Implementado)
+- **Core**: AuthService, SupermarketService, EncarteService, OfertaService (todos usando Signals).
+- **Manager Features**: 
+    - Gestão de Identidade Visual (Upload de Logo, Seleção de Cores Hex).
+    - Listagem, Criação e Edição de Encartes Digitais com Temas Sazonais.
+- **Client Features**:
+    - Visualizador de Encarte Imersivo (Layout de Tabloide Profissional).
 
-## Ambiente Local
-Utilize os scripts em `infra/scripts` para subir o ambiente completo com Docker Compose.
+## Como Executar
+
+### Backend & Infra
+Use os scripts em `infra/scripts`:
+- `.\infra\scripts\up-local.ps1` (Sobe o banco, RabbitMQ, MinIO e Microserviços)
+
+### Frontend
+1. Vá para `frontend/smartmarket-web`
+2. `npm install`
+3. `ng serve`
+4. Acesse `http://localhost:4200`
+
+## Documentação Técnica
+* 📄 [Requisitos Funcionais](./docs/REQUIREMENTS.md)
+* 🏛️ [Arquitetura Técnica](./docs/architecture/ARCHITECTURE.md)

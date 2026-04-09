@@ -34,7 +34,7 @@ services:
       timeout: 20s
       retries: 3
 
-  # Cria o bucket no MinIO automaticamente ao iniciar
+  # Cria os buckets no MinIO automaticamente ao iniciar
   create-bucket:
     image: minio/mc:latest
     container_name: smartmarket-mc
@@ -45,7 +45,11 @@ services:
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 admin password;
       /usr/bin/mc mb myminio/smartmarket-products --ignore-existing;
+      /usr/bin/mc mb myminio/smartmarket-brands --ignore-existing;
+      /usr/bin/mc mb myminio/smartmarket-themes --ignore-existing;
       /usr/bin/mc anonymous set public myminio/smartmarket-products;
+      /usr/bin/mc anonymous set public myminio/smartmarket-brands;
+      /usr/bin/mc anonymous set public myminio/smartmarket-themes;
       exit 0;
       "
 

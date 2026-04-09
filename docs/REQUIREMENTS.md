@@ -1,8 +1,8 @@
 ﻿# 📋 SmartMarket — Documento de Requisitos
 
-> **Versão:** 1.5.0
+> **Versão:** 1.6.0
 > **Data:** 2025-07-29
-> **Status:** MVP - Backend Implementado (Whitelabel e Temas concluídos)
+> **Status:** MVP - Backend & Frontend Implementados
 > **Equipe:** 3 desenvolvedores
 
 ---
@@ -53,7 +53,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | **Nome** | SmartMarket |
 | **Tipo** | Web Responsiva + APIs REST |
 | **Modelo de Negócio** | SaaS B2B2C |
-| **Fase Atual** | MVP — Backend Implementado |
+| **Fase Atual** | MVP — Backend & Frontend Implementados |
 
 ---
 
@@ -77,11 +77,11 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 #### 2. Dashboard Gestor Supermercado (Visão da Loja)
 *   **Personalização de Loja:** Configuração de Logomarca, Cor Primária e Secundária.
 *   Gestão de Ofertas (Preços dos produtos na sua loja).
-*   **Criação de Encarte com Tema:** Criação de tabloides digitais escolhendo um Tema Sazonal.
+*   **Gestão de Encartes Digitais:** Listagem, Criação e Edição de tabloides digitais escolhendo um Tema Sazonal.
 
 #### 3. Visão do Cliente (App)
 *   Home com promoções geolocalizadas.
-*   **Visualização de Tabloide:** Renderização do encarte com as cores da loja + elementos gráficos do tema sazonal.
+*   **Visualização de Tabloide Imersiva:** Renderização do encarte com as cores da loja + elementos gráficos do tema sazonal.
 
 ---
 
@@ -90,7 +90,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 ### 3.1 RF-01 — Autenticação e Segurança
 *   **RF-01.1:** O sistema deve permitir login via E-mail/Senha para os três perfis.
 *   **RF-01.2:** Uso de JWT para sessões stateless.
-*   **RF-01.3:** Recuperação de senha via e-mail.
+*   **RF-01.3:** Uso de Signals para estado reativo do usuário no Frontend.
 
 ### 3.2 RF-02 — Gestão de Supermercados (Whitelabel)
 *   **RF-02.1:** O Admin deve cadastrar/aprovar supermercados.
@@ -129,7 +129,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 
 ---
 
-## 5. Modelagem de Domínio (V1.5)
+## 5. Modelagem de Domínio (V1.6)
 
 | Entidade | Atributos Principais |
 |---|---|
@@ -146,7 +146,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | Camada | Tecnologia |
 |---|---|
 | **Backend** | Java 21 LTS + Spring Boot 3.4.x |
-| **Frontend** | Angular 18+ + Tailwind CSS + Signals |
+| **Frontend** | Angular 18+ + Tailwind CSS + Angular Material + Signals |
 | **API Gateway** | Spring Cloud Gateway |
 | **Segurança** | Spring Security + JWT |
 | **Banco de Dados** | PostgreSQL 16 (Database-per-service) |
@@ -162,8 +162,8 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 
 1.  **Fase 1 (Concluída):** Fundamentos de Segurança e Auth-Service.
 2.  **Fase 2 (Concluída):** Supermarket-Service com Whitelabel e Product-Service com Encartes Temáticos.
-3.  **Fase 3 (Em andamento):** Frontend Angular (Portal Admin e Gestor).
-4.  **Fase 4:** App Cliente (Mobile First) e Geolocalização.
+3.  **Fase 3 (Concluída):** Frontend Angular (Portal Admin e Gestor).
+4.  **Fase 4 (Em andamento):** App Cliente (Mobile First) e Geolocalização.
 5.  **Fase 5:** Notificações Push e Analytics.
 
 ---

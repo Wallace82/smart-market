@@ -1,26 +1,27 @@
+[CmdletBinding()]
 param(
     [switch]$Build
 )
 
-$ErrorActionPreference = "Stop"
-
-$composePath = Join-Path $PSScriptRoot "..\compose"
-$baseFile = Join-Path $composePath "docker-compose.local.yml"
-$overrideFile = Join-Path $composePath "docker-compose.override.yml"
-
-if (!(Test-Path $baseFile)) {
-    throw "Arquivo nao encontrado: $baseFile"
-}
-
-if (!(Test-Path $overrideFile)) {
-    throw "Arquivo nao encontrado: $overrideFile"
-}
+$ErrorActionPreference = 'Stop'
+$composeDir = Join-Path $PSScriptRoot "..\compose"
+$localYaml = Join-Path $composeDir "docker-compose.local.yml"
+$overrideYaml = Join-Path $composeDir "docker-compose.override.yml"
 
 Write-Host "Subindo ambiente local SmartMarket..." -ForegroundColor Cyan
+
+$buildArg = ""
 if ($Build) {
-    docker compose -f $baseFile -f $overrideFile up -d --build
-} else {
-    docker compose -f $baseFile -f $overrideFile up -d
+    $buildArg = "--build"
+    Write-Host "Modo de build ativado. Compilando imagens..." -ForegroundColor Yellow
 }
 
-Write-Host "Ambiente iniciado. Verifique com: docker compose -f `"$baseFile`" -f `"$overrideFile`" ps" -ForegroundColor Green
+$cmd = "docker compose -f `"$localYaml`""
+if (Test-Path $overrideYaml) {
+    $cmd += " -f `"$overrideYaml`""
+}
+$cmd += " up -d $buildArg"
+
+Invoke-Expression $cmd
+
+Write-Host "Ambiente iniciado. Verifique com: docker compose -f `"$localYaml`" ps" -ForegroundColor Green

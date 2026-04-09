@@ -1,37 +1,54 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: api-gateway
   cloud:
     gateway:
       routes:
+        # Rota para o auth-service
         - id: auth-service
           uri: ${AUTH_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/api/v1/auth/**,/api/v1/users/**
+            - Path=/api/v1/auth/**, /api/v1/users/**
+        
+        # Rota para o supermarket-service
         - id: supermarket-service
           uri: ${SUPERMARKET_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/api/v1/supermarkets/**,/api/v1/plans/**
+            - Path=/api/v1/supermercados/**, /api/v1/plans/**
+
+        # Rota para o product-service
         - id: product-service
           uri: ${PRODUCT_SERVICE_URL:http://localhost:8083}
           predicates:
-            - Path=/api/v1/products/**,/api/v1/categories/**,/api/v1/promotions/**,/api/v1/flyers/**
-        - id: client-service
-          uri: ${CLIENT_SERVICE_URL:http://localhost:8084}
-          predicates:
-            - Path=/api/v1/clients/**,/api/v1/favorites/**,/api/v1/shopping-lists/**,/api/v1/visualizations/**,/api/v1/nearby-supermarkets/**
-        - id: notification-service
-          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
-          predicates:
-            - Path=/api/v1/campaigns/**,/api/v1/geofence/**,/api/v1/notifications/**
-        - id: recommendation-service
-          uri: ${RECOMMENDATION_SERVICE_URL:http://localhost:8086}
-          predicates:
-            - Path=/api/v1/recommendations/**
-server:
-  port: 8080
+            - Path=/api/v1/produtos-base/**, /api/v1/ofertas/**, /api/v1/categorias/**
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost}
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dGhpcy1pcy1hLXZlcnktbG9uZy1hbmQtc2VjdXJlLWp3dC1zZWNyZXQta2V5LWZvci1zbWFydG1hcmtldA==}
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always

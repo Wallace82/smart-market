@@ -12,53 +12,36 @@ smartmarket/
 └── docs/
     ├── REQUIREMENTS.md   # Requisitos funcionais e não funcionais
     ├── architecture/     # Diagramas e decisões arquiteturais
-    └── prompts/          # Prompts de geração de código por módulo
+    └── images/           # Assets de marca e logos
 ```
 
 ## Stack
 
 | Camada | Tecnologia |
 |---|---|
-| Backend | Java 21 LTS + Spring Boot 3.x, Spring Cloud, Spring Security, JWT |
+| Backend | Java 21 LTS + Spring Boot 3.4.x, Spring Cloud, Spring Security, JWT |
 | Frontend | Angular 18+ + Angular Material + Tailwind CSS + Signals |
 | Mensageria | RabbitMQ (Comunicação Assíncrona entre Microserviços) |
 | Banco de Dados | PostgreSQL 16+ (Database-per-service) |
 | Migração de BD | Flyway |
 | Object Storage | MinIO (Imagens de Produtos, Logos e Temas) |
 | Containerização | Docker + Docker Compose |
-| Testes | JUnit 5 + Mockito + Testcontainers |
-| CI/CD | GitHub Actions |
 
-## Perfis de Usuário
+## Status do Projeto (MVP)
 
-- **Admin** — Gestor total da plataforma. Gerencia Temas Sazonais e Catálogo Global.
-- **Gestor Supermercado** — Gerencia identidade visual (Whitelabel), produtos, promoções e Encartes Digitais.
-- **Cliente** — Consome promoções e monta lista de compras.
+### Backend ✅
+- `auth-service`: Autenticação JWT e Security.
+- `supermarket-service`: Gestão de Supermercados com suporte a Whitelabel (Logos e Cores).
+- `product-service`: Gestão de Produtos, Ofertas e Encartes Digitais Temáticos.
 
-## Documentação Técnica
+### Frontend 🔄 (Em progresso avançado)
+- **Autenticação:** Login e gerenciamento de estado com Signals concluído.
+- **Portal do Gestor:** 
+    - Gestão de Identidade Visual (Cores e Logo) concluída.
+    - Listagem e Edição de Encartes concluídas.
+    - Criação de Encarte com temas sazonais e seleção de ofertas concluída.
+- **Visão do Cliente:** 
+    - Visualizador de Tabloide Imersivo (Whitelabel + Temas) concluído.
 
-* 📄 [Requisitos Funcionais e Não Funcionais](./docs/REQUIREMENTS.md)
-* 🏛️ [Arquitetura e Fluxo de Comunicação](./docs/architecture/ARCHITECTURE.md)
-
-## Status do Projeto
-
-Desenvolvimento Ativo - MVP:
-- `auth-service`: Autenticação JWT e Security implementados.
-- `supermarket-service`: Gestão de Supermercados com suporte a Whitelabel (Logos e Cores) e Integração MinIO concluída.
-- `product-service`: Gestão de Produtos, Ofertas e Encartes Digitais Temáticos (Sazonais) com Integração MinIO concluída.
-
-## Ambiente Local (Docker Compose)
-
-Scripts PowerShell disponíveis em `infra/scripts`:
-
-- Subir ambiente: `.\infra\scripts\up-local.ps1`
-- Subir com rebuild: `.\infra\scripts\up-local.ps1 -Build`
-- Ver status dos containers: `.\infra\scripts\ps-local.ps1`
-- Verificar saude dos servicos: `.\infra\scripts\check-local.ps1`
-- Ver logs de tudo: `.\infra\scripts\logs-local.ps1`
-- Ver logs de um serviço: `.\infra\scripts\logs-local.ps1 -Service auth-service -Follow`
-- Reiniciar tudo: `.\infra\scripts\restart-local.ps1`
-- Reiniciar um serviço: `.\infra\scripts\restart-local.ps1 -Service api-gateway`
-- Reiniciar com rebuild: `.\infra\scripts\restart-local.ps1 -Build`
-- Parar ambiente: `.\infra\scripts\down-local.ps1`
-- Parar e remover volumes: `.\infra\scripts\down-local.ps1 -RemoveVolumes`
+## Ambiente Local
+Utilize os scripts em `infra/scripts` para subir o ambiente completo com Docker Compose.

@@ -1,6 +1,8 @@
 package com.smartmarket.product.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -14,6 +16,7 @@ public class EncarteDigital {
     private EncarteStatus status; // Ex: RASCUNHO, PUBLICADO, ARQUIVADO
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
+    private List<EncarteItem> itens = new ArrayList<>();
 
     public EncarteDigital() {
         this.status = EncarteStatus.RASCUNHO;
@@ -27,6 +30,10 @@ public class EncarteDigital {
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.status = status;
+    }
+
+    public void addEncarteItem(EncarteItem item) {
+        itens.add(item);
     }
 
     // Getters e Setters
@@ -48,6 +55,8 @@ public class EncarteDigital {
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
+    public List<EncarteItem> getItens() { return itens; }
+    public void setItens(List<EncarteItem> itens) { this.itens = itens; }
 
     @Override
     public boolean equals(Object o) {

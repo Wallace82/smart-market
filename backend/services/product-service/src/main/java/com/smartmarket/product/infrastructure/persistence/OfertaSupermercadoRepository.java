@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface EncarteDigitalRepository extends JpaRepository<EncarteDigitalEntity, UUID> {
-    List<EncarteDigitalEntity> findBySupermercadoId(UUID supermercadoId);
+public interface OfertaSupermercadoRepository extends JpaRepository<OfertaSupermercadoEntity, UUID> {
+    List<OfertaSupermercadoEntity> findBySupermercadoId(UUID supermercadoId);
 }

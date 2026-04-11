@@ -32,15 +32,37 @@ smartmarket/
 
 ## Como Executar
 
-### Backend & Infra
-Use os scripts em `infra/scripts`:
-- `.\infra\scripts\up-local.ps1` (Sobe o banco, RabbitMQ, MinIO e Microserviços)
+### 1. Preparar o Backend (Compilação)
+O Dockerfile espera que os pacotes `.jar` já tenham sido gerados. Antes de subir o ambiente, você deve compilar todos os microserviços.
 
-### Frontend
+Na raiz do diretório `backend/`:
+```bash
+./mvnw clean package -DskipTests
+```
+
+### 2. Subir Infraestrutura e Microserviços
+Use os scripts em `infra/scripts`:
+```powershell
+.\infra\scripts\up-local.ps1
+```
+Isso subirá o PostgreSQL, MinIO, RabbitMQ e todos os microserviços.
+
+### 3. Popular o Banco de Dados (Seed Data)
+Para que as telas funcionem com dados de teste (usuário gestor, supermercado modelo, temas e ofertas), rode o script SQL no container do Postgres:
+```powershell
+Get-Content .\infra\scripts\seed_data.sql | docker exec -i smartmarket-postgres psql -U smartmarket -d smartmarket
+```
+
+### 4. Executar o Frontend
 1. Vá para `frontend/smartmarket-web`
-2. `npm install`
-3. `ng serve`
-4. Acesse `http://localhost:4200`
+2. Instale as dependências (caso não tenha feito): `npm install`
+3. Inicie com a configuração de proxy:
+```bash
+ng serve --proxy-config proxy.conf.json
+```
+4. Acesse `http://localhost:4200/login`
+   - **Login:** `gestor@smartmarket.com`
+   - **Senha:** `password`
 
 ## Documentação Técnica
 * 📄 [Requisitos Funcionais](./docs/REQUIREMENTS.md)

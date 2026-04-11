@@ -3,6 +3,7 @@ package com.smartmarket.product.infrastructure.persistence;
 import com.smartmarket.product.domain.model.EncarteStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public class EncarteDigitalEntity {
     private UUID supermercadoId;
 
     @Column(name = "tema_id")
-    private UUID temaId; // Foreign key para TemaEncarteEntity
+    private UUID temaId;
 
     @Column(nullable = false)
     private String titulo;
@@ -39,7 +40,7 @@ public class EncarteDigitalEntity {
     private LocalDateTime atualizadoEm;
 
     @OneToMany(mappedBy = "encarteDigital", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EncarteItemEntity> itens;
+    private List<EncarteItemEntity> itens = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -51,6 +52,11 @@ public class EncarteDigitalEntity {
     @PreUpdate
     protected void onUpdate() {
         atualizadoEm = LocalDateTime.now();
+    }
+
+    public void addEncarteItem(EncarteItemEntity item) {
+        itens.add(item);
+        item.setEncarteDigital(this);
     }
 
     // Getters and Setters

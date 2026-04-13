@@ -23,8 +23,11 @@ public class CriarEncarteDigitalUseCase {
     }
 
     public EncarteDigital execute(EncarteDigital encarteDigital) {
+        // Garantir que o ID sempre existe antes de usar
         if (encarteDigital.getId() == null) {
             encarteDigital.setId(UUID.randomUUID());
+        }
+        if (encarteDigital.getCriadoEm() == null) {
             encarteDigital.setCriadoEm(LocalDateTime.now());
         }
         encarteDigital.setAtualizadoEm(LocalDateTime.now());

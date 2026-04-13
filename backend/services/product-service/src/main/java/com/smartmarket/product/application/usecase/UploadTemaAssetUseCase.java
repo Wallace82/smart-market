@@ -19,7 +19,7 @@ public class UploadTemaAssetUseCase {
         this.storageService = storageService;
     }
 
-    public String execute(UUID temaId, String originalFileName, InputStream inputStream, String contentType) {
+    public TemaEncarte execute(UUID temaId, String originalFileName, InputStream inputStream, String contentType) {
         TemaEncarte tema = repository.findById(temaId)
                 .orElseThrow(() -> new IllegalArgumentException("Tema de encarte não encontrado com ID: " + temaId));
 
@@ -30,8 +30,8 @@ public class UploadTemaAssetUseCase {
 
         String newUrl = storageService.upload(originalFileName, inputStream, contentType);
         tema.setUrlBackgroundDecorativo(newUrl);
-        repository.save(tema);
+        TemaEncarte temaAtualizado = repository.save(tema);
 
-        return newUrl;
+        return temaAtualizado;
     }
 }

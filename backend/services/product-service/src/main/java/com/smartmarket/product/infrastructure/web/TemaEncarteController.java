@@ -92,9 +92,7 @@ public class TemaEncarteController {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
-            String newUrl = uploadTemaAssetUseCase.execute(id, file.getOriginalFilename(), file.getInputStream(), file.getContentType());
-            TemaEncarte temaAtualizado = listarTemasEncarteUseCase.buscarPorId(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Tema de encarte não encontrado com ID: " + id));
+            TemaEncarte temaAtualizado = uploadTemaAssetUseCase.execute(id, file.getOriginalFilename(), file.getInputStream(), file.getContentType());
             return ResponseEntity.ok(fromDomain(temaAtualizado));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

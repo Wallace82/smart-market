@@ -29,10 +29,12 @@ public class EncarteDigitalMapper {
         entity.setCriadoEm(domain.getCriadoEm());
         entity.setAtualizadoEm(domain.getAtualizadoEm());
 
-        Optional.ofNullable(domain.getItens()).orElse(Collections.emptyList()).stream()
+        List<EncarteItemEntity> items = Optional.ofNullable(domain.getItens())
+                .orElse(Collections.emptyList())
+                .stream()
                 .map(itemDomain -> toItemEntity(itemDomain, entity))
-                .collect(Collectors.toList())
-                .forEach(entity::addEncarteItem); // Supondo um método addEncarteItem na entidade
+                .collect(Collectors.toList());
+        items.forEach(entity::addEncarteItem);
 
         return entity;
     }

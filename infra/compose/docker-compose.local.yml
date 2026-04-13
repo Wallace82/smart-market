@@ -73,6 +73,12 @@ services:
     container_name: smartmarket-auth-service
     ports:
       - "8081:8081"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,6 +89,12 @@ services:
     container_name: smartmarket-supermarket-service
     ports:
       - "8082:8082"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,6 +105,12 @@ services:
     container_name: smartmarket-product-service
     ports:
       - "8083:8083"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,6 +123,12 @@ services:
     container_name: smartmarket-client-service
     ports:
       - "8084:8084"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
     depends_on:
       postgres:
         condition: service_healthy
@@ -115,6 +139,12 @@ services:
     container_name: smartmarket-notification-service
     ports:
       - "8085:8085"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
     depends_on:
       postgres:
         condition: service_healthy
@@ -125,6 +155,12 @@ services:
     container_name: smartmarket-recommendation-service
     ports:
       - "8086:8086"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
     depends_on:
       postgres:
         condition: service_healthy

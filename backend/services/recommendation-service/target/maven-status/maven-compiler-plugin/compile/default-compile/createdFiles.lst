@@ -1,2 +1,2 @@
-com\smartmarket\recommendation\RecommendationServiceApplication.class
-com\smartmarket\recommendation\infrastructure\web\HealthController.class
+com/smartmarket/recommendation/infrastructure/web/HealthController.class
+com/smartmarket/recommendation/RecommendationServiceApplication.class

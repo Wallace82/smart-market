@@ -4,7 +4,7 @@ CREATE TABLE produtos_base (
     descricao TEXT,
     marca VARCHAR(100),
     unidade_medida VARCHAR(20) NOT NULL,
-    peso_volume NUMERIC(10, 3),
+    peso_volume DOUBLE PRECISION,
     url_imagem VARCHAR(500),
     categoria_id UUID,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,

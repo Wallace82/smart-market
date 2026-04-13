@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: notification-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/smartmarket}
+    username: ${DB_USERNAME:smartmarket}
+    password: ${DB_PASSWORD:smartmarket}
+server:
+  port: 8085
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics

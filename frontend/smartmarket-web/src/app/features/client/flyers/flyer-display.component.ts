@@ -3,11 +3,11 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { EncarteDigitalResponse, TemaEncarteResponse } from '../../../../core/models/encarte.model';
-import { SupermarketResponse } from '../../../../core/models/supermarket.model';
-import { EncarteService } from '../../../../core/services/encarte.service';
-import { SupermarketService } from '../../../../core/services/supermarket.service';
-import { OfertaService, OfertaSupermercado } from '../../../../core/services/oferta.service';
+import { EncarteDigitalResponse, TemaEncarteResponse } from '../../../core/models/encarte.model';
+import { SupermarketResponse } from '../../../core/models/supermarket.model';
+import { EncarteService } from '../../../core/services/encarte.service';
+import { SupermarketService } from '../../../core/services/supermarket.service';
+import { OfertaService, OfertaSupermercado } from '../../../core/services/oferta.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 

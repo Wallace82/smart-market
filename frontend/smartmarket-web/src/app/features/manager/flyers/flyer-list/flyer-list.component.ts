@@ -7,11 +7,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router, RouterModule } from '@angular/router';
-import { EncarteService } from '../../../../core/services/encarte.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { SupermarketService } from '../../../../core/services/supermarket.service';
-import { EncarteDigitalResponse } from '../../../../core/models/encarte.model';
-import { SupermarketResponse } from '../../../../core/models/supermarket.model';
+import { EncarteService } from '../../../core/services/encarte.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { SupermarketService } from '../../../core/services/supermarket.service';
+import { EncarteDigitalResponse } from '../../../core/models/encarte.model';
+import { SupermarketResponse } from '../../../core/models/supermarket.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({

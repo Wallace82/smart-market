@@ -7,9 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { SupermarketResponse } from '../../../../core/models/supermarket.model';
-import { SupermarketService } from '../../../../core/services/supermarket.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { SupermarketResponse } from '../../../core/models/supermarket.model';
+import { SupermarketService } from '../../../core/services/supermarket.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-identity-settings',

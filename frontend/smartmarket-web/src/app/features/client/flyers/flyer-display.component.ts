@@ -45,7 +45,7 @@ export class FlyerDisplayComponent implements OnInit {
     this.loading.set(true);
     
     this.encarteService.buscarEncartePorId(encarteId).subscribe({
-      next: (encarteData) => {
+      next: (encarteData: EncarteDigitalResponse) => {
         this.encarte.set(encarteData);
         
         // Agora buscamos Supermercado, Tema e Detalhes das Ofertas em paralelo
@@ -61,13 +61,13 @@ export class FlyerDisplayComponent implements OnInit {
             
             // Buscar detalhes de cada oferta selecionada no encarte
             if (encarteData.itens && encarteData.itens.length > 0) {
-              const ofertasIds = encarteData.itens.map(i => i.ofertaId);
-              const ofertasRequests = ofertasIds.map(id => 
+              const ofertasIds = encarteData.itens.map((i: any) => i.ofertaId);
+              const ofertasRequests = ofertasIds.map((id: string) => 
                 this.ofertaService.buscarPorId(id).pipe(catchError(() => of(null)))
               );
               
-              forkJoin(ofertasRequests).subscribe(detalhes => {
-                this.detalhesOfertas.set(detalhes.filter(d => d !== null) as OfertaSupermercado[]);
+              forkJoin(ofertasRequests).subscribe((detalhes: any[]) => {
+                this.detalhesOfertas.set(detalhes.filter((d: any) => d !== null) as OfertaSupermercado[]);
                 this.loading.set(false);
               });
             } else {

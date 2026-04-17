@@ -12,6 +12,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { SupermarketService } from '../../../../core/services/supermarket.service';
 import { EncarteDigitalResponse } from '../../../../core/models/encarte.model';
 import { SupermarketResponse } from '../../../../core/models/supermarket.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-flyer-list',
@@ -24,7 +25,8 @@ import { SupermarketResponse } from '../../../../core/models/supermarket.model';
     MatIconModule,
     MatSnackBarModule,
     MatTableModule,
-    MatMenuModule
+    MatMenuModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './flyer-list.component.html',
   styleUrl: './flyer-list.component.scss'

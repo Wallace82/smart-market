@@ -1,61 +1,68 @@
-<div class="p-6">
-  <mat-card class="p-6 shadow-lg rounded-lg">
-    <mat-card-title class="flex justify-between items-center mb-6">
+<div class="p-4 md:p-6 max-w-7xl mx-auto">
+  <mat-card class="p-4 md:p-6 shadow-lg rounded-lg">
+    <mat-card-title class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <span class="text-2xl font-bold text-gray-800">Meus Encartes Digitais</span>
-      <button mat-flat-button color="primary" routerLink="/manager/flyers/create">
+      <button mat-flat-button color="primary" routerLink="/manager/flyers/create" class="w-full sm:w-auto">
         <mat-icon>add</mat-icon> Novo Encarte
       </button>
     </mat-card-title>
+
     <mat-card-content>
-      <div *ngIf="loading()" class="flex justify-center items-center h-48">
-        <mat-spinner></mat-spinner>
+      <!-- Loading State -->
+      <div *ngIf="loading()" class="flex justify-center items-center py-12">
+        <mat-spinner diameter="40"></mat-spinner>
       </div>
 
-      <div *ngIf="error()" class="text-center text-red-500 mt-8">
-        <p>{{ error() }}</p>
+      <!-- Error State -->
+      <div *ngIf="error()" class="bg-red-50 text-red-600 p-4 rounded-md border border-red-200 flex items-center mb-4">
+        <mat-icon class="mr-2">error_outline</mat-icon>
+        <p class="m-0">{{ error() }}</p>
       </div>
 
       <div *ngIf="!loading() && !error()">
-        <div *ngIf="encartes().length === 0" class="text-center text-gray-500 py-8">
-          <p>Você ainda não possui encartes digitais.</p>
-          <p>Clique em "Novo Encarte" para começar!</p>
+        <!-- Empty State -->
+        <div *ngIf="encartes().length === 0" class="text-center py-16 px-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+          <mat-icon class="text-6xl text-gray-300 mb-4">campaign</mat-icon>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">Você ainda não possui encartes</h3>
+          <p class="text-gray-500 mb-6">Crie seu primeiro encarte digital para divulgar suas ofertas.</p>
+          <button mat-stroked-button color="primary" routerLink="/manager/flyers/create">
+            Criar Agora
+          </button>
         </div>
 
-        <div *ngIf="encartes().length > 0" class="overflow-x-auto">
-          <table mat-table [dataSource]="encartes()" class="w-full min-w-[700px]">
+        <!-- Data View: Tabela para Desktop, Cards para Mobile -->
+        <div *ngIf="encartes().length > 0">
 
-            <!-- Coluna Título -->
-            <ng-container matColumnDef="titulo">
-              <th mat-header-cell *matHeaderCellDef> Título </th>
-              <td mat-cell *matCellDef="let encarte"> {{ encarte.titulo }} </td>
-            </ng-container>
+          <!-- View Mobile: Cards -->
+          <div class="block md:hidden space-y-4">
+            <mat-card *ngFor="let encarte of encartes()" class="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              <div class="p-4 flex flex-col gap-3">
+                <div class="flex justify-between items-start">
+                  <h3 class="font-bold text-lg text-gray-800 break-words pr-2">{{ encarte.titulo }}</h3>
+                  <button mat-icon-button [matMenuTriggerFor]="menuMobile" aria-label="Ações" class="flex-shrink-0 -mt-2 -mr-2">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                </div>
 
-            <!-- Coluna Data Início -->
-            <ng-container matColumnDef="dataInicio">
-              <th mat-header-cell *matHeaderCellDef> Início </th>
-              <td mat-cell *matCellDef="let encarte"> {{ encarte.dataInicio | date:'shortDate' }} </td>
-            </ng-container>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="getStatusClass(encarte.status)">
+                    {{ getStatusLabel(encarte.status) }}
+                  </span>
+                </div>
 
-            <!-- Coluna Data Fim -->
-            <ng-container matColumnDef="dataFim">
-              <th mat-header-cell *matHeaderCellDef> Fim </th>
-              <td mat-cell *matCellDef="let encarte"> {{ encarte.dataFim | date:'shortDate' }} </td>
-            </ng-container>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md mt-2">
+                  <div>
+                    <span class="block text-xs font-semibold text-gray-400 uppercase">Início</span>
+                    {{ encarte.dataInicio | date:'dd/MM/yyyy' }}
+                  </div>
+                  <div>
+                    <span class="block text-xs font-semibold text-gray-400 uppercase">Fim</span>
+                    {{ encarte.dataFim | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
 
-            <!-- Coluna Status -->
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef> Status </th>
-              <td mat-cell *matCellDef="let encarte"> {{ encarte.status }} </td>
-            </ng-container>
-
-            <!-- Coluna Ações -->
-            <ng-container matColumnDef="acoes">
-              <th mat-header-cell *matHeaderCellDef> Ações </th>
-              <td mat-cell *matCellDef="let encarte">
-                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Ações">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #menu="matMenu">
+                <!-- Menu Mobile -->
+                <mat-menu #menuMobile="matMenu">
                   <button mat-menu-item (click)="visualizarEncarte(encarte.id)">
                     <mat-icon>visibility</mat-icon>
                     <span>Visualizar</span>
@@ -64,21 +71,86 @@
                     <mat-icon>edit</mat-icon>
                     <span>Editar</span>
                   </button>
+                  <mat-divider></mat-divider>
                   <button mat-menu-item (click)="alterarStatus(encarte.id, 'PUBLICADO')" [disabled]="encarte.status === 'PUBLICADO'">
-                    <mat-icon>publish</mat-icon>
+                    <mat-icon class="text-green-600">publish</mat-icon>
                     <span>Publicar</span>
                   </button>
                   <button mat-menu-item (click)="alterarStatus(encarte.id, 'ARQUIVADO')" [disabled]="encarte.status === 'ARQUIVADO'">
-                    <mat-icon>archive</mat-icon>
+                    <mat-icon class="text-orange-600">archive</mat-icon>
                     <span>Arquivar</span>
                   </button>
                 </mat-menu>
-              </td>
-            </ng-container>
+              </div>
+            </mat-card>
+          </div>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+          <!-- View Desktop: Tabela -->
+          <div class="hidden md:block overflow-x-auto bg-white rounded-lg border border-gray-200">
+            <table mat-table [dataSource]="encartes()" class="w-full">
+
+              <!-- Coluna Título -->
+              <ng-container matColumnDef="titulo">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-600 bg-gray-50"> Título </th>
+                <td mat-cell *matCellDef="let encarte" class="font-medium text-gray-800"> {{ encarte.titulo }} </td>
+              </ng-container>
+
+              <!-- Coluna Data Início -->
+              <ng-container matColumnDef="dataInicio">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-600 bg-gray-50"> Início </th>
+                <td mat-cell *matCellDef="let encarte" class="text-gray-600"> {{ encarte.dataInicio | date:'dd/MM/yyyy' }} </td>
+              </ng-container>
+
+              <!-- Coluna Data Fim -->
+              <ng-container matColumnDef="dataFim">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-600 bg-gray-50"> Fim </th>
+                <td mat-cell *matCellDef="let encarte" class="text-gray-600"> {{ encarte.dataFim | date:'dd/MM/yyyy' }} </td>
+              </ng-container>
+
+              <!-- Coluna Status -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-600 bg-gray-50"> Status </th>
+                <td mat-cell *matCellDef="let encarte">
+                  <span class="px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap" [ngClass]="getStatusClass(encarte.status)">
+                    {{ getStatusLabel(encarte.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Coluna Ações -->
+              <ng-container matColumnDef="acoes">
+                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-600 bg-gray-50 text-right pr-4"> Ações </th>
+                <td mat-cell *matCellDef="let encarte" class="text-right pr-2">
+                  <button mat-icon-button [matMenuTriggerFor]="menuDesktop" aria-label="Ações" class="text-gray-500 hover:text-gray-800">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menuDesktop="matMenu">
+                    <button mat-menu-item (click)="visualizarEncarte(encarte.id)">
+                      <mat-icon>visibility</mat-icon>
+                      <span>Visualizar</span>
+                    </button>
+                    <button mat-menu-item (click)="editarEncarte(encarte.id)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Editar</span>
+                    </button>
+                    <mat-divider></mat-divider>
+                    <button mat-menu-item (click)="alterarStatus(encarte.id, 'PUBLICADO')" [disabled]="encarte.status === 'PUBLICADO'">
+                      <mat-icon class="text-green-600">publish</mat-icon>
+                      <span>Publicar</span>
+                    </button>
+                    <button mat-menu-item (click)="alterarStatus(encarte.id, 'ARQUIVADO')" [disabled]="encarte.status === 'ARQUIVADO'">
+                      <mat-icon class="text-orange-600">archive</mat-icon>
+                      <span>Arquivar</span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors"></tr>
+            </table>
+          </div>
+
         </div>
       </div>
     </mat-card-content>

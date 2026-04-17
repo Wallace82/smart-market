@@ -7,9 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { SupermarketResponse } from '../../../core/models/supermarket.model';
-import { SupermarketService } from '../../../core/services/supermarket.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { SupermarketResponse } from '@core/models/supermarket.model';
+import { SupermarketService } from '@core/services/supermarket.service';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-identity-settings',
@@ -68,7 +68,7 @@ export class IdentitySettingsComponent implements OnInit {
     const user = this.authService.user();
     if (user && user.id) {
       this.supermarketService.buscarPorGestor(user.id).subscribe({
-        next: (markets) => {
+        next: (markets: SupermarketResponse[]) => {
           if (markets && markets.length > 0) {
             this.supermarket.set(markets[0]);
           } else {
@@ -104,11 +104,11 @@ export class IdentitySettingsComponent implements OnInit {
     };
 
     this.supermarketService.atualizar(market.id, updateData).subscribe({
-      next: (updatedMarket) => {
+      next: (updatedMarket: SupermarketResponse) => {
         this.supermarket.set(updatedMarket);
         if (this.selectedFile) {
           this.supermarketService.uploadLogomarca(market.id, this.selectedFile).subscribe({
-            next: (marketWithLogo) => {
+            next: (marketWithLogo: SupermarketResponse) => {
               this.supermarket.set(marketWithLogo);
               this.loading.set(false);
               this.exibirMensagem('Configurações e Logomarca salvas!');

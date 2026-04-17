@@ -7,11 +7,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router, RouterModule } from '@angular/router';
-import { EncarteService } from '../../../core/services/encarte.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { SupermarketService } from '../../../core/services/supermarket.service';
-import { EncarteDigitalResponse } from '../../../core/models/encarte.model';
-import { SupermarketResponse } from '../../../core/models/supermarket.model';
+import { EncarteService } from '@core/services/encarte.service';
+import { AuthService } from '@core/services/auth.service';
+import { SupermarketService } from '@core/services/supermarket.service';
+import { EncarteDigitalResponse } from '@core/models/encarte.model';
+import { SupermarketResponse } from '@core/models/supermarket.model';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
@@ -26,7 +27,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatSnackBarModule,
     MatTableModule,
     MatMenuModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule // <-- CORREÇÃO: Módulo importado para resolver o erro NG8001
   ],
   templateUrl: './flyer-list.component.html',
   styleUrl: './flyer-list.component.scss'
@@ -62,15 +64,15 @@ export class FlyerListComponent implements OnInit {
     }
 
     this.supermarketService.buscarPorGestor(user.id).subscribe({
-      next: (markets) => {
+      next: (markets: SupermarketResponse[]) => {
         if (markets && markets.length > 0) {
           this.supermarket.set(markets[0]);
           this.encarteService.listarEncartes(markets[0].id).subscribe({
-            next: (encartesData) => {
+            next: (encartesData: EncarteDigitalResponse[]) => {
               this.encartes.set(encartesData);
               this.loading.set(false);
             },
-            error: (err) => {
+            error: (err: any) => {
               this.error.set('Erro ao carregar encartes: ' + (err.message || err));
               this.loading.set(false);
               this.snackBar.open('Erro ao carregar encartes.', 'Fechar', { duration: 3000 });
@@ -81,7 +83,7 @@ export class FlyerListComponent implements OnInit {
           this.loading.set(false);
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error.set('Erro ao buscar supermercado do gestor: ' + (err.message || err));
         this.loading.set(false);
         this.snackBar.open('Erro ao buscar supermercado.', 'Fechar', { duration: 3000 });
@@ -90,8 +92,6 @@ export class FlyerListComponent implements OnInit {
   }
 
   editarEncarte(id: string): void {
-    // Implementar navegação para um componente de edição de encarte
-    // Por enquanto, podemos navegar para a tela de criação com o ID para simular edição
     this.router.navigate(['/manager/flyers/edit', id]);
   }
 
@@ -99,16 +99,40 @@ export class FlyerListComponent implements OnInit {
     this.encarteService.alterarStatusEncarte(id, novoStatus).subscribe({
       next: () => {
         this.snackBar.open(`Status do encarte alterado para ${novoStatus}!`, 'Fechar', { duration: 3000 });
-        this.carregarEncartes(); // Recarrega a lista para refletir a mudança
+        this.carregarEncartes();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.snackBar.open('Erro ao alterar status: ' + (err.message || err), 'Fechar', { duration: 3000 });
       }
     });
   }
 
   visualizarEncarte(id: string): void {
-    // Navegar para a visualização do cliente
     this.router.navigate(['/client/flyers', id]);
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'PUBLICADO':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'RASCUNHO':
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'ARQUIVADO':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'EXPIRADO':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'PUBLICADO': return 'Publicado';
+      case 'RASCUNHO': return 'Rascunho';
+      case 'ARQUIVADO': return 'Arquivado';
+      case 'EXPIRADO': return 'Expirado';
+      default: return status;
+    }
   }
 }

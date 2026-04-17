@@ -14,12 +14,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EncarteService } from '../../../core/services/encarte.service';
-import { SupermarketService } from '../../../core/services/supermarket.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { OfertaService, OfertaSupermercado } from '../../../core/services/oferta.service';
-import { TemaEncarteResponse, EncarteDigitalRequest, EncarteItem } from '../../../core/models/encarte.model';
-import { SupermarketResponse } from '../../../core/models/supermarket.model';
+import { EncarteService } from '@core/services/encarte.service';
+import { SupermarketService } from '@core/services/supermarket.service';
+import { AuthService } from '@core/services/auth.service';
+import { OfertaService, OfertaSupermercado } from '@core/services/oferta.service';
+import { TemaEncarteResponse, EncarteDigitalRequest, EncarteItem } from '@core/models/encarte.model';
+import { SupermarketResponse } from '@core/models/supermarket.model';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -112,7 +112,7 @@ export class FlyerCreateComponent implements OnInit {
           this.supermarket.set(market);
           
           // Carrega ofertas do supermercado
-          this.ofertaService.buscarPorSupermercado(market.id).subscribe(ofertas => {
+          this.ofertaService.buscarPorSupermercado(market.id).subscribe((ofertas: OfertaSupermercado[]) => {
             this.ofertasDisponiveis.set(ofertas);
             
             // Se for edição, sincroniza as ofertas selecionadas

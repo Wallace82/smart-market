@@ -31,9 +31,11 @@ export class AuthService {
 
     return this.http.post<any>(`${this.apiUrl}/login`, payload).pipe(
       tap(response => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          this.decodificarToken(response.token);
+        // Aceita diferentes formatos de resposta do backend
+        const token = response.token || response.jwt || response.accessToken;
+        if (token) {
+          localStorage.setItem('token', token);
+          this.decodificarToken(token);
         }
       })
     );

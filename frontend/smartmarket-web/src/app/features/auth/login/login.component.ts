@@ -61,7 +61,15 @@ export class LoginComponent {
       finalize(() => this.loading.set(false))
     ).subscribe({
       next: () => {
-        this.router.navigate(['/manager/dashboard']);
+        const user = this.authService.user();
+        
+        if (user?.roles.includes('ROLE_ADMIN')) {
+          this.router.navigate(['/admin/supermarkets']);
+        } else if (user?.roles.includes('ROLE_GESTOR')) {
+          this.router.navigate(['/manager/flyers']);
+        } else {
+          this.router.navigate(['/client/home']);
+        }
       },
       error: (err) => {
         this.errorMessage.set('E-mail ou senha inválidos. Por favor, tente novamente.');

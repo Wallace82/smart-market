@@ -3,9 +3,11 @@ CREATE SCHEMA IF NOT EXISTS auth;
 CREATE SCHEMA IF NOT EXISTS supermarket;
 CREATE SCHEMA IF NOT EXISTS product;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- 1. Inserir Usuário Gestor (auth-service)
 INSERT INTO auth.users (id, email, password, role, active, created_at)
-VALUES ('some-gestor-uuid', 'gestor@smartmarket.com', '$2a$10$dGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLXNjb3R0LW1hcmtldA', 'ROLE_GESTOR', true, now())
+VALUES ('some-gestor-uuid', 'gestor@smartmarket.com', crypt('password', gen_salt('bf')), 'ROLE_GESTOR', true, now())
 ON CONFLICT (email) DO NOTHING;
 
 -- 2. Inserir Supermercado (supermarket-service)

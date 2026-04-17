@@ -59,6 +59,7 @@ export class FlyerListComponent implements OnInit {
 
   carregarEncartes(): void {
     this.loading.set(true);
+    this.error.set(null);
     const user = this.authService.user();
 
     if (!user || !user.id) {
@@ -66,31 +67,27 @@ export class FlyerListComponent implements OnInit {
       this.loading.set(false);
       return;
     }
-
-    this.supermarketService.buscarPorGestor(user.id).subscribe({
-      next: (markets: SupermarketResponse[]) => {
-        if (markets && markets.length > 0) {
-          this.supermarket.set(markets[0]);
-          this.encarteService.listarEncartes(markets[0].id).subscribe({
-            next: (encartesData: EncarteDigital[]) => {
-              this.encartes.set(encartesData);
-              this.loading.set(false);
-            },
-            error: (err: any) => {
-              this.error.set('Erro ao carregar encartes: ' + (err.message || err));
-              this.loading.set(false);
-              this.snackBar.open('Erro ao carregar encartes.', 'Fechar', { duration: 3000 });
-            }
-          });
-        } else {
-          this.error.set('Nenhum supermercado associado a este gestor.');
-          this.loading.set(false);
+    // MELHORIA: Refatoração com switchMap para evitar nested subscriptions
+    this.supermarketService.buscarPorGestor(user.id).pipe(
+      tap((markets: SupermarketResponse[]) => {
+        if (!markets || markets.length === 0) {
+          throw new Error('Nenhum supermercado associado a este gestor.');
         }
-      },
-      error: (err: any) => {
-        this.error.set('Erro ao buscar supermercado do gestor: ' + (err.message || err));
+        this.supermarket.set(markets[0]); // Assume o primeiro supermercado
+      }),
+      switchMap((markets: SupermarketResponse[]) => {
+        return this.encarteService.listarEncartes(markets[0].id);
+      }),
+      catchError((err: any) => {
+        const errorMessage = err.message || 'Erro desconhecido ao carregar dados.';
+        this.error.set('Erro ao carregar encartes: ' + errorMessage);
+        this.snackBar.open('Erro ao carregar encartes.', 'Fechar', { duration: 3000 });
+        return of([]); // Retorna um observable vazio para que a subscription principal não quebre
+      })
+    ).subscribe({
+      next: (encartesData: EncarteDigital[]) => {
+        this.encartes.set(encartesData);
         this.loading.set(false);
-        this.snackBar.open('Erro ao buscar supermercado.', 'Fechar', { duration: 3000 });
       }
     });
   }

@@ -2,14 +2,14 @@ package com.smartmarket.auth.application.dto;
 
 public class LoginRequestDTO {
     private String email;
-    private String senha;
+    private String password;
 
     public LoginRequestDTO() {
     }
 
-    public LoginRequestDTO(String email, String senha) {
+    public LoginRequestDTO(String email, String password) {
         this.email = email;
-        this.senha = senha;
+        this.password = password;
     }
 
     public String getEmail() {
@@ -20,11 +20,11 @@ public class LoginRequestDTO {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
+    public String getPassword() {
+        return password;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

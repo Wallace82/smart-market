@@ -1,19 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { EncarteService } from '@core/services/encarte.service';
 import { AuthService } from '@core/services/auth.service';
 import { SupermarketService } from '@core/services/supermarket.service';
-import { EncarteDigitalResponse } from '@core/models/encarte.model';
-import { SupermarketResponse } from '@core/models/supermarket.model';
+import { EncarteDigital } from '@core/models/encarte.model'; // Usando EncarteDigital diretamente
+import { SupermarketResponse } from '@core/models/supermarket.model'; // Nova interface
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip'; // Módulo MatTooltip
+import { catchError, switchMap, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-flyer-list',
@@ -34,7 +37,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   styleUrl: './flyer-list.component.scss'
 })
 export class FlyerListComponent implements OnInit {
-  encartes = signal<EncarteDigitalResponse[]>([]);
+  encartes = signal<EncarteDigital[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   supermarket = signal<SupermarketResponse | null>(null);
@@ -68,7 +71,7 @@ export class FlyerListComponent implements OnInit {
         if (markets && markets.length > 0) {
           this.supermarket.set(markets[0]);
           this.encarteService.listarEncartes(markets[0].id).subscribe({
-            next: (encartesData: EncarteDigitalResponse[]) => {
+            next: (encartesData: EncarteDigital[]) => {
               this.encartes.set(encartesData);
               this.loading.set(false);
             },
@@ -95,7 +98,7 @@ export class FlyerListComponent implements OnInit {
     this.router.navigate(['/manager/flyers/edit', id]);
   }
 
-  alterarStatus(id: string, novoStatus: 'RASCUNHO' | 'PUBLICADO' | 'ARQUIVADO' | 'EXPIRADO'): void {
+  alterarStatus(id: string, novoStatus: EncarteDigital['status']): void { // MELHORIA: Tipagem mais precisa
     this.encarteService.alterarStatusEncarte(id, novoStatus).subscribe({
       next: () => {
         this.snackBar.open(`Status do encarte alterado para ${novoStatus}!`, 'Fechar', { duration: 3000 });
@@ -111,15 +114,15 @@ export class FlyerListComponent implements OnInit {
     this.router.navigate(['/client/flyers', id]);
   }
 
-  getStatusClass(status: string): string {
+  getStatusClass(status: EncarteDigital['status']): string { // MELHORIA: Tipagem mais precisa
     switch (status) {
       case 'PUBLICADO':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'RASCUNHO':
         return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'ARQUIVADO':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'EXPIRADO':
+        return 'bg-blue-100 text-blue-800 border-blue-200'; // MELHORIA: Cor para arquivado
+      case 'EXPIRADO': // Correção: Voltando para EXPIRADO conforme tipagem
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -127,11 +130,11 @@ export class FlyerListComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    switch (status) {
+    switch (status as EncarteDigital['status']) { // MELHORIA: Cast para tipagem
       case 'PUBLICADO': return 'Publicado';
       case 'RASCUNHO': return 'Rascunho';
       case 'ARQUIVADO': return 'Arquivado';
-      case 'EXPIRADO': return 'Expirado';
+      case 'EXPIRADO': return 'Expirado'; // Correção: Voltando para EXPIRADO
       default: return status;
     }
   }

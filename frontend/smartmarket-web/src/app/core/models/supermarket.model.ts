@@ -1,46 +1,19 @@
-export interface Supermarket {
+export interface SupermarketResponse {
   id: string;
-  nomeFantasia: string;
+  nome: string;
+  nomeFantasia?: string;
   cnpj: string;
-  status: 'PENDENTE' | 'ATIVO' | 'INATIVO';
-  endereco: string;
-  latitude: number;
-  longitude: number;
-  raioAtuacao: number;
-  gestorId: string;
-  urlLogomarca?: string; // Novo campo
-  corPrimariaHex?: string; // Novo campo
-  corSecundariaHex?: string; // Novo campo
-  criadoEm: string;
-  atualizadoEm?: string;
+  status: 'ATIVO' | 'INATIVO' | 'PENDENTE';
+  urlLogomarca?: string;
+  corPrimariaHex?: string;
+  corSecundariaHex?: string;
+  // Adicione outros campos conforme necessário
 }
 
 export interface SupermarketRequest {
-  nomeFantasia: string;
+  nome: string;
+  nomeFantasia?: string;
   cnpj: string;
-  endereco: string;
-  latitude: number;
-  longitude: number;
-  raioAtuacao: number;
-  gestorId: string;
-  urlLogomarca?: string;
   corPrimariaHex?: string;
   corSecundariaHex?: string;
-}
-
-export interface SupermarketResponse {
-  id: string;
-  nomeFantasia: string;
-  cnpj: string;
-  status: 'PENDENTE' | 'ATIVO' | 'INATIVO';
-  endereco: string;
-  latitude: number;
-  longitude: number;
-  raioAtuacao: number;
-  gestorId: string;
-  urlLogomarca?: string;
-  corPrimariaHex?: string;
-  corSecundariaHex?: string;
-  criadoEm: string;
-  atualizadoEm?: string;
 }

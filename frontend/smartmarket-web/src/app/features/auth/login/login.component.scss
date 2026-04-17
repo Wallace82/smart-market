@@ -1,2 +1,57 @@
-/* Você pode adicionar estilos específicos do componente aqui, se necessário.
-   O Tailwind CSS já lida com a maioria dos estilos utilitários. */
+// Usando @use para importar variáveis e mixins do Angular Material
+@use '@angular/material' as mat;
+
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr; // Mobile-first (1 coluna)
+  min-height: 100vh;
+  background-color: #f3f4f6; // Fundo cinza moderno
+}
+
+.branding-panel {
+  display: none; // Escondido no mobile
+  background-color: #4f46e5;
+  // Um leve gradiente moderno na cor da marca
+  background-image: linear-gradient(to top right, #4f46e5, #7c3aed);
+  padding: 4rem;
+
+  .branding-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+}
+
+.form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05) !important;
+}
+
+@media (min-width: 1024px) {
+  .login-container {
+    grid-template-columns: 40% 60%; // Desktop (Split-screen)
+  }
+  .branding-panel {
+    display: block;
+  }
+  .login-card {
+    padding: 3rem;
+  }
+}
+
+// Ajuste limpo do material design interior
+:host ::ng-deep .login-card .mat-mdc-card-content {
+  padding: 0 !important;
+}

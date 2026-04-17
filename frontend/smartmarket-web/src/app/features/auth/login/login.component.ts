@@ -1,14 +1,19 @@
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
+import { finalize } from 'rxjs';
+
+// Angular Material Modules
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+// Core Services
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -16,45 +21,56 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule
+    MatProgressSpinnerModule
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  form: FormGroup;
-  loading = signal(false);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router,
-    private snackBar: MatSnackBar
-  ) {
-    this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+  public loading = signal(false);
+  public errorMessage = signal<string | null>(null);
+  public hidePassword = signal(true);
+
+  public loginForm: FormGroup = this.fb.group({
+    email: ['gestor@smartmarket.com', [Validators.required, Validators.email]],
+    password: ['password', [Validators.required]],
+  });
+
+  public login(): void {
+    if (this.loginForm.invalid) {
+      return;
+    }
+
+    this.loading.set(true);
+    this.errorMessage.set(null);
+
+    const credentials = this.loginForm.getRawValue();
+
+    this.authService.login(credentials).pipe(
+      finalize(() => this.loading.set(false))
+    ).subscribe({
+      next: () => {
+        this.router.navigate(['/manager/dashboard']);
+      },
+      error: (err) => {
+        this.errorMessage.set('E-mail ou senha inválidos. Por favor, tente novamente.');
+      }
     });
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) return;
-
-    this.loading.set(true);
-    this.authService.login(this.form.value).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/manager/settings/identity']);
-      },
-      error: () => {
-        this.loading.set(false);
-        this.snackBar.open('E-mail ou senha inválidos', 'Fechar', { duration: 3000 });
-      }
-    });
+  public togglePasswordVisibility(event: MouseEvent): void {
+    event.stopPropagation();
+    this.hidePassword.set(!this.hidePassword());
   }
 }

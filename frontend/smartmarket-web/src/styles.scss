@@ -2,3 +2,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
+/* ==========================================================================
+   SMARTMARKET DESIGN SYSTEM VARIABLES
+   Estas variáveis devem ser a fonte da verdade para cores na aplicação.
+   ========================================================================== */
+:root {
+  /* Cores da Marca */
+  --color-primary: #4f46e5;
+  --color-primary-dark: #3730a3;
+  --color-primary-light: #818cf8;
+  
+  --color-secondary: #10b981;
+  --color-accent: #f59e0b;
+
+  /* Backgrounds & Surfaces */
+  --color-bg-base: #f3f4f6;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+
+  /* Textos */
+  --color-text-title: #111827;
+  --color-text-body: #4b5563;
+  --color-text-muted: #9ca3af;
+
+  /* Shapes */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+
+  --font-family-base: 'Inter', sans-serif;
+}

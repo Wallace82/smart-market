@@ -31,10 +31,12 @@ import { of } from 'rxjs';
     MatTableModule,
     MatMenuModule,
     MatProgressSpinnerModule,
-    MatDividerModule // <-- CORREÇÃO: Módulo importado para resolver o erro NG8001
+    MatDividerModule,
+    MatTooltipModule // <-- CORREÇÃO: Módulo de tooltip que estava faltando
   ],
   templateUrl: './flyer-list.component.html',
-  styleUrl: './flyer-list.component.scss'
+  styleUrl: './flyer-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush // MELHORIA: Adicionando ChangeDetection
 })
 export class FlyerListComponent implements OnInit {
   encartes = signal<EncarteDigital[]>([]);
@@ -44,13 +46,12 @@ export class FlyerListComponent implements OnInit {
 
   displayedColumns: string[] = ['titulo', 'dataInicio', 'dataFim', 'status', 'acoes'];
 
-  constructor(
-    private encarteService: EncarteService,
-    private authService: AuthService,
-    private supermarketService: SupermarketService,
-    private snackBar: MatSnackBar,
-    private router: Router
-  ) {}
+  // MELHORIA: Usando inject() para consistência em componentes standalone
+  private readonly encarteService = inject(EncarteService);
+  private readonly authService = inject(AuthService);
+  private readonly supermarketService = inject(SupermarketService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.carregarEncartes();

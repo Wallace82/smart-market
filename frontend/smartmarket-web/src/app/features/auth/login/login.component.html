@@ -1,8 +1,8 @@
-<div class="login-container">
+<div class="login-container" style="font-family: var(--font-family-base);">
   <!-- Coluna de Branding (visível apenas em telas grandes) -->
   <div class="branding-panel">
     <div class="branding-content">
-      <h1 class="text-5xl font-black text-white leading-tight">
+      <h1 class="text-5xl font-black text-white leading-tight tracking-tight">
         SmartMarket
       </h1>
       <p class="mt-4 text-xl text-white/80">
@@ -15,11 +15,11 @@
   <div class="form-panel">
     <mat-card class="login-card">
       <mat-card-header class="flex flex-col items-center text-center">
-        <mat-icon class="text-indigo-600 !w-16 !h-16 mb-4 !text-6xl">storefront</mat-icon>
-        <mat-card-title class="!text-3xl !font-bold !mb-2 text-gray-800">
+        <mat-icon class="!w-16 !h-16 mb-4 !text-6xl text-[color:var(--color-primary)]">storefront</mat-icon>
+        <mat-card-title class="!text-3xl !font-bold !mb-2 text-[color:var(--color-text-title)]">
           Bem-vindo de volta!
         </mat-card-title>
-        <mat-card-subtitle class="!text-base text-gray-500">
+        <mat-card-subtitle class="!text-base text-[color:var(--color-text-body)]">
           Acesse sua conta para gerenciar seu supermercado.
         </mat-card-subtitle>
       </mat-card-header>
@@ -30,7 +30,7 @@
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>E-mail</mat-label>
             <input matInput formControlName="email" type="email" required>
-            <mat-icon matPrefix class="mr-2 text-gray-400">alternate_email</mat-icon>
+            <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">alternate_email</mat-icon>
             <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
               O e-mail é obrigatório.
             </mat-error>
@@ -43,7 +43,7 @@
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Senha</mat-label>
             <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required>
-            <mat-icon matPrefix class="mr-2 text-gray-400">lock_outline</mat-icon>
+            <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">lock_outline</mat-icon>
             <button mat-icon-button matSuffix (click)="togglePasswordVisibility($event)" type="button" [attr.aria-label]="'Esconder ou mostrar senha'">
               <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
@@ -69,7 +69,7 @@
           </button>
 
           <div class="text-center mt-4">
-            <a routerLink="/forgot-password" class="text-sm text-indigo-600 hover:underline">
+            <a routerLink="/forgot-password" class="text-sm text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)] hover:underline transition-colors">
               Esqueceu sua senha?
             </a>
           </div>

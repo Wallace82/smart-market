@@ -1,4 +1,4 @@
-﻿# 📋 SmartMarket — Documento de Requisitos
+﻿﻿# 📋 SmartMarket — Documento de Requisitos
 
 > **Versão:** 1.6.0
 > **Data:** 2025-07-29
@@ -91,6 +91,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 *   **RF-01.1:** O sistema deve permitir login via E-mail/Senha para os três perfis.
 *   **RF-01.2:** Uso de JWT para sessões stateless.
 *   **RF-01.3:** Uso de Signals para estado reativo do usuário no Frontend.
+*   **RF-01.4:** O acesso a páginas protegidas sem autenticação deve redirecionar o usuário para a tela de login.
 
 ### 3.2 RF-02 — Gestão de Supermercados (Whitelabel)
 *   **RF-02.1:** O Admin deve cadastrar/aprovar supermercados.

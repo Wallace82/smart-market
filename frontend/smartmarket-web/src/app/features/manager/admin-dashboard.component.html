@@ -1,0 +1,22 @@
+<div class="mb-6">
+  <h1 class="text-3xl font-bold text-gray-800">Dashboard do Administrador</h1>
+  <p class="text-gray-500">Visão geral da plataforma SmartMarket.</p>
+</div>
+
+<ng-container *ngIf="loading(); else content">
+  <div class="flex justify-center items-center h-64">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <mat-card *ngFor="let metric of metrics()" class="p-4 flex items-center">
+      <mat-icon [class]="metric.color + ' text-4xl mr-4'">{{ metric.icon }}</mat-icon>
+      <div>
+        <p class="text-gray-500 text-sm">{{ metric.title }}</p>
+        <p class="text-2xl font-bold text-gray-800">{{ metric.value }}</p>
+      </div>
+    </mat-card>
+  </div>
+</ng-template>

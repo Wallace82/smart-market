@@ -1,11 +1,21 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 
 export interface User {
   id: string;
   email: string;
   roles: string[];
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
 }
 
 @Injectable({
@@ -17,25 +27,25 @@ export class AuthService {
   // Usando Signals para estado reativo do usuário
   private _user = signal<User | null>(null);
   user = computed(() => this._user());
+  private readonly router = inject(Router);
   
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient) { // O router é injetado via função inject()
     this.carregarUsuarioDoStorage();
   }
 
-  login(credentials: any): Observable<any> {
+  login(credentials: LoginCredentials): Observable<LoginResponse> {
     // Adapta o payload para o formato que o backend atual espera (usando 'senha')
     const payload = {
       email: credentials.email,
       senha: credentials.password
     };
 
-    return this.http.post<any>(`${this.apiUrl}/login`, payload).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, payload).pipe(
       tap(response => {
-        // Aceita diferentes formatos de resposta do backend
-        const token = response.token || response.jwt || response.accessToken;
-        if (token) {
-          localStorage.setItem('token', token);
-          this.decodificarToken(token);
+        console.log('Resposta do servidor:', response);
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+          this.decodificarToken(response.token);
         }
       })
     );
@@ -43,10 +53,17 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('token');
+    localStorage.removeItem('user'); // Limpeza completa
     this._user.set(null);
+    this.router.navigate(['/login']);
   }
 
-  isLoggedIn(): boolean {
+  /**
+   * Verifica se o usuário está autenticado.
+   * Utilizado pelo AuthGuard para proteger rotas.
+   * @returns `true` se houver um usuário logado, `false` caso contrário.
+   */
+  isAuthenticated(): boolean {
     return !!this._user();
   }
 

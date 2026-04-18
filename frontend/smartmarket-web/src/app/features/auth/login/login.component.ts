@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Core Services
-import { AuthService } from '@core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -64,11 +64,11 @@ export class LoginComponent {
         const user = this.authService.user();
         
         if (user?.roles.includes('ROLE_ADMIN')) {
-          this.router.navigate(['/admin/supermarkets']);
+          this.router.navigate(['/admin/dashboard']);
         } else if (user?.roles.includes('ROLE_GESTOR')) {
-          this.router.navigate(['/manager/flyers']);
+          this.router.navigate(['/manager/dashboard']);
         } else {
-          this.router.navigate(['/client/home']);
+          this.router.navigate(['/client/home']); // Mantém para o perfil de cliente
         }
       },
       error: (err) => {

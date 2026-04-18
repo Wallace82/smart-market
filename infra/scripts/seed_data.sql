@@ -50,3 +50,15 @@ VALUES ('55555555-5555-5555-5555-555555555551', '22222222-2222-2222-2222-2222222
        ('55555555-5555-5555-5555-555555555552', '22222222-2222-2222-2222-222222222222', '44444444-4444-4444-4444-444444444442', 7.49, true, now()),
        ('55555555-5555-5555-5555-555555555553', '22222222-2222-2222-2222-222222222222', '44444444-4444-4444-4444-444444444443', 4.25, true, now())
 ON CONFLICT (id) DO NOTHING;
+
+-- 6. Inserir Encarte Digital (product-service)
+INSERT INTO product.encartes_digitais (id, supermercado_id, tema_id, titulo, data_inicio, data_fim, status, criado_em)
+VALUES ('66666666-6666-6666-6666-666666666661', '22222222-2222-2222-2222-222222222222', '33333333-3333-3333-3333-333333333331', 'Especial de Natal', CURRENT_DATE, CURRENT_DATE + INTERVAL '10 days', 'PUBLICADO', now())
+ON CONFLICT (id) DO NOTHING;
+
+-- 7. Relacionar Ofertas ao Encarte (Tabela de relacionamento Many-to-Many)
+-- Atenção: Ajuste o nome da tabela 'encartes_digitais_ofertas' caso o seu JPA tenha gerado um nome diferente
+INSERT INTO product.encartes_digitais_ofertas (encarte_id, oferta_id)
+VALUES ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555551'),
+       ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555552'),
+       ('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555553');

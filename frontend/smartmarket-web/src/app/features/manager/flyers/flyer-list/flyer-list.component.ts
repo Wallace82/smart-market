@@ -11,6 +11,8 @@ import { finalize } from 'rxjs';
 
 // Service
 import { EncarteService } from '../../../../core/services/encarte.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { SupermarketService } from '../../../../core/services/supermarket.service';
 
 @Component({
   selector: 'app-flyer-list',
@@ -117,19 +119,48 @@ import { EncarteService } from '../../../../core/services/encarte.service';
 })
 export class FlyerListComponent implements OnInit {
   private encarteService = inject(EncarteService);
+  private authService = inject(AuthService);
+  private supermarketService = inject(SupermarketService);
 
   public encartes = signal<any[]>([]);
   public loading = signal<boolean>(true);
   public displayedColumns: string[] = ['titulo', 'dataInicio', 'dataFim', 'status', 'acoes'];
+  
+  private supermercadoId: string | null = null;
 
   ngOnInit(): void {
-    this.carregarEncartes();
+    this.carregarDadosIniciais();
   }
 
-  carregarEncartes(): void {
+  carregarDadosIniciais(): void {
     this.loading.set(true);
-    // O serviço envia o JWT, então o backend já deve identificar de qual supermercado buscar
-    this.encarteService.listarEncartes()
+    const user = this.authService.user();
+    
+    if (user && user.id) {
+      // Primeiro buscamos a qual supermercado o gestor logado pertence
+      this.supermarketService.buscarPorGestor(user.id).subscribe({
+        next: (supermercados: any[]) => {
+          if (supermercados && supermercados.length > 0) {
+            this.supermercadoId = supermercados[0].id;
+            this.carregarEncartes(this.supermercadoId!);
+          } else {
+            this.loading.set(false);
+            console.warn('Nenhum supermercado vinculado a este gestor.');
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao buscar supermercado do gestor', err);
+          this.loading.set(false);
+        }
+      });
+    } else {
+      this.loading.set(false);
+    }
+  }
+
+  carregarEncartes(supermercadoId: string): void {
+    this.loading.set(true);
+    this.encarteService.listarEncartes(supermercadoId)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (data: any) => {
@@ -147,7 +178,9 @@ export class FlyerListComponent implements OnInit {
     if (confirm('Tem certeza que deseja arquivar este encarte? Ele não ficará mais visível para os clientes.')) {
       this.encarteService.alterarStatusEncarte(id, 'ARQUIVADO').subscribe({
         next: () => {
-          this.carregarEncartes(); // Recarrega a lista após sucesso
+          if (this.supermercadoId) {
+            this.carregarEncartes(this.supermercadoId); // Recarrega a lista após sucesso
+          }
         },
         error: (err) => console.error('Erro ao arquivar encarte', err)
       });

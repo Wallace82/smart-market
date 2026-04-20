@@ -1,0 +1,114 @@
+<div class="flex flex-col gap-6 pb-8">
+  
+  <!-- Cabeçalho e Ações da Página -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">
+        Gestão de Supermercados
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Gerencie as lojas cadastradas, planos e permissões de acesso na plataforma.
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">filter_list</mat-icon> Filtros
+      </button>
+      <button class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">add</mat-icon> Novo Supermercado
+      </button>
+    </div>
+  </header>
+
+  <!-- Resumo em Mini-Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Total de Lojas</p>
+        <p class="text-2xl font-bold text-gray-900">{{ totalStores() }}</p>
+      </div>
+      <div class="bg-gray-100 p-2 rounded-lg text-gray-600"><mat-icon>storefront</mat-icon></div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Lojas Ativas</p>
+        <p class="text-2xl font-bold text-gray-900">{{ activeStores() }}</p>
+      </div>
+      <div class="bg-green-50 p-2 rounded-lg text-green-600"><mat-icon>check_circle</mat-icon></div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Aguardando Aprovação</p>
+        <p class="text-2xl font-bold text-gray-900">1</p>
+      </div>
+      <div class="bg-orange-50 p-2 rounded-lg text-orange-600"><mat-icon>pending_actions</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- Barra de Pesquisa e Tabela -->
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+    
+    <!-- Search Bar (Header da Tabela) -->
+    <div class="p-4 border-b border-gray-200 bg-white">
+      <div class="relative w-full max-w-md">
+        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !text-[20px] !w-5 !h-5">search</mat-icon>
+        <input type="text" placeholder="Buscar por nome, CNPJ ou ID..." 
+               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+      </div>
+    </div>
+
+    <!-- Tabela Responsiva -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+            <th class="px-6 py-4">Supermercado</th>
+            <th class="px-6 py-4">CNPJ</th>
+            <th class="px-6 py-4">Plano</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Cadastro em</th>
+            <th class="px-6 py-4 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let store of stores()" class="hover:bg-gray-50 transition-colors group">
+            
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <img [src]="store.logoUrl" alt="Logo" class="w-10 h-10 rounded-lg border border-gray-200 shadow-sm">
+                <div>
+                  <p class="text-sm font-bold text-gray-900">{{ store.name }}</p>
+                  <p class="text-xs text-gray-500">ID: {{ store.id }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ store.cnpj }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200">{{ store.plan }}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': store.status === 'Ativo',
+                  'bg-orange-100 text-orange-800': store.status === 'Pendente',
+                  'bg-red-100 text-red-800': store.status === 'Bloqueado'
+                }">
+                <!-- Micro pontinho animado ou fixo -->
+                <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="{'bg-green-500': store.status === 'Ativo', 'bg-orange-500': store.status === 'Pendente', 'bg-red-500': store.status === 'Bloqueado'}"></span>
+                {{ store.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ store.joinedAt }}</td>
+            
+            <!-- Botões de Ação Hover -->
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button mat-icon-button matTooltip="Editar" class="!text-gray-400 hover:!text-blue-600 transition-colors"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button matTooltip="Bloquear / Opções" class="!text-gray-400 hover:!text-red-600 transition-colors"><mat-icon>more_vert</mat-icon></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

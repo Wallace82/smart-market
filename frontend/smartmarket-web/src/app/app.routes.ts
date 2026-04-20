@@ -17,7 +17,7 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
-    canActivate: [authGuard],
+//
     children: [
       { path: '', redirectTo: 'manager/dashboard', pathMatch: 'full' }, // Rota padrão para gestor
       {

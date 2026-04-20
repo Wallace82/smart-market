@@ -1,0 +1,78 @@
+<div class="flex flex-col gap-8 pb-8">
+  
+  <!-- Cabeçalho da Página -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-5">
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">
+        Gestão de Encartes
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Crie e gerencie os folhetos de ofertas digitais do seu supermercado.
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-orange-700 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">add_photo_alternate</mat-icon> Novo Encarte
+      </button>
+    </div>
+  </header>
+
+  <!-- Barra de Filtros e Resumo -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="relative w-full max-w-md">
+      <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !text-[20px] !w-5 !h-5">search</mat-icon>
+      <input type="text" placeholder="Buscar encartes..." 
+             class="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors shadow-sm">
+    </div>
+
+    <div class="flex items-center gap-4 text-sm">
+      <span class="flex items-center gap-1 text-gray-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+        <div class="w-2 h-2 rounded-full bg-green-500"></div> {{ activeCount() }} Ativos
+      </span>
+      <span class="flex items-center gap-1 text-gray-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+        <mat-icon class="!text-[16px] !w-4 !h-4 text-blue-500">visibility</mat-icon> {{ totalViews() }} Visualizações
+      </span>
+    </div>
+  </div>
+
+  <!-- Grid de Encartes -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    
+    <div *ngFor="let flyer of flyers()" class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow group">
+      
+      <!-- Capa e Badge de Status -->
+      <div class="relative h-48 w-full bg-gray-100 overflow-hidden">
+        <img [src]="flyer.coverUrl" alt="Capa do Encarte" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500">
+        
+        <!-- Status Badge overlay -->
+        <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-sm"
+             [ngClass]="{
+               'bg-green-500/90 text-white': flyer.status === 'Ativo',
+               'bg-gray-800/80 text-white': flyer.status === 'Rascunho',
+               'bg-red-500/90 text-white': flyer.status === 'Expirado'
+             }">
+          {{ flyer.status }}
+        </div>
+      </div>
+
+      <!-- Conteúdo do Card -->
+      <div class="p-5 flex-1 flex flex-col">
+        <h3 class="text-lg font-bold text-gray-900 line-clamp-1 mb-1">{{ flyer.title }}</h3>
+        <p class="text-xs text-gray-500 mb-4 flex items-center gap-1">
+          <mat-icon class="!text-[14px] !w-3.5 !h-3.5">event</mat-icon> Válido até: {{ flyer.validUntil }}
+        </p>
+        
+        <div class="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
+          <div class="flex items-center gap-1.5 text-sm font-medium text-gray-600">
+            <mat-icon class="!text-[18px] !w-4.5 !h-4.5 text-blue-500">visibility</mat-icon> {{ flyer.views }}
+          </div>
+          <div class="flex items-center gap-1">
+            <button mat-icon-button class="!text-gray-400 hover:!text-blue-600 transition-colors !w-8 !h-8"><mat-icon class="!text-[20px]">edit</mat-icon></button>
+            <button mat-icon-button class="!text-gray-400 hover:!text-red-600 transition-colors !w-8 !h-8"><mat-icon class="!text-[20px]">delete</mat-icon></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

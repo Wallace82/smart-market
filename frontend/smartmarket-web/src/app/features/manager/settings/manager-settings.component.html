@@ -1,0 +1,178 @@
+<div class="flex flex-col gap-6 pb-8">
+  
+  <!-- Cabeçalho e Ações da Página -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">
+        Minha Loja
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Atualize as informações do seu supermercado, logotipo e endereço principal.
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+        Descartar
+      </button>
+      <button class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">save</mat-icon> Salvar Alterações
+      </button>
+    </div>
+  </header>
+
+  <!-- Área de Formulários e Perfil -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    
+    <!-- Card de Perfil da Loja (Esquerda) -->
+    <div class="xl:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col items-center text-center h-max">
+      
+      <!-- Upload de Logo Moderno -->
+      <div class="relative group cursor-pointer mb-5">
+        <div class="w-32 h-32 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-50">
+          <img [src]="storeData().logoUrl" alt="Logo da Loja" class="w-full h-full object-cover">
+        </div>
+        <div class="absolute inset-0 bg-gray-900/60 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <mat-icon class="text-white !text-[32px] !w-8 !h-8 mb-1">photo_camera</mat-icon>
+          <span class="text-[10px] text-white font-bold uppercase tracking-widest">Alterar</span>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-gray-900">{{ storeData().name }}</h3>
+      <p class="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full mt-2 mb-6">Plano Pro • Ativo</p>
+      
+      <div class="w-full text-left space-y-4 pt-6 border-t border-gray-100">
+        <div class="flex items-center text-sm text-gray-600">
+          <mat-icon class="mr-3 !text-[20px] !w-5 !h-5 text-gray-400">badge</mat-icon> {{ storeData().cnpj }}
+        </div>
+        <div class="flex items-center text-sm text-gray-600">
+          <mat-icon class="mr-3 !text-[20px] !w-5 !h-5 text-gray-400">email</mat-icon> {{ storeData().email }}
+        </div>
+        <div class="flex items-center text-sm text-gray-600">
+          <mat-icon class="mr-3 !text-[20px] !w-5 !h-5 text-gray-400">phone</mat-icon> {{ storeData().phone }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulários (Direita) -->
+    <div class="xl:col-span-2 space-y-6">
+      
+      <!-- Bloco: Informações Básicas -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <h2 class="text-base font-bold text-gray-900 mb-5 border-b border-gray-100 pb-3">Informações Básicas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Nome do Supermercado</label>
+            <input type="text" [value]="storeData().name" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide flex items-center justify-between">CNPJ <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-gray-400" matTooltip="Não pode ser alterado">lock</mat-icon></label>
+            <input type="text" [value]="storeData().cnpj" class="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed" disabled>
+          </div>
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">E-mail Comercial</label>
+            <input type="email" [value]="storeData().email" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">WhatsApp / Telefone</label>
+            <input type="text" [value]="storeData().phone" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco: Endereço (Design Minimalista) -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <h2 class="text-base font-bold text-gray-900 mb-5 border-b border-gray-100 pb-3 flex items-center justify-between">
+          Endereço Principal
+          <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Buscar CEP</button>
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-6 gap-5">
+          <div class="flex flex-col sm:col-span-2">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">CEP</label>
+            <input type="text" [value]="storeData().cep" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col sm:col-span-4">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Endereço (Rua/Avenida)</label>
+            <input type="text" [value]="storeData().address" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col sm:col-span-4">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Cidade</label>
+            <input type="text" [value]="storeData().city" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col sm:col-span-2">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Estado (UF)</label>
+            <select class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+              <option value="SP" selected>São Paulo (SP)</option>
+              <option value="RJ">Rio de Janeiro (RJ)</option>
+              <option value="MG">Minas Gerais (MG)</option>
+            </select>
+          </div>
+          <div class="flex flex-col sm:col-span-3 mt-2 border-t border-gray-100 pt-4">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Latitude (GPS)</label>
+            <input type="text" [value]="storeData().latitude" placeholder="Ex: -23.550520" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col sm:col-span-3 mt-2 border-t border-gray-100 pt-4">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Longitude (GPS)</label>
+            <input type="text" [value]="storeData().longitude" placeholder="Ex: -46.633308" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco: Personalização de Marca -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <h2 class="text-base font-bold text-gray-900 mb-2 border-b border-gray-100 pb-3 flex items-center gap-2">
+          <mat-icon class="text-purple-500">palette</mat-icon> Personalização de Marca
+        </h2>
+        <p class="text-sm text-gray-500 mb-5">Escolha as cores que serão usadas como padrão na geração dos seus encartes e promoções.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Cor Primária</label>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm overflow-hidden shrink-0">
+                <input type="color" [value]="storeData().primaryColor" class="w-16 h-16 -m-2 cursor-pointer">
+              </div>
+              <input type="text" [value]="storeData().primaryColor" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors uppercase">
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Cor Secundária</label>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm overflow-hidden shrink-0">
+                <input type="color" [value]="storeData().secondaryColor" class="w-16 h-16 -m-2 cursor-pointer">
+              </div>
+              <input type="text" [value]="storeData().secondaryColor" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors uppercase">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloco: Lojas e Filiais -->
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <h2 class="text-base font-bold text-gray-900 mb-2 border-b border-gray-100 pb-3 flex items-center justify-between">
+          <span class="flex items-center gap-2"><mat-icon class="text-blue-500">store</mat-icon> Lojas e Filiais</span>
+          <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center"><mat-icon class="!text-[16px] !w-4 !h-4 mr-1">add</mat-icon> Adicionar Filial</button>
+        </h2>
+        <p class="text-sm text-gray-500 mb-5">Gerencie as filiais da sua rede para direcionar campanhas e ofertas por localidade.</p>
+        
+        <div class="space-y-3">
+          <div *ngFor="let branch of storeData().branches" class="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50 hover:bg-white hover:shadow-sm transition-all group">
+            <div class="flex items-start gap-3">
+              <div class="p-2 bg-white rounded-lg border border-gray-200 text-gray-400 group-hover:text-blue-500 transition-colors">
+                <mat-icon>location_on</mat-icon>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-gray-900">{{ branch.name }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ branch.address }}</p>
+              </div>
+            </div>
+            <div class="flex gap-1">
+              <button mat-icon-button class="!text-gray-400 hover:!text-blue-600 transition-colors"><mat-icon class="!text-[20px]">edit</mat-icon></button>
+              <button mat-icon-button class="!text-gray-400 hover:!text-red-600 transition-colors"><mat-icon class="!text-[20px]">delete</mat-icon></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

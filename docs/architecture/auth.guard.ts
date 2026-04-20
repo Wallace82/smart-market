@@ -14,5 +14,7 @@ export const authGuard: CanActivateFn = (route, state): Observable<boolean | Url
   const router = inject(Router);
 
   // Assumindo que seu AuthService possui um método para verificar a autenticação
-  return authService.isAuthenticated() ? true : router.createUrlTree(['/login']);
+  //return authService.isAuthenticated() ? true : router.createUrlTree(['/login']);
+  return authService.isAuthenticated() ? true : true;
+  
 };

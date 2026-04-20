@@ -1,0 +1,50 @@
+<mat-toolbar class="!bg-white !text-gray-800 border-b border-gray-200 shadow-sm flex justify-between px-6 h-16">
+  <div class="flex items-center gap-4">
+    <!-- Botão para colapsar/expandir a sidebar (funcionalidade futura) -->
+    <button mat-icon-button class="!text-gray-500 hover:!text-green-600 transition-colors xl:hidden">
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <!-- Breadcrumb / Título da Página (SUGESTÃO) -->
+    <!-- Esta área pode ser preenchida dinamicamente por um serviço de título -->
+    <div class="text-sm font-medium text-gray-500 hidden sm:block">
+      <a href="#" class="hover:text-green-600">Páginas</a> / <span class="text-gray-900">Dashboard</span>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <!-- Botão de Notificações com Badge "Pulsante" em Laranja -->
+    <button mat-icon-button class="!text-gray-500 hover:!text-green-600 transition-colors relative group">
+      <mat-icon>notifications_none</mat-icon>
+      <span class="absolute top-2 right-2 flex h-2.5 w-2.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+      </span>
+    </button>
+    
+    <!-- Botão Dropdown do Perfil -->
+    <button mat-button [matMenuTriggerFor]="userMenu" class="!flex !items-center !gap-2 !text-gray-600 hover:!text-green-600 transition-colors !rounded-full sm:!rounded-lg !px-2 sm:!px-4">
+      <!-- Avatar Dinâmico -->
+      <img [src]="userAvatarUrl()" alt="Avatar" class="h-8 w-8 rounded-full border border-gray-200 shadow-sm">
+      <span class="font-medium hidden sm:block">{{ userName() }}</span>
+      <mat-icon class="!text-sm hidden sm:block">arrow_drop_down</mat-icon>
+    </button>
+    
+    <!-- Menu de Usuário Moderno -->
+    <mat-menu #userMenu="matMenu" class="!rounded-xl !mt-2 shadow-lg border border-gray-100">
+      <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+        <p class="text-sm font-medium text-gray-900">{{ userName() }}</p>
+        <p class="text-xs text-gray-500 truncate">{{ userEmail() }}</p>
+      </div>
+      <button mat-menu-item class="hover:!text-green-600">
+        <mat-icon class="!text-gray-500">person_outline</mat-icon>
+        <span>Meu Perfil</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="onLogout()" class="!text-orange-600 hover:!bg-orange-50">
+        <mat-icon class="!text-orange-600">logout</mat-icon>
+        <span class="font-medium">Sair da Plataforma</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>

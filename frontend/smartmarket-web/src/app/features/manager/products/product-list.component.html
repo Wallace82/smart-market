@@ -1,0 +1,106 @@
+<div class="flex flex-col gap-6 pb-8">
+  
+  <!-- Cabeçalho e Ações da Página -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">
+        Catálogo de Produtos
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Gerencie o estoque, preços base e categorias dos produtos da sua loja.
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">filter_list</mat-icon> Filtros
+      </button>
+      <button class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">add</mat-icon> Novo Produto
+      </button>
+    </div>
+  </header>
+
+  <!-- Resumo em Mini-Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Total de Produtos</p>
+        <p class="text-2xl font-bold text-gray-900">{{ totalProducts() }}</p>
+      </div>
+      <div class="bg-blue-50 p-2 rounded-lg text-blue-600"><mat-icon>inventory_2</mat-icon></div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Alertas de Estoque</p>
+        <p class="text-2xl font-bold" [ngClass]="outOfStock() > 0 ? 'text-red-600' : 'text-gray-900'">{{ outOfStock() }}</p>
+      </div>
+      <div class="p-2 rounded-lg" [ngClass]="outOfStock() > 0 ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-400'"><mat-icon>warning</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- Barra de Pesquisa e Tabela -->
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+    
+    <!-- Search Bar -->
+    <div class="p-4 border-b border-gray-200 bg-white">
+      <div class="relative w-full max-w-md">
+        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !text-[20px] !w-5 !h-5">search</mat-icon>
+        <input type="text" placeholder="Buscar por nome, código ou categoria..." 
+               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+      </div>
+    </div>
+
+    <!-- Tabela Responsiva -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+            <th class="px-6 py-4">Produto</th>
+            <th class="px-6 py-4">Categoria</th>
+            <th class="px-6 py-4">Preço Base</th>
+            <th class="px-6 py-4">Estoque</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let product of products()" class="hover:bg-gray-50 transition-colors group">
+            
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <img [src]="product.imageUrl" alt="Produto" class="w-10 h-10 rounded-lg border border-gray-200 shadow-sm object-cover">
+                <div>
+                  <p class="text-sm font-bold text-gray-900">{{ product.name }}</p>
+                  <p class="text-xs text-gray-500">Cód: {{ product.id }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs font-medium border border-gray-200">{{ product.category }}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">R$ {{ product.price }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <span [ngClass]="{'text-red-600 font-bold bg-red-50 px-2 py-1 rounded': product.stock === 0}">{{ product.stock }} un.</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': product.status === 'Ativo',
+                  'bg-gray-100 text-gray-800': product.status === 'Inativo',
+                  'bg-red-100 text-red-800': product.status === 'Sem Estoque'
+                }">
+                <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="{'bg-green-500': product.status === 'Ativo', 'bg-gray-500': product.status === 'Inativo', 'bg-red-500': product.status === 'Sem Estoque'}"></span>
+                {{ product.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button mat-icon-button matTooltip="Editar" class="!text-gray-400 hover:!text-blue-600 transition-colors"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button matTooltip="Remover" class="!text-gray-400 hover:!text-red-600 transition-colors"><mat-icon>delete</mat-icon></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

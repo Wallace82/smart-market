@@ -1,0 +1,70 @@
+<aside class="w-72 h-full bg-gray-900 text-gray-300 flex flex-col">
+  <!-- Topo da Sidebar (Logo) -->
+  <div class="h-20 flex items-center gap-4 px-6 shrink-0">
+    <!-- 
+      NOTA: Para um melhor visual em fundo escuro, 
+      recomenda-se usar uma versão da logo com fundo transparente.
+    -->
+    <img src="assets/images/logo_app.png" alt="SmartMarket Logo" class="h-10 w-auto object-contain">
+    <span class="text-xl font-bold tracking-tight text-white">Smart<span class="text-green-500">Market</span></span>
+  </div>
+
+  <!-- Menu de Navegação Rolável -->
+  <nav class="flex-1 px-4 py-4 space-y-2">
+    
+    <!-- Global: Dashboard -->
+    <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="nav-item group">
+      <mat-icon matListItemIcon class="nav-icon">dashboard</mat-icon>
+      <span matListItemTitle>Dashboard</span>
+    </a>
+
+    <!-- Menu Condicional: Administrador -->
+    <ng-container *ngIf="isAdmin()">
+      <h3 class="nav-subheader">Administração</h3>
+      <a mat-list-item routerLink="/admin/stores" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon">storefront</mat-icon>
+        <span matListItemTitle>Supermercados</span>
+      </a>
+      <a mat-list-item routerLink="/admin/users" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon">people</mat-icon>
+        <span matListItemTitle>Usuários</span>
+      </a>
+    </ng-container>
+
+    <!-- Menu Condicional: Gestor Lojista -->
+    <ng-container *ngIf="isManager()">
+      <h3 class="nav-subheader">Meu Supermercado</h3>
+      <a mat-list-item routerLink="/manager/products" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon">inventory</mat-icon>
+        <span matListItemTitle>Produtos</span>
+      </a>
+      <a mat-list-item routerLink="/manager/flyers" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon group-hover:!text-orange-400">local_offer</mat-icon>
+        <span matListItemTitle>Encartes</span>
+      </a>
+      <a mat-list-item routerLink="/manager/offers" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon group-hover:!text-orange-500">sell</mat-icon>
+        <span matListItemTitle>Ofertas</span>
+      </a>
+      <a mat-list-item routerLink="/manager/settings" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon group-hover:!text-gray-100">store_mall_directory</mat-icon>
+        <span matListItemTitle>Minha Loja</span>
+      </a>
+    </ng-container>
+
+    <!-- Menu Condicional: Cliente Comprador -->
+    <ng-container *ngIf="isClient()">
+      <h3 class="nav-subheader">Compras</h3>
+      <a mat-list-item routerLink="/client/orders" routerLinkActive="active-link" class="nav-item group">
+        <mat-icon matListItemIcon class="nav-icon group-hover:!text-blue-400">receipt_long</mat-icon>
+        <span matListItemTitle>Meus Pedidos</span>
+      </a>
+    </ng-container>
+  </nav>
+
+  <!-- Rodapé da Sidebar (Badge de Verificação) -->
+  <div class="p-4 border-t border-white/10 flex items-center justify-center text-sm text-gray-500 font-medium shrink-0">
+    <mat-icon class="!text-[16px] !w-4 !h-4 mr-2">verified_user</mat-icon>
+    <span>SmartMarket v1.0.0</span>
+  </div>
+</aside>

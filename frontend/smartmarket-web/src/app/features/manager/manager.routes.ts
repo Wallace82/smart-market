@@ -1,25 +1,15 @@
 import { Routes } from '@angular/router';
 
+import { ManagerFlyersComponent } from './flyers/manager-flyers.component';
+import { OfferManagementComponent } from './flyers/offer-management.component';
+import { ManagerDashboardComponent } from './dashboard/manager-dashboard.component';
+import { ProductListComponent } from './products/product-list.component';
+import { ManagerSettingsComponent } from './settings/manager-settings.component';
+
 export const MANAGER_ROUTES: Routes = [
-  {
-    path: 'dashboard',
-    loadComponent: () => import('./dashboard/manager-dashboard.component').then(m => m.ManagerDashboardComponent),
-    title: 'Dashboard do Gestor'
-  },
-  {
-    path: 'flyers',
-    loadComponent: () => import('./flyers/flyer-management.component').then(m => m.FlyerManagementComponent),
-    title: 'Gestão de Encartes'
-  },
-  {
-    path: 'offers',
-    loadComponent: () => import('./offers/offer-management.component').then(m => m.OfferManagementComponent),
-    title: 'Gestão de Ofertas'
-  },
-  {
-    path: 'settings',
-    loadComponent: () => import('./settings/supermarket-settings.component').then(m => m.SupermarketSettingsComponent),
-    title: 'Configurações da Loja'
-  },
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+  { path: 'dashboard', component: ManagerDashboardComponent },
+  { path: 'flyers', component: ManagerFlyersComponent },
+  { path: 'offers', component: OfferManagementComponent },
+  { path: 'products', component: ProductListComponent },
+  { path: 'settings', component: ManagerSettingsComponent },
 ];

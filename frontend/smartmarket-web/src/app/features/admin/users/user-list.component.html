@@ -1,0 +1,112 @@
+<div class="flex flex-col gap-6 pb-8">
+  
+  <!-- Cabeçalho e Ações da Página -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">
+        Gestão de Usuários
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Gerencie administradores, lojistas e clientes, configurando acessos e permissões.
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">filter_list</mat-icon> Filtros
+      </button>
+      <button class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">person_add</mat-icon> Novo Usuário
+      </button>
+    </div>
+  </header>
+
+  <!-- Resumo em Mini-Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Total de Usuários</p>
+        <p class="text-2xl font-bold text-gray-900">{{ totalUsers() }}</p>
+      </div>
+      <div class="bg-gray-100 p-2 rounded-lg text-gray-600"><mat-icon>people</mat-icon></div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Gestores Ativos</p>
+        <p class="text-2xl font-bold text-gray-900">{{ activeManagers() }}</p>
+      </div>
+      <div class="bg-blue-50 p-2 rounded-lg text-blue-600"><mat-icon>store_mall_directory</mat-icon></div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Clientes na Plataforma</p>
+        <p class="text-2xl font-bold text-gray-900">{{ platformClients() }}</p>
+      </div>
+      <div class="bg-orange-50 p-2 rounded-lg text-orange-600"><mat-icon>shopping_cart</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- Barra de Pesquisa e Tabela -->
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+    
+    <!-- Search Bar -->
+    <div class="p-4 border-b border-gray-200 bg-white">
+      <div class="relative w-full max-w-md">
+        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !text-[20px] !w-5 !h-5">search</mat-icon>
+        <input type="text" placeholder="Buscar por nome, e-mail ou perfil..." 
+               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+      </div>
+    </div>
+
+    <!-- Tabela Responsiva -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+            <th class="px-6 py-4">Usuário</th>
+            <th class="px-6 py-4">Perfil de Acesso</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4">Último Acesso</th>
+            <th class="px-6 py-4 text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let user of users()" class="hover:bg-gray-50 transition-colors group">
+            
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <img [src]="user.avatarUrl" alt="Avatar" class="w-10 h-10 rounded-full border border-gray-200 shadow-sm">
+                <div>
+                  <p class="text-sm font-bold text-gray-900">{{ user.name }}</p>
+                  <p class="text-xs text-gray-500">{{ user.email }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-xs font-medium px-2.5 py-1 rounded-md border"
+                    [ngClass]="{
+                      'bg-green-50 text-green-700 border-green-200': user.role === 'Administrador',
+                      'bg-blue-50 text-blue-700 border-blue-200': user.role === 'Gestor',
+                      'bg-gray-100 text-gray-600 border-gray-200': user.role === 'Cliente'
+                    }">
+                {{ user.role }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{'bg-green-100 text-green-800': user.status === 'Ativo', 'bg-gray-100 text-gray-800': user.status === 'Inativo', 'bg-red-100 text-red-800': user.status === 'Bloqueado'}">
+                <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="{'bg-green-500': user.status === 'Ativo', 'bg-gray-500': user.status === 'Inativo', 'bg-red-500': user.status === 'Bloqueado'}"></span>
+                {{ user.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.lastLogin }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button mat-icon-button matTooltip="Editar Perfil" class="!text-gray-400 hover:!text-blue-600 transition-colors"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button matTooltip="Opções de Conta" class="!text-gray-400 hover:!text-gray-900 transition-colors"><mat-icon>more_vert</mat-icon></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -11,12 +11,6 @@
 
 <ng-template #content>
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <mat-card *ngFor="let metric of metrics()" class="p-4 flex items-center">
-      <mat-icon [class]="metric.color + ' text-4xl mr-4'">{{ metric.icon }}</mat-icon>
-      <div>
-        <p class="text-gray-500 text-sm">{{ metric.title }}</p>
-        <p class="text-2xl font-bold text-gray-800">{{ metric.value }}</p>
-      </div>
-    </mat-card>
+    <app-metric-card *ngFor="let metric of metrics()" [metric]="metric"></app-metric-card>
   </div>
 </ng-template>

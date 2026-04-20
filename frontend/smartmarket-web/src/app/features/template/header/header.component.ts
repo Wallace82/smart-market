@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 // Core
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-header',

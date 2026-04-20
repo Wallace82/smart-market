@@ -4,13 +4,12 @@ import { RouterOutlet } from '@angular/router';
 
 // Angular Material
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { SidebarComponent } from '../side-bar/sidebar.component';
+import { HeaderComponent } from '../header/header.component';
 
-// Componentes do Layout
-import { HeaderComponent } from './header.component';
-import { SidebarComponent } from './sidebar.component';
 
 @Component({
-  selector: 'app-layout',
+  selector: 'app-main-layout',
   standalone: true,
   imports: [
     CommonModule,
@@ -19,8 +18,8 @@ import { SidebarComponent } from './sidebar.component';
     HeaderComponent,
     SidebarComponent,
   ],
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss'],
+  templateUrl: './main-layout.component.html',
+  styleUrls: ['./main-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LayoutComponent {}
+export class MainLayoutComponent {}

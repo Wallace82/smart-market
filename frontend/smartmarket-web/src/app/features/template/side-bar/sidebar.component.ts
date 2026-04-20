@@ -7,7 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 
 // Core
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',

@@ -1,13 +1,14 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
-import { LayoutComponent } from './features/auth/login/layout.component';
+import { authGuard } from '@core/auth/auth.guard';
+import { LayoutComponent } from '@features/template/layout/layout.component';
+
 
 export const routes: Routes = [
   // Rotas públicas (fora do layout principal)
   {
     path: 'login',
     loadComponent: () =>
-      import('./features/auth/login/login.component').then(
+      import('./features/login/login.component').then(
         (m) => m.LoginComponent
       ),
   },

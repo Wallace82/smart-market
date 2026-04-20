@@ -11,7 +11,7 @@ import { finalize } from 'rxjs';
 
 // Service
 import { EncarteService } from '../../../../core/services/encarte.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { SupermarketService } from '../../../../core/services/supermarket.service';
 
 @Component({

@@ -4,9 +4,10 @@ import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 // Angular Material
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+// Componentes
+import { MetricCardComponent } from './metric-card.component';
 
 interface MetricCard {
   title: string;
@@ -18,7 +19,7 @@ interface MetricCard {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, MatProgressSpinnerModule, MetricCardComponent],
   templateUrl: './admin-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

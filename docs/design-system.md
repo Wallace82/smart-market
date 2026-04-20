@@ -6,15 +6,15 @@ Este documento define as diretrizes visuais e de interface para garantir consist
 
 ## 1. 🎨 Paleta de Cores
 
-A paleta foi desenhada para transmitir um ar tecnológico e moderno (Indigo) sem perder a essência do varejo e supermercados (Verde/Laranja).
+A paleta foi desenhada com base na logomarca do SmartMarket, priorizando o frescor e sucesso do varejo (Verde), a energia de descontos (Laranja) e a tecnologia SaaS (Azul).
 
 ### Cores Principais
 | Nome | HEX | Variável CSS | Uso Recomendado |
 | :--- | :--- | :--- | :--- |
-| **Primary (Indigo)** | `#4f46e5` | `--color-primary` | Botões principais, Header, Destaques SaaS. |
-| **Primary Dark** | `#3730a3` | `--color-primary-dark` | Hover em botões primários. |
-| **Secondary (Emerald)** | `#10b981` | `--color-secondary` | Elementos de varejo, ícones de sucesso, badges. |
-| **Accent (Orange)** | `#f59e0b` | `--color-accent` | Alertas de promoção, botões de ação secundária. |
+| **Primary (Green)** | `#16a34a` | `--color-primary` | Botões principais, Header, Destaques SaaS (Cor do "Smart"). |
+| **Primary Dark** | `#15803d` | `--color-primary-dark` | Hover em botões primários. |
+| **Secondary (Blue)** | `#0284c7` | `--color-secondary` | Elementos conectivos, links, badges informativos. |
+| **Accent (Orange)** | `#ea580c` | `--color-accent` | Alertas de promoção, destaque de preços (Cor do "Market"). |
 
 ### Neutras e Fundo (Backgrounds & Surfaces)
 | Nome | HEX | Variável CSS | Uso Recomendado |

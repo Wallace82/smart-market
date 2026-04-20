@@ -1,7 +1,11 @@
-<mat-card class="p-4 flex items-center">
-  <mat-icon [class]="metric.color + ' text-4xl mr-4'">{{ metric.icon }}</mat-icon>
-  <div>
-    <p class="text-gray-500 text-sm">{{ metric.title }}</p>
-    <p class="text-2xl font-bold text-gray-800">{{ metric.value }}</p>
+<mat-card class="!p-6 !rounded-2xl border border-gray-100 shadow-sm !bg-white">
+  <div class="flex items-center justify-between w-full">
+    <div class="flex flex-col">
+      <p class="text-sm font-medium text-gray-500">{{ metric.title }}</p>
+      <p class="mt-1 text-3xl font-extrabold tracking-tight text-gray-900">{{ metric.value }}</p>
+    </div>
+    <div class="rounded-full p-4 bg-gray-50 flex items-center justify-center">
+      <mat-icon [class]="metric.color + ' !w-8 !h-8 !text-[32px]'">{{ metric.icon }}</mat-icon>
+    </div>
   </div>
 </mat-card>

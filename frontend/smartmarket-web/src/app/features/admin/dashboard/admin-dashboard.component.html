@@ -1,16 +1,87 @@
-<div class="mb-6">
-  <h1 class="text-3xl font-bold text-gray-800">Dashboard do Administrador</h1>
-  <p class="text-gray-500">Visão geral da plataforma SmartMarket.</p>
+<div class="flex flex-col gap-8 pb-8">
+  <!-- Cabeçalho do Dashboard -->
+  <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-200 pb-5">
+    <div class="flex items-center gap-4">
+      <!-- Logomarca Integrada -->
+      <img src="assets/images/logo_app.png" alt="SmartMarket Logo" class="h-16 w-auto object-contain bg-white rounded-lg border border-gray-100 p-2 shadow-sm">
+      
+      <div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">
+          Painel Administrativo
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">
+          Visão geral e indicadores em tempo real da plataforma <span class="font-medium text-green-600">SmartMarket</span>.
+        </p>
+      </div>
+    </div>
+    
+    <!-- Ações Auxiliares (Design mais profissional) -->
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all">
+        Atualizar Dados
+      </button>
+    </div>
+  </header>
+
+  <!-- Estado de Carregamento Refinado -->
+  <ng-container *ngIf="loading(); else content">
+    <div class="flex flex-col justify-center items-center h-64 rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <mat-spinner diameter="48"></mat-spinner>
+      <span class="mt-4 text-sm font-medium text-gray-500 animate-pulse">Carregando métricas...</span>
+    </div>
+  </ng-container>
+
+  <!-- Grid de Conteúdo -->
+  <ng-template #content>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <app-metric-card 
+        *ngFor="let metric of metrics()" 
+        [metric]="metric"
+        class="block transition-transform duration-300 hover:-translate-y-1">
+      </app-metric-card>
+    </div>
+
+    <!-- Nova Seção: Gráficos e Tabelas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
+      
+      <!-- Gráfico Simulado de Acessos (CSS Puro, super leve e interativo) -->
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+        <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <mat-icon class="text-blue-500">trending_up</mat-icon> Acessos na Plataforma (7 dias)
+        </h2>
+        <div class="flex-1 flex items-end justify-between gap-2 h-48 mt-auto px-2">
+          <div *ngFor="let data of chartData()" class="flex flex-col items-center w-full h-full justify-end group cursor-pointer">
+            <!-- Container da Barra -->
+            <div class="w-full max-w-[48px] bg-green-500 group-hover:bg-green-600 rounded-t-md transition-all duration-300 relative flex justify-center shadow-sm" [style.height]="data.height">
+              <!-- Valor visível sobre a barra para demonstração -->
+              <span class="absolute -top-6 text-gray-800 text-xs font-bold">
+                {{ data.value }}
+              </span>
+            </div>
+            <span class="text-xs font-medium text-gray-500 mt-3">{{ data.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Atividades Recentes -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <mat-icon class="text-orange-500">notifications_active</mat-icon> Atividades Recentes
+        </h2>
+        <div class="space-y-6">
+          <div *ngFor="let activity of recentActivities()" class="flex items-start gap-4 hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors">
+            <!-- Bolinha de Status -->
+            <div class="w-2.5 h-2.5 mt-2 rounded-full shadow-sm flex-shrink-0" 
+                 [ngClass]="{'bg-green-500': activity.status === 'success', 'bg-orange-500': activity.status === 'warning', 'bg-blue-500': activity.status === 'info'}">
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-900 truncate">{{ activity.store }}</p>
+              <p class="text-xs text-gray-500 truncate">{{ activity.action }}</p>
+            </div>
+            <span class="text-xs font-medium text-gray-400 whitespace-nowrap">{{ activity.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 </div>
-
-<ng-container *ngIf="loading(); else content">
-  <div class="flex justify-center items-center h-64">
-    <mat-spinner></mat-spinner>
-  </div>
-</ng-container>
-
-<ng-template #content>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <app-metric-card *ngFor="let metric of metrics()" [metric]="metric"></app-metric-card>
-  </div>
-</ng-template>

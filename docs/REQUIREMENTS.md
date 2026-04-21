@@ -1,4 +1,4 @@
-﻿﻿# 📋 SmartMarket — Documento de Requisitos
+﻿﻿﻿﻿# 📋 SmartMarket — Documento de Requisitos
 
 > **Versão:** 1.6.0
 > **Data:** 2025-07-29
@@ -92,6 +92,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 *   **RF-01.2:** Uso de JWT para sessões stateless.
 *   **RF-01.3:** Uso de Signals para estado reativo do usuário no Frontend.
 *   **RF-01.4:** O acesso a páginas protegidas sem autenticação deve redirecionar o usuário para a tela de login.
+*   **RF-01.5:** A vitrine do cliente final (ofertas, produtos e encartes) deve ter **acesso público**, permitindo a navegação tanto para usuários logados quanto não logados (anônimos).
 
 ### 3.2 RF-02 — Gestão de Supermercados (Whitelabel)
 *   **RF-02.1:** O Admin deve cadastrar/aprovar supermercados.
@@ -101,15 +102,29 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 ### 3.3 RF-03 — Catálogo e Ofertas
 *   **RF-03.1:** O Admin mantém o Catálogo Global de Produtos.
 *   **RF-03.2:** O Gestor seleciona produtos do catálogo e define o preço de oferta para sua loja.
+*   **RF-03.3:** O Cliente (logado ou não logado) deve poder visualizar os produtos e ofertas disponíveis.
+*   **RF-03.4:** O Cliente deve poder aplicar diversos filtros na busca de ofertas (por categoria, faixa de preço, supermercado, etc.).
 
 ### 3.4 RF-04 — Encartes Virtuais Temáticos
 *   **RF-04.1:** O Admin cadastra **Temas Sazonais** (Assets gráficos e cores de fundo).
 *   **RF-04.2:** O Gestor cria um **Encarte Digital** associando um Tema e uma lista de Ofertas.
 *   **RF-04.3:** O sistema gera um preview do encarte mesclando Whitelabel (Loja) + Tema (Sazonal).
+*   **RF-04.4:** O Cliente (logado ou não logado) deve poder visualizar o encarte completo (tablóide digital) do supermercado de forma imersiva.
 
 ### 3.5 RF-05 — Notificações e Geolocalização
-*   **RF-05.1:** O sistema deve identificar a localização do Cliente.
+*   **RF-05.1:** O sistema deve capturar a **geolocalização do usuário** (via permissão de GPS do navegador/dispositivo ou entrada manual de CEP).
 *   **RF-05.2:** Disparo de notificações push (RabbitMQ) quando o cliente entra no raio de atuação de um supermercado com ofertas ativas.
+*   **RF-05.3:** **Busca por proximidade:** O sistema deve permitir a aplicação de filtros em um raio de localização configurável (ex: ofertas a num raio de 5km, 10km).
+*   **RF-05.4:** **Exibição de supermercados próximos:** A vitrine principal deve priorizar automaticamente e destacar os estabelecimentos fisicamente mais próximos do usuário.
+*   **RF-05.5:** **Personalização de ofertas por região:** O catálogo exibido para o cliente deve ser dinâmico, exibindo apenas encartes e produtos disponíveis na sua região de cobertura.
+
+### 3.6 RF-06 — Coleta de Dados e Estatísticas (Analytics)
+*   **RF-06.1:** O sistema deve ser orientado a dados (data-driven), coletando métricas de engajamento de forma contínua.
+*   **RF-06.2:** Registro de **produtos mais visualizados** e **ofertas mais clicadas**.
+*   **RF-06.3:** Rastreamento contínuo das **preferências dos usuários** e **histórico de navegação**.
+*   **RF-06.4:** Monitoramento analítico dos **filtros mais utilizados** nas telas de busca.
+*   **RF-06.5:** Medição do **tempo de permanência nas telas** e no consumo visual dos encartes digitais.
+*   **RF-06.6:** Captura da **localização dos acessos** (mediante permissão do usuário) para gerar mapas de calor de interesse.
 
 ---
 

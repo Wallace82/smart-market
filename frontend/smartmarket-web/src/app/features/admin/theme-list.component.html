@@ -1,0 +1,81 @@
+<div class="flex flex-col gap-6 pb-8">
+  
+  <!-- Cabeçalho e Ações da Página -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">
+        Temas Sazonais
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Crie as identidades visuais de campanhas (ex: Natal, Black Friday) que os lojistas usarão em seus encartes.
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">filter_list</mat-icon> Filtros
+      </button>
+      <button class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all">
+        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">format_paint</mat-icon> Criar Novo Tema
+      </button>
+    </div>
+  </header>
+
+  <!-- Resumo em Mini-Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Total de Temas Criados</p>
+        <p class="text-2xl font-bold text-gray-900">{{ totalThemes() }}</p>
+      </div>
+      <div class="bg-gray-100 p-2 rounded-lg text-gray-600"><mat-icon>collections</mat-icon></div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-gray-500">Temas Ativos (Disponíveis p/ Lojas)</p>
+        <p class="text-2xl font-bold text-gray-900">{{ activeThemes() }}</p>
+      </div>
+      <div class="bg-green-50 p-2 rounded-lg text-green-600"><mat-icon>check_circle</mat-icon></div>
+    </div>
+  </div>
+
+  <!-- Grid de Temas Visuais -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mt-4">
+    <div *ngFor="let theme of themes()" class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-all duration-300">
+      
+      <!-- Preview da Imagem de Fundo (Asset) -->
+      <div class="relative h-40 w-full bg-gray-100 overflow-hidden border-b border-gray-200">
+        <img [src]="theme.backgroundUrl" alt="Background Tema" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700">
+        
+        <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold shadow-sm backdrop-blur-sm"
+             [ngClass]="{
+               'bg-green-500/90 text-white': theme.status === 'Ativo',
+               'bg-gray-800/80 text-white': theme.status === 'Rascunho',
+               'bg-gray-200/90 text-gray-600': theme.status === 'Inativo'
+             }">
+          {{ theme.status }}
+        </div>
+      </div>
+
+      <!-- Detalhes do Tema -->
+      <div class="p-5">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 leading-tight mb-1">{{ theme.name }}</h3>
+            <p class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md inline-block">{{ theme.occasion }}</p>
+          </div>
+          <!-- Bolha de Cor Base do Tema -->
+          <div class="w-8 h-8 rounded-full border-2 border-gray-100 shadow-inner shrink-0" [style.backgroundColor]="theme.colorHex" [matTooltip]="'Cor Principal: ' + theme.colorHex"></div>
+        </div>
+        
+        <div class="mt-6 flex items-center justify-between pt-4 border-t border-gray-50">
+          <p class="text-xs text-gray-400">ID: {{ theme.id }}</p>
+          <div class="flex items-center gap-1">
+            <button mat-icon-button matTooltip="Editar Tema" class="!text-gray-400 hover:!text-blue-600 transition-colors !w-8 !h-8"><mat-icon class="!text-[20px]">edit</mat-icon></button>
+            <button mat-icon-button matTooltip="Desativar/Excluir" class="!text-gray-400 hover:!text-red-600 transition-colors !w-8 !h-8"><mat-icon class="!text-[20px]">delete</mat-icon></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

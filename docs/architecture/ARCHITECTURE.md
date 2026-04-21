@@ -73,6 +73,34 @@ Cada microserviço backend é estruturado nas seguintes camadas:
 
 ---
 
+## 4.1 Estrutura do Frontend (Angular)
+
+O projeto frontend em Angular é organizado de forma modular e escalável, seguindo as melhores práticas para aplicações de grande porte. A estrutura de diretórios principal (`src/app`) é:
+
+*   **`core`**: Contém a lógica central e singletons da aplicação, que são carregados apenas uma vez.
+    *   `guards`: Guardas de rota (ex: `auth.guard.ts`).
+    *   `interceptors`: Interceptadores HTTP (ex: para adicionar o token JWT).
+    *   `services`: Serviços globais (ex: `AuthService`, `NotificationService`).
+    *   `models`: Interfaces e tipos globais.
+
+*   **`features`**: Cada pasta aqui representa uma "Feature" ou módulo de negócio da aplicação, com seus próprios componentes, serviços e rotas (lazy-loaded).
+    *   `admin`: Painel do administrador da plataforma.
+    *   `manager`: Painel do gestor do supermercado.
+    *   `client`: A aplicação do cliente final.
+    *   `auth`: Telas de login, registro e recuperação de senha.
+    *   `template`: Componentes de layout principal (Header, Sidebar, Footer).
+
+*   **`shared`**: Contém componentes, diretivas e pipes reutilizáveis que não possuem estado e podem ser usados em múltiplos `features`.
+    *   `components`: Componentes genéricos (ex: `LoadingSpinnerComponent`, `EmptyStateComponent`).
+    *   `pipes`: Pipes de formatação (ex: `real-currency.pipe.ts`).
+    *   `directives`: Diretivas customizadas.
+
+*   **`assets`**: Arquivos estáticos como imagens, ícones e fontes.
+
+Essa estrutura promove o baixo acoplamento, facilita o carregamento sob demanda (*Lazy Loading*) das funcionalidades e melhora a manutenibilidade e a organização do código-fonte.
+
+---
+
 ## 5. Padrões de Comunicação entre Microserviços
 
 A comunicação entre os serviços ocorre de duas formas principais, dependendo do caso de uso:

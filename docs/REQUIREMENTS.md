@@ -22,6 +22,8 @@
 11. [Estrutura dos Projetos](#11-estrutura-dos-projetos)
 12. [Diferencial Estratégico: Marketing Inteligente por Proximidade](#12-diferencial-estratégico-marketing-inteligente-por-proximidade)
 13. [Diferencial Estratégico: Canal de Aquisição Físico-Digital (Totem QR Code)](#13-diferencial-estratégico-canal-de-aquisição-físico-digital-totem-qr-code)
+14. [Diferencial Estratégico: Acesso Público e Experiência sem Fricção (Product-Led Growth)](#14-diferencial-estratégico-acesso-público-e-experiência-sem-fricção-product-led-growth)
+15. [Estratégia de Cache em Múltiplas Camadas (Alta Performance)](#15-estratégia-de-cache-em-múltiplas-camadas-alta-performance)
 
 ---
 
@@ -298,3 +300,71 @@ Para maximizar o impacto deste canal, as seguintes evoluções devem ser conside
 2.  **Campanhas Específicas via QR Code:** Evoluir o sistema para que o QR Code possa apontar para campanhas específicas (ex: "Ofertas de Hortifruti da Terça") em vez de apenas o encarte principal, criando um senso de urgência e exclusividade.
 3.  **Bônus de Primeira Interação:** Oferecer um cupom de desconto exclusivo para o primeiro acesso via totem, como forma de incentivar a experimentação e criar um ciclo de retorno.
 4.  **Integração com Notificações:** Após o usuário navegar pelo encarte, exibir um prompt amigável sugerindo a ativação de notificações para ser avisado sobre novas promoções daquela loja.
+
+---
+
+## 14. Diferencial Estratégico: Acesso Público e Experiência sem Fricção (Product-Led Growth)
+
+### 🎯 Visão de Negócio e Growth
+Para maximizar a adoção da plataforma e reduzir o Custo de Aquisição de Clientes (CAC), o SmartMarket adota a estratégia de *Product-Led Growth* através de um modelo "Try Before You Buy" (ou "Navegue Antes de Logar"). O usuário deve perceber o valor da plataforma (ofertas relevantes e próximas) nos primeiros 5 segundos de uso, removendo a barreira do cadastro obrigatório. A conversão para usuário logado ocorrerá de forma orgânica e por engajamento.
+
+### 14.1. Funcionalidade: Tela Inicial Universal e Acesso Desbloqueado
+Todos os usuários, autenticados ou anônimos, têm acesso a uma experiência rica. O conteúdo core da plataforma (encartes, produtos em destaque e vitrines) é totalmente consumível sem bloqueios de tela ou forçantes de login.
+
+### 14.2. Requisitos Funcionais (RF-09)
+*   **RF-09.1 - Vitrine Universal:** A página inicial (`/`) deve exibir de imediato: Produtos em Destaque, Supermercados Próximos e Encartes Ativos, independentemente do status de autenticação.
+*   **RF-09.2 - Navegação Completa Anônima:** O usuário anônimo pode abrir encartes (visualização de tablóide), buscar produtos por barra de pesquisa e usar todos os filtros de categoria e preço.
+*   **RF-09.3 - Conversão Contextual (Soft Gate):** Ações de personalização e retenção, como "Favoritar Produto" ou "Criar Lista de Compras", devem abrir um modal amigável (Soft Gate) convidando o usuário a criar uma conta ou fazer login, sem perder o contexto (após o login, a ação de favoritar é concluída automaticamente).
+
+### 14.3. Requisitos de Geolocalização Pública (Raio de 3KM)
+*   **RF-09.4 - Permissão Opcional de GPS:** Ao carregar a tela inicial pela primeira vez, o aplicativo deve solicitar, via prompt nativo do navegador/OS, acesso à geolocalização.
+*   **RF-09.5 - Raio Padrão (3 KM):** Se a permissão for concedida, o sistema (via Redis Geospatial) filtra automaticamente e exibe apenas os supermercados e ofertas em um raio de até 3 km do usuário.
+*   **RF-09.6 - Fallback para Busca Manual:** Se a permissão for negada (ou falhar), a interface deve exibir um campo visível no Header para que o usuário informe seu CEP ou Bairro, garantindo o funcionamento do filtro geográfico.
+
+### 14.4. Requisitos de Experiência do Usuário (UX)
+*   **UX-14.4.1 - Header de Conversão:** O Header para usuários não logados deve conter botões claros de "Entrar" (Secundário) e "Criar Conta" (Primário / Destaque), posicionados no canto superior direito.
+*   **UX-14.4.2 - Skeleton Screens:** Durante o carregamento da Home, utilizar *Skeleton Loaders* para mitigar a percepção de tempo de espera e reter a atenção do usuário.
+*   **UX-14.4.3 - Progressive Profiling:** Em vez de pedir todos os dados no cadastro, o SmartMarket deve adotar o *Login Social* (Google, Apple) em 1 clique para reduzir a fricção e pedir dados adicionais (como CPF ou interesses) apenas posteriormente.
+
+### 14.5. Requisitos de Analytics e Comportamento Anônimo (Crítico)
+*   **RF-09.7 - Tracking Anônimo:** O sistema de analytics deve gerar um UUID de sessão anônima (`Session ID`), armazenado localmente (cookie/local storage), para rastrear a jornada de usuários não logados.
+*   **RF-09.8 - Eventos a Monitorar:** Devemos rastrear: 1) Taxa de rejeição sem interação, 2) Tempo gasto no encarte anônimo, 3) Interação com o filtro de localização, 4) Cliques em produtos.
+*   **RF-09.9 - Funil de Conversão (Anonymous to Registered):** O dashboard de Growth do administrador deve exibir a métrica de "Taxa de Conversão de Sessões Anônimas para Usuários Logados", identificando qual "Soft Gate" (ex: "clicou em favoritar") mais gerou conversões.
+
+### 14.6. Requisitos de Privacidade (LGPD)
+*   **RF-09.10 - Banner de Cookies e Privacidade:** Exibir de forma sutil, na parte inferior da tela, o aviso sobre uso de cookies para melhoria de experiência anônima.
+*   **RF-09.11 - Transparência de Dados:** No prompt de localização (customizado antes do prompt do OS), deve haver um texto explicativo claro: "Usamos sua localização apenas para mostrar as melhores ofertas perto de você".
+
+### 14.7. Requisitos Não Funcionais (RNF-05)
+*   **RNF-05.1 - Performance com Tráfego Público:** Como a página inicial será pública, requisições do catálogo base devem ser servidas por Cache em Memória (Redis) e, se possível, os *assets* (imagens/banners) devem usar CDN Edge Caching. O *Time to First Byte* (TTFB) da vitrine anônima deve ser inferior a 150ms.
+*   **RNF-05.2 - Rate Limiting:** Implementar Rate Limiting rigoroso no `api-gateway` para rotas públicas, visando proteger a infraestrutura contra ataques de botnets ou *web scraping* automatizado extraindo ofertas.
+
+### 🛠️ Diferenciais, Sugestões e Boas Práticas (Growth & IA Features)
+Para enriquecer a experiência dos usuários mesmo sem possuirmos seus dados nominais:
+
+1.  **Personalização Baseada em Comportamento Anônimo:** Usar o `local storage` para salvar categorias recentemente clicadas na mesma sessão. Se o usuário clicou em 3 itens de "Churrasco", a vitrine passa a priorizar e reordenar a seção de Carnes no topo da Home.
+2.  **Trending "Na sua Região" (Recomendação Inteligente):** Em vez de exibir apenas produtos genéricos, criar um carrossel na Home: "Produtos mais buscados no seu bairro hoje". Isso cria um *Fear Of Missing Out* (FOMO) local.
+3.  **Persistência de Dados de Conversão:** Ao tentar salvar uma "Lista de Compras" sem estar logado, o sistema salva os itens em cache. Após o usuário completar a criação da conta, o SmartMarket migra a lista em cache para o banco de dados oficial dele, não frustrando o esforço inicial do usuário ("Seamless Handoff").
+
+---
+
+## 15. Estratégia de Cache em Múltiplas Camadas (Alta Performance)
+
+Para suportar o alto volume de tráfego gerado pela vitrine pública (acessos anônimos) e garantir tempo de resposta na casa dos milissegundos, o SmartMarket adota uma estratégia de cache em 4 camadas.
+
+### 15.1. Camada 1: Cache no Frontend (Angular)
+*   **RF-15.1.1:** O frontend deve utilizar cache em memória via RxJS (`shareReplay`) para evitar requisições duplicadas de componentes que consomem os mesmos endpoints na mesma sessão de tela.
+*   **RF-15.1.2:** O sistema deve utilizar `localStorage` para reter o estado de preferências não-sensíveis do usuário anônimo (ex: o CEP da busca fallback) para evitar requisições desnecessárias na reabertura do site.
+
+### 15.2. Camada 2: Cache HTTP e Edge (CDN/Browser)
+*   **RF-15.2.1:** As respostas de endpoints públicos (catálogo, vitrine) devem obrigatoriamente utilizar a diretiva HTTP `Cache-Control: stale-while-revalidate`, fornecendo ao usuário um dado de forma instantânea enquanto o backend renova a informação em segundo plano.
+*   **RF-15.2.2:** O backend deve emitir cabeçalhos `ETag`. O frontend (ou browser) enviará `If-None-Match`, permitindo ao Gateway responder com HTTP `304 Not Modified` caso os dados não tenham sofrido alteração, reduzindo o consumo de banda.
+
+### 15.3. Camada 3: Cache no Backend (Spring Boot + Redis)
+*   **RF-15.3.1:** Consultas custosas do banco de dados devem ser mantidas no cache em memória usando o cluster do Redis.
+*   **RF-15.3.2 (Cache por Geohash):** O sistema NÃO deve cachear listas de ofertas utilizando a Latitude/Longitude granular do dispositivo. Em vez disso, o sistema de localização deve converter a coordenada para um **Geohash** (com tamanho fixo, ex: raio de 600m). O sistema agrupará os usuários geograficamente, garantindo que toda a sub-região receba um único "Cache Hit".
+
+### 15.4. Camada 4: Invalidação de Cache Crítico (Event-Driven)
+*   **RF-15.4.1:** Para evitar que o usuário enxergue preços inconsistentes, a invalidação do Redis deve ser ativa e não apenas por expiração de tempo (TTL).
+*   **RF-15.4.2:** Após o banco de dados (PostgreSQL) registrar a alteração de uma oferta ou encarte, o serviço de origem deve publicar um evento (ex: `OfferPriceChangedEvent`) no RabbitMQ.
+*   **RF-15.4.3:** O listener deste evento cuidará do "Eviction" (despejo) exato no cache regional (`Geohash`) do produto/encarte recém-alterado.

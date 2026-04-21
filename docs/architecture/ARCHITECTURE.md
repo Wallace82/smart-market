@@ -168,3 +168,24 @@ O sistema foi desenhado para permitir que cada supermercado mantenha sua identid
 * **Logs Centralizados:** Exportação de logs estruturados para o ELK Stack ou Grafana Loki.
 * **Métricas de Saúde:** Endpoints do Actuator (`/actuator/prometheus`) para consumo pelo Prometheus/Grafana.
 * **Distributed Tracing:** OpenTelemetry para rastreio de requisições entre microserviços.
+
+---
+
+## 11. Estratégia de Cache (Multi-Layer Caching)
+
+Para garantir respostas em milissegundos e suportar picos de tráfego de usuários anônimos na vitrine pública, a arquitetura implementa cache em quatro níveis complementares:
+
+### 11.1 Nível 1: Client-Side (Angular)
+*   **State Management com RxJS:** Utiliza-se intensamente o operador `shareReplay({ bufferSize: 1, refCount: true })` nas chamadas `HttpClient` para garantir que apenas uma requisição saia do browser, mesmo que dezenas de componentes a assinem simultaneamente.
+*   **Local Storage:** Cache de contexto offline local do usuário (última localização buscada e UUID da sessão anônima).
+
+### 11.2 Nível 2: Edge / HTTP Cache (API Gateway)
+*   **Stale-While-Revalidate:** Rotas públicas (`/api/v1/public/**`) embutem headers como `Cache-Control: public, max-age=60, stale-while-revalidate=1200`. Isso permite entrega massiva e paralela em background sem gargalo no servidor principal.
+*   **ETag (Entity Tag):** Adoção do filtro nativo `ShallowEtagHeaderFilter` no Spring Boot para prevenir *over-fetching*. O Gateway valida a *hash* do conteúdo respondendo com HTTP `304` e corpo vazio quando não há novidades.
+
+### 11.3 Nível 3: Application Cache (Redis)
+*   **Spring Cache Abstraction:** Usa-se o Redis como provedor primário. 
+*   **Chaveamento Geográfico Inteligente:** Em vez de chaves exclusivas por usuário logado (o que gera "Cache Miss" constante), a chave do cache unifica os clientes usando um agrupamento físico (**Geohash**) via algoritmo do Redis Geospatial, o que centraliza a leitura e maximiza os acessos bem sucedidos à memória.
+
+### 11.4 Nível 4: Invalidação Reativa via Broker
+O cache não depende unicamente do tempo de expiração (TTL). Ao ser salvo um ajuste de oferta (Write DB) via API, o PostgreSQL é garantido via transação. Logo após, a persistência despacha no RabbitMQ um evento como `OfferPriceChangedEvent`. O *Cache Invalidation Service* capta a mensagem e remove (evict) seletivamente as chaves em memória para a localidade afetada, resultando em leitura sempre consolidada nos próximos segundos após atualizações.

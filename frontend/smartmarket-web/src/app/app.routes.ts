@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './features/template/main/main-layout.component';
 import { HomeComponent } from './features/template/layout/home.component';
-import { authGuard } from '@core/auth/auth.guard';
 
 export const routes: Routes = [
   // ==================================================
@@ -11,6 +10,16 @@ export const routes: Routes = [
     path: '',
     component: HomeComponent,
     title: 'SmartMarket - Ofertas Perto de Você',
+  },
+  {
+    path: 'flyers',
+    title: 'SmartMarket - Todos os Encartes',
+    loadComponent: () => import('./features/public/flyers/flyer-list.component').then(m => m.FlyerListComponent)
+  },
+  {
+    path: 'flyer/:id',
+    title: 'SmartMarket - Visualizador de Encarte',
+    loadComponent: () => import('./features/manager/dashboard/flyer-viewer.component').then(m => m.FlyerViewerComponent)
   },
   {
     path: 'login',
@@ -35,14 +44,14 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     loadChildren: () =>
       import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },
   {
     path: 'manager',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     // Você precisará criar o arquivo de rotas para o gestor, similar ao de admin
     loadChildren: () =>
       import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),

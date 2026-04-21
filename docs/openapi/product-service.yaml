@@ -1,0 +1,188 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket - Product Service API
+  description: API responsável pela gestão de catálogo, ofertas, encartes e resolução de QR Codes físicos.
+  version: 1.1.0
+servers:
+  - url: http://localhost:8082
+    description: Ambiente de Desenvolvimento local
+
+paths:
+  /api/v1/public/offers:
+    get:
+      summary: Lista ofertas promocionais ativas por proximidade
+      description: Retorna as ofertas de supermercados próximos ao usuário (Product-Led Growth). Suporta cache regional (Geohash).
+      tags:
+        - Ofertas Públicas
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          example: -23.5505
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          example: -46.6333
+        - name: radiusKm
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 3.0
+      responses:
+        '200':
+          description: Lista de ofertas
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "public, max-age=60, stale-while-revalidate=1200"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferResponse'
+
+  /api/v1/public/flyers:
+    get:
+      summary: Lista encartes digitais (tablóides) por proximidade
+      tags:
+        - Encartes Públicos
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: radiusKm
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 3.0
+      responses:
+        '200':
+          description: Encartes encontrados na região
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FlyerSummaryResponse'
+
+  /api/v1/public/supermarkets/{supermarketId}/totem/active-flyer:
+    get:
+      summary: Resolve o QR Code do Totem Físico
+      description: Redireciona ou retorna o encarte ativo do supermercado. Dispara evento de Analytics em background.
+      tags:
+        - Totem QR Code
+      parameters:
+        - name: supermarketId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Anonymous-Id
+          in: header
+          required: false
+          description: UUID gerado pelo frontend para rastrear sessões anônimas.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retorna os dados completos do encarte atual para renderização imersiva.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlyerDetailResponse'
+        '404':
+          description: Nenhum encarte ativo no momento para esta loja.
+
+components:
+  schemas:
+    OfferResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productName:
+          type: string
+          example: "Cerveja Artesanal IPA 500ml"
+        category:
+          type: string
+          example: "Bebidas"
+        imageUrl:
+          type: string
+          format: uri
+        originalPrice:
+          type: number
+          format: double
+        promotionalPrice:
+          type: number
+          format: double
+        supermarketName:
+          type: string
+        distanceKm:
+          type: number
+          format: double
+          example: 1.2
+
+    FlyerSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketName:
+          type: string
+        title:
+          type: string
+          example: "Especial de Churrasco"
+        coverImageUrl:
+          type: string
+          format: uri
+        expiresAt:
+          type: string
+          format: date-time
+        distanceKm:
+          type: number
+          format: double
+
+    FlyerDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        pages:
+          type: array
+          items:
+            type: object
+            properties:
+              pageNumber:
+                type: integer
+              imageUrl:
+                type: string
+                format: uri
+              hotspots:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferResponse'

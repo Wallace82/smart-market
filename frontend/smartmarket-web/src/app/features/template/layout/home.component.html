@@ -11,8 +11,7 @@
     <!-- Logo e Navegação de Topo -->
     <header class="relative z-20 max-w-7xl mx-auto px-6 lg:px-8 pt-8 flex items-center justify-between">
       <div class="flex items-center gap-2 cursor-default">
-        <mat-icon class="!text-green-300 !w-8 !h-8 !text-[32px]">shopping_basket</mat-icon>
-        <span class="text-2xl font-black tracking-tight text-white">Smart<span class="text-green-300">Market</span></span>
+        <img src="assets/images/logo_app.png" alt="SmartMarket Logo" class="h-32 md:h-40 w-auto object-contain mix-blend-multiply drop-shadow-lg">
       </div>
       <div class="hidden sm:flex items-center gap-2">
         <a routerLink="/login" mat-button class="!text-white hover:!bg-white/10 !rounded-lg font-medium transition-all">Fazer Login</a>
@@ -65,18 +64,18 @@
             <mat-icon>my_location</mat-icon>
           </div>
           <div>
-            <p class="text-sm font-medium text-gray-500">Localização Ativa</p>
-            <p class="text-gray-900 font-bold">Mostrando lojas em um raio de 3 KM</p>
+            <p class="text-sm font-medium text-gray-500">Mostrando ofertas perto de:</p>
+            <p class="text-gray-900 font-bold">{{ userAddress() }} <span class="text-gray-400 text-sm font-normal ml-1 block sm:inline">(Raio de 3 KM)</span></p>
           </div>
         </div>
-        <button mat-button class="!text-green-600">Alterar Raio</button>
+        <button mat-button class="!text-green-600">Alterar</button>
       </div>
 
       <!-- Seção: Supermercados Próximos -->
       <div class="mb-12">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Supermercados na Região</h2>
-          <button mat-button class="!text-green-600">Ver Todos</button>
+          <a routerLink="/supermarkets" mat-button class="!text-green-600 font-medium">Ver Todos</a>
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -101,6 +100,7 @@
           <h2 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
             <mat-icon class="!text-blue-500">auto_stories</mat-icon> Encartes da Semana
           </h2>
+          <a routerLink="/flyers" mat-button class="!text-green-600 font-medium">Ver Todos</a>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           @for (encarte of flyers(); track encarte.id) {
@@ -126,6 +126,7 @@
           <h2 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
             <mat-icon class="!text-orange-500">local_fire_department</mat-icon> Em Alta Perto de Você
           </h2>
+          <a routerLink="/offers" mat-button class="!text-green-600 font-medium">Ver Todas</a>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

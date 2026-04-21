@@ -1,0 +1,113 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket - Analytics & Recommendation Service
+  description: Ingestão de eventos de telemetria e predição de interesses.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8085
+
+paths:
+  /api/v1/public/analytics/events:
+    post:
+      summary: Registra um evento de telemetria
+      description: Captura cliques, visualizações de encarte, acessos via Totem QR Code e interesses orgânicos.
+      tags:
+        - Tracking
+      parameters:
+        - name: X-Anonymous-Id
+          in: header
+          required: false
+          description: ID para trackear a sessão de visitantes não autenticados (Product-Led Growth).
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetryEvent'
+      responses:
+        '202':
+          description: Evento computado (assíncrono).
+
+  /api/v1/manager/analytics/dashboard:
+    get:
+      summary: Retorna métricas consolidadas para o Gestor
+      description: Traz os dados de visitas físicas, CTR de push e encartes mais lidos.
+      tags:
+        - Métricas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: JSON com dados agregados para os gráficos do Frontend.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagerDashboardMetrics'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TelemetryEvent:
+      type: object
+      required:
+        - eventType
+        - resourceId
+      properties:
+        eventType:
+          type: string
+          enum: 
+            - PRODUCT_VIEW
+            - FLYER_PAGE_VIEW
+            - OFFER_CLICK
+            - QR_CODE_SCANNED
+            - PUSH_OPENED
+            - SOFT_GATE_CONVERTED
+        resourceId:
+          type: string
+          description: ID do produto, encarte ou campanha alvo.
+        contextData:
+          type: object
+          additionalProperties: true
+          description: Metadados extras (ex. tempo de tela em segundos, categoria do produto p/ motor de interesse).
+          example:
+            category: "Bebidas"
+            timeSpentSeconds: 12
+        source:
+          type: string
+          enum: [WEB, MOBILE_APP, TOTEM_QR]
+
+    ManagerDashboardMetrics:
+      type: object
+      properties:
+        totalActiveFlyers:
+          type: integer
+        totalPushesSent:
+          type: integer
+        pushOpenRatePercentage:
+          type: number
+          format: double
+        physicalVisitsAttributed:
+          type: integer
+        conversionChartData:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              pushes:
+                type: integer
+              visits:
+                type: integer
+        topCategories:
+          type: array
+          items:
+            type: string

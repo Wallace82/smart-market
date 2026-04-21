@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket - Notification & Geofencing Service
+  description: Gestão de campanhas push de marketing por proximidade.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8084
+
+paths:
+  /api/v1/public/geofence/triggers:
+    post:
+      summary: Dispara evento de entrada/saída de geofence
+      description: O app mobile (Angular/Capacitor) aciona esta rota em background quando cruza uma cerca virtual.
+      tags:
+        - Geofencing
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeofenceTriggerRequest'
+      responses:
+        '202':
+          description: Evento aceito e enfileirado no RabbitMQ.
+
+  /api/v1/manager/campaigns:
+    post:
+      summary: Cria nova campanha de Push Geofence
+      tags:
+        - Campanhas Manager
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignRequest'
+      responses:
+        '201':
+          description: Campanha criada com sucesso.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    GeofenceTriggerRequest:
+      type: object
+      required:
+        - supermarketId
+        - eventType
+        - lat
+        - lng
+      properties:
+        supermarketId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [ENTRY, EXIT, DWELL]
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+        timestamp:
+          type: string
+          format: date-time
+
+    CampaignRequest:
+      type: object
+      required:
+        - title
+        - messageBody
+        - radiusMeters
+        - targetInterests
+      properties:
+        title:
+          type: string
+          example: "Oferta de Picanha Perto!"
+        messageBody:
+          type: string
+          description: Aceita variáveis como {Nome} e {Nome_Supermercado}.
+          example: "Olá {Nome}, a Picanha está em promoção a 500m de você no {Nome_Supermercado}."
+        radiusMeters:
+          type: integer
+          example: 1000
+        targetInterests:
+          type: array
+          items:
+            type: string
+          example: ["Açougue", "Churrasco"]
+        linkedOfferId:
+          type: string
+          format: uuid
+          description: ID da oferta para gerar o Deep Link.
+        frequencyCapping:
+          type: object
+          properties:
+            maxPushesPerDay:
+              type: integer
+              example: 1
+        validUntil:
+          type: string
+          format: date-time

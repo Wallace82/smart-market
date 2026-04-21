@@ -20,6 +20,8 @@
 9. [Modelagem de Domínio](#9-modelagem-de-domínio)
 10. [Definição dos Microserviços](#10-definição-dos-microserviços)
 11. [Estrutura dos Projetos](#11-estrutura-dos-projetos)
+12. [Diferencial Estratégico: Marketing Inteligente por Proximidade](#12-diferencial-estratégico-marketing-inteligente-por-proximidade)
+13. [Diferencial Estratégico: Canal de Aquisição Físico-Digital (Totem QR Code)](#13-diferencial-estratégico-canal-de-aquisição-físico-digital-totem-qr-code)
 
 ---
 
@@ -201,3 +203,98 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 *   **client-service:** Perfil do consumidor e listas de compras.
 *   **notification-service:** Orquestração de Pushes e E-mails.
 *   **recommendation-service:** IA para sugestão de ofertas baseadas no perfil.
+
+---
+
+## 12. Diferencial Estratégico: Marketing Inteligente por Proximidade
+
+### 🏪 Visão de Negócio
+Esta funcionalidade posiciona o SmartMarket não apenas como um repositório de encartes, mas como uma **plataforma inteligente de divulgação e atração de tráfego físico (Drive-to-Store)**. Trata-se de um canal direto de marketing para o supermercado, altamente segmentado, baseado em dados reais de intenção de compra e focado em alta conversão.
+
+### 12.1. Funcionalidade: Marketing Inteligente por Proximidade
+Um ecossistema automatizado que conecta a localização em tempo real do consumidor com seu histórico de preferências, disparando gatilhos de marketing (Push Notifications) exatos no momento em que ele está fisicamente propício a realizar uma compra.
+
+### 12.2. Requisitos Funcionais (Coleta e Campanhas)
+*   **RF-12.2.1:** O sistema deve monitorar e registrar a navegação do usuário no aplicativo (cliques em produtos, encartes abertos, buscas realizadas e tempo de tela).
+*   **RF-12.2.2:** O sistema deve taguear automaticamente os interesses do usuário baseado no engajamento (ex: afinidade com "Cervejas Artesanais", "Itens de Churrasco", "Fraldas e Bebês").
+*   **RF-12.2.3:** O Gestor do Supermercado deve poder criar "Campanhas Inteligentes" no painel, definindo regras de segmentação (ex: "Enviar para usuários que favoritaram carne e estão a 1km da loja").
+*   **RF-12.2.4:** A configuração da campanha deve permitir a definição de: Produto/Encarte alvo, Mensagem Customizada (Copy), Preço Promocional e Raio de Alcance (ex: 500m, 1km, 3km).
+
+### 12.3. Requisitos de Geolocalização
+*   **RF-12.3.1:** O aplicativo móvel deve capturar e atualizar a localização (Latitude/Longitude) do usuário em background, otimizando o consumo de bateria.
+*   **RF-12.3.2:** O backend (via `notification-service` e Redis Geospatial) deve calcular a proximidade radial entre as coordenadas do usuário e as coordenadas dos supermercados parceiros.
+*   **RF-12.3.3:** O sistema deve gerar eventos (triggers) automáticos de *Geofencing* quando o usuário realizar "Entry" (entrar no raio) ou "Exit" (sair do raio) de uma zona configurada pela campanha.
+
+### 12.4. Requisitos de Personalização
+*   **RF-12.4.1:** O motor de recomendação deve cruzar a geolocalização do usuário com seu perfil de interesses para validar se uma notificação deve ser enviada.
+*   **RF-12.4.2:** O sistema deve suportar variáveis dinâmicas no texto do Push (ex: `"Olá {Nome}, a Picanha que você olhou ontem está em oferta a 500 metros daqui, no {Nome_Supermercado}!"`).
+
+### 12.5. Requisitos de Notificação Push
+*   **RF-12.5.1:** O disparo da notificação deve ocorrer em tempo real (tolerância de até 1 minuto) após a entrada do usuário no raio configurado.
+*   **RF-12.5.2:** O conteúdo da notificação deve conter um "Deep Link" que, ao ser clicado, abra diretamente a tela do produto ou o encarte da oferta no app.
+*   **RF-12.5.3:** O sistema deve garantir resiliência no disparo utilizando mensageria (RabbitMQ) para enfileiramento dos Pushes.
+
+### 12.6. Requisitos de Analytics e Métricas (Crítico)
+*   **RF-12.6.1 - Engajamento:** O sistema deve rastrear e exibir no dashboard do supermercado o funil da campanha: Quantidade de Pushes Enviados ➔ Pushes Recebidos ➔ Pushes Abertos (CTR).
+*   **RF-12.6.2 - Comportamento Físico (Footfall Attribution):** O sistema deve registrar uma "Visita ao Supermercado" caso o usuário entre em um raio de altíssima proximidade (ex: 20 a 50 metros) em até 24 horas após receber a notificação.
+*   **RF-12.6.3 - Inteligência de Dados:** O sistema deve gerar relatórios agregados de: Categorias mais convertidas via Push, Mapas de Calor (Heatmaps) de onde os usuários abrem o app, e Correlação exata entre o investimento na campanha e o tráfego físico gerado.
+
+### 12.7. Requisitos de Privacidade e Consentimento (Obrigatório)
+*   **RF-12.7.1:** O sistema deve estar 100% aderente à **LGPD**, exibindo um modal claro solicitando o aceite aos Termos de Uso e Política de Privacidade na criação da conta.
+*   **RF-12.7.2:** O aplicativo deve solicitar permissão explícita (OS-level prompt) para acesso à localização, explicando claramente o benefício ("Para enviar ofertas exclusivas quando você estiver perto").
+*   **RF-12.7.3:** O usuário deve ter um painel de Preferências de Privacidade onde possa gerenciar facilmente o *Opt-in* e *Opt-out* de rastreamento de localização e notificações push, a qualquer momento.
+*   **RF-12.7.4:** Dados sensíveis de localização bruta devem ser retidos pelo tempo mínimo necessário ou anonimizados para fins estatísticos (Data Anonymization).
+
+### 🛠️ Diferenciais, Sugestões e Boas Práticas (Growth Features)
+Para elevar esta funcionalidade ao nível "World Class", recomendo a implementação das seguintes estratégias na esteira de evolução:
+
+1.  **Frequency Capping (Controle de Fadiga):** Implementar um limite rígido (ex: máximo de 1 push por loja por dia, ou 3 por semana) para evitar que o usuário considere o app como *Spam* e o desinstale.
+2.  **Testes A/B Nativos:** Permitir que o gestor do supermercado crie duas versões de texto (Copy) para a mesma campanha de proximidade, enviando para fatias da audiência e usando a vencedora automaticamente.
+3.  **Predição de Recompra (AI-Driven):** O `recommendation-service` pode calcular o ciclo de vida do produto (ex: pacote de fraldas acaba em média a cada 15 dias). O Push de proximidade se torna muito mais forte se ativado na janela exata da provável recompra.
+4.  **Fallback para SMS/WhatsApp:** Para usuários de alto valor (VIPs do supermercado) que optaram por desligar o Push, permitir o roteamento do alerta via WhatsApp corporativo da loja, desde que haja opt-in específico.
+
+---
+
+## 13. Diferencial Estratégico: Canal de Aquisição Físico-Digital (Totem QR Code)
+
+### 🌱 Visão de Negócio e Posicionamento Sustentável
+Esta funcionalidade estabelece uma ponte estratégica entre o ambiente físico do supermercado e a plataforma digital SmartMarket. O objetivo é criar um canal de aquisição e engajamento de baixo atrito, posicionando o produto como uma solução moderna e ecologicamente consciente. Ao substituir o encarte de papel por um acesso digital imediato, reforçamos o valor de sustentabilidade e modernização para o supermercado parceiro.
+
+### 13.1. Funcionalidade: Totem de Acesso ao Encarte Digital
+Um totem físico, posicionado estrategicamente na entrada do supermercado, contendo um QR Code dinâmico. Ao escanear o código, o cliente é direcionado instantaneamente para o encarte digital daquela loja específica, sem a necessidade de login ou instalação de aplicativo.
+
+### 13.2. Requisitos Funcionais (RF-07)
+*   **RF-07.1 - Geração de QR Code por Loja:** O painel do Gestor do Supermercado deve fornecer uma área para gerar ou visualizar um QR Code único para sua loja. Este QR Code deve conter parâmetros de rastreamento (ex: `?utm_source=totem&utm_campaign=acesso_fisico`).
+*   **RF-07.2 - Vinculação Dinâmica:** O QR Code deve ser permanente. O sistema deve garantir que o link associado a ele sempre redirecione para o encarte digital que estiver ativo no momento do escaneamento.
+*   **RF-07.3 - Acesso Público e Imediato:** A página de destino do QR Code deve ser pública, de carregamento rápido e não exigir qualquer tipo de autenticação, em conformidade com o requisito **RF-01.5**.
+
+### 13.3. Requisitos de Experiência do Usuário (UX)
+*   **UX-13.3.1 - Interação Instantânea:** A experiência do usuário deve ser fluida. Ao apontar a câmera, o acesso ao encarte deve ser percebido como instantâneo.
+*   **UX-13.3.2 - Navegação Mobile-First:** A visualização do encarte deve ser 100% otimizada para dispositivos móveis, com gestos intuitivos de zoom e navegação entre as páginas ou ofertas.
+*   **UX-13.3.3 - Incentivo à Exploração (CTA):** Durante a navegação no encarte, o sistema deve apresentar *Call-to-Actions* (CTAs) contextuais e não intrusivos para incentivar o engajamento mais profundo, como "Criar minha lista de compras" ou "Salvar oferta".
+
+### 13.4. Requisitos de Analytics e Métricas (RF-08)
+*   **RF-08.1 - Rastreamento de Origem:** O sistema de analytics deve ser capaz de identificar e segmentar todos os acessos provenientes do QR Code do totem.
+*   **RF-08.2 - Funil de Conversão Físico-Digital:** O dashboard do gestor deve exibir métricas chave para este canal:
+    *   Número de escaneamentos do QR Code.
+    *   Tempo médio de sessão por usuário vindo do totem.
+    *   Produtos e ofertas mais visualizados a partir deste canal.
+    *   Taxa de conversão (usuários que realizaram uma ação secundária, como salvar uma oferta ou iniciar um cadastro).
+*   **RF-08.3 - Análise Comparativa:** Permitir a comparação de desempenho entre o tráfego originado pelo totem físico e outros canais de aquisição digital.
+
+### 13.5. Requisitos Não Funcionais (RNF-04)
+*   **RNF-04.1 - Performance de Carregamento:** A página do encarte acessada via QR Code deve ter um *Largest Contentful Paint (LCP)* inferior a 2 segundos em uma conexão 4G.
+*   **RNF-04.2 - Alta Disponibilidade:** O endpoint de redirecionamento do QR Code deve ter um SLA de 99.95% de disponibilidade.
+*   **RNF-04.3 - Compatibilidade Mobile:** Garantir funcionamento pleno nos navegadores padrão (Chrome, Safari) das duas últimas versões dos sistemas operacionais iOS e Android.
+
+### 13.6. Requisitos de Negócio e Material de Apoio
+*   **RN-13.6.1 - Guia de Design do Totem:** A plataforma SmartMarket deve fornecer aos supermercados um guia de identidade visual para a construção do totem, com especificações de cores, logo e tipografia, garantindo consistência da marca.
+*   **RN-13.6.2 - Slogans Recomendados:** Sugerir frases de impacto para o totem, como: "Aponte, Economize e Ajude o Planeta" ou "Seu Encarte Agora é Digital. Rápido e Ecológico".
+
+### 🛠️ Diferenciais e Evolução (Growth Features)
+Para maximizar o impacto deste canal, as seguintes evoluções devem ser consideradas no roadmap:
+
+1.  **Testes A/B de Mensagens:** Permitir que o gestor teste diferentes chamadas (slogans) no totem e meça qual gera mais escaneamentos, otimizando a comunicação.
+2.  **Campanhas Específicas via QR Code:** Evoluir o sistema para que o QR Code possa apontar para campanhas específicas (ex: "Ofertas de Hortifruti da Terça") em vez de apenas o encarte principal, criando um senso de urgência e exclusividade.
+3.  **Bônus de Primeira Interação:** Oferecer um cupom de desconto exclusivo para o primeiro acesso via totem, como forma de incentivar a experimentação e criar um ciclo de retorno.
+4.  **Integração com Notificações:** Após o usuário navegar pelo encarte, exibir um prompt amigável sugerindo a ativação de notificações para ser avisado sobre novas promoções daquela loja.

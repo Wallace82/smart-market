@@ -25,7 +25,8 @@ A arquitetura geral segue o padrão **API Gateway**, onde todas as requisições
 * **Documentação de API:** OpenAPI 3.0 (Swagger UI)
 
 ### 2.2 Frontend
-* **Framework:** Angular 18+
+* **Framework Web:** Angular 18+
+* **Framework Mobile:** Ionic / Capacitor (Necessário para empacotamento nativo, Pushes e Background Geolocation)
 * **Linguagem:** TypeScript
 * **UI/UX:** Angular Material + Tailwind CSS
 * **Gerenciamento de Estado:** Signals / RxJS
@@ -33,7 +34,7 @@ A arquitetura geral segue o padrão **API Gateway**, onde todas as requisições
 ### 2.3 Banco de Dados e Armazenamento
 * **Banco de Dados Relacional:** PostgreSQL 16 (Padrão Database-per-Service)
 * **Object Storage (Arquivos/Imagens):** MinIO (Compatível com AWS S3 API)
-* **Cache (Futuro):** Redis (para catálogo de produtos e promoções)
+* **In-Memory Datastore / Cache:** Redis (Fundamental para cálculos de **Redis Geospatial** e cache de ofertas)
 
 ### 2.4 Infraestrutura, DevOps e Observabilidade
 * **Containerização:** Docker
@@ -83,8 +84,8 @@ Utilizada para consultas (**Leituras**) que requerem resposta imediata para a in
 
 ### 5.2 Comunicação Assíncrona (Mensageria / Eventos)
 Utilizada para comandos de **Escrita** ou processos que não exigem resposta em tempo real, garantindo baixo acoplamento e consistência eventual. Utilizaremos o **RabbitMQ** como *Message Broker*.
-* **Exemplo 1 (Notificações):** Quando uma oferta é ativada pelo supermercado, um evento `OfferActivatedEvent` é publicado. O `notification-service` consome esse evento e inicia o disparo de Pushes para clientes na região (Geofencing).
-* **Exemplo 2 (Auditoria e Analytics):** O `client-service` publica um evento `ProductVisualizedEvent` quando um cliente abre um produto. O `recommendation-service` consome isso em background para treinar seu algoritmo de recomendações.
+* **Exemplo 1 (Geofencing e Notificações):** O App mobile envia pings de localização. Quando o usuário entra no raio da loja, o `notification-service` (usando Redis Geospatial) detecta e publica um `GeofenceEntryEvent`. O mesmo serviço consome isso enfileirando o envio do Push em tempo real.
+* **Exemplo 2 (QR Code e Analytics):** Quando o usuário escaneia o Totem na loja, o Gateway/Frontend publica um `QRCodeScannedEvent`. O `recommendation-service` consome para gerar métricas de conversão físico-digital e Heatmaps.
 
 ---
 
@@ -92,18 +93,20 @@ Utilizada para comandos de **Escrita** ou processos que não exigem resposta em 
 
 ```mermaid
 graph TD
-    Client(Cliente - Angular Web) -->|HTTPS/REST| Gateway(API Gateway)
+    Client(Cliente - App Mobile/Web) -->|HTTPS/REST| Gateway(API Gateway)
     
     Gateway -->|Roteamento Seguro| Auth(Auth Service)
     Gateway -->|Roteamento Seguro| Supermarket(Supermarket Service)
     Gateway -->|Roteamento Seguro| Product(Product Service)
     Gateway -->|Roteamento Seguro| Customer(Client Service)
+    Gateway -->|Ping Localização / QR Code| Notification(Notification Service)
     
     Auth -.->|Validação Síncrona JWT| Gateway
     
-    Product -->|Publica Evento: OfertaAtivada| RabbitMQ((RabbitMQ Event Bus))
-    Supermarket -->|Publica Evento: SupermercadoBloqueado| RabbitMQ
-    Customer -->|Publica Evento: ClienteFavoritouProduto| RabbitMQ
+    Product -->|Publica: OfertaAtivada| RabbitMQ((RabbitMQ Event Bus))
+    Supermarket -->|Publica: LojaAtualizada| RabbitMQ
+    Customer -->|Publica: ProdutoVisualizado| RabbitMQ
+    Notification -->|Publica: GeofenceEntry / QRScanned| RabbitMQ
     
     RabbitMQ -->|Consome Evento| Notification(Notification Service)
     RabbitMQ -->|Consome Evento| Recommendation(Recommendation Service)
@@ -117,6 +120,9 @@ graph TD
     Customer --- DB_Cust[(PostgreSQL Client)]
     Notification --- DB_Notif[(PostgreSQL Notif)]
     Recommendation --- DB_Rec[(PostgreSQL Recom)]
+    
+    Notification --- Redis[(Redis Geospatial)]
+    Product --- Redis
 ```
 
 ---

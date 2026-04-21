@@ -1,36 +1,58 @@
 import { Routes } from '@angular/router';
+import { MainLayoutComponent } from './features/template/main/main-layout.component';
+import { HomeComponent } from './features/template/layout/home.component';
 import { authGuard } from '@core/auth/auth.guard';
-import { LayoutComponent } from '@features/template/layout/layout.component';
-
 
 export const routes: Routes = [
-  // Rotas públicas (fora do layout principal)
+  // ==================================================
+  // Rotas Públicas (Acesso sem login)
+  // ==================================================
+  {
+    path: '',
+    component: HomeComponent,
+    title: 'SmartMarket - Ofertas Perto de Você',
+  },
   {
     path: 'login',
+    title: 'SmartMarket - Login',
+    // Assumindo que o componente de login existe em 'features/auth'
     loadComponent: () =>
-      import('./features/login/login.component').then(
-        (m) => m.LoginComponent
+      import('./features/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    title: 'SmartMarket - Crie sua Conta',
+    // Assumindo que o componente de registro existe ou será criado
+    loadComponent: () =>
+      import('./features/login/register.component').then(
+        (m) => m.RegisterComponent
       ),
   },
 
-  // Rotas protegidas (dentro do layout principal)
+  // ==================================================
+  // Rotas Protegidas (Exigem login e usam o layout principal)
+  // ==================================================
   {
-    path: '',
-    component: LayoutComponent,
-//
-    children: [
-      { path: '', redirectTo: 'manager/dashboard', pathMatch: 'full' }, // Rota padrão para gestor
-      {
-        path: 'admin',
-        loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
-      },
-      {
-        path: 'manager',
-        loadChildren: () => import('./features/manager/manager.routes').then(m => m.MANAGER_ROUTES)
-      }
-    ],
+    path: 'admin',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+  },
+  {
+    path: 'manager',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    // Você precisará criar o arquivo de rotas para o gestor, similar ao de admin
+    loadChildren: () =>
+      import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),
   },
 
-  // Fallback - redireciona para o login se a rota não existir
-  { path: '**', redirectTo: 'login' },
+  // ==================================================
+  // Rota de Fallback (Página não encontrada)
+  // ==================================================
+  {
+    path: '**',
+    redirectTo: '', // Redireciona qualquer URL não encontrada para a home pública
+  },
 ];

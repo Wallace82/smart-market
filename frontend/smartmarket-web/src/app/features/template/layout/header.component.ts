@@ -28,6 +28,8 @@ import { AuthService } from '@core/auth/auth.service';
 export class HeaderComponent {
   private authService = inject(AuthService);
 
+  public isAuthenticated = computed(() => !!this.authService.user());
+
   public userName = computed(() => this.authService.user()?.email || 'Usuário');
   public userEmail = computed(() => this.authService.user()?.email || 'email@exemplo.com');
 

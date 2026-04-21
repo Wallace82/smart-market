@@ -1,92 +1,91 @@
-<div class="flex flex-col gap-8 pb-8">
+<div class="p-6 max-w-7xl mx-auto space-y-6">
   <!-- Cabeçalho -->
-  <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-200 pb-5">
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
     <div>
-      <h1 class="text-3xl font-extrabold tracking-tight text-gray-900">
-        Painel do Lojista
-      </h1>
-      <p class="text-sm text-gray-500 mt-1">
-        Acompanhe as vendas, desempenho de produtos e engajamento dos seus encartes.
-      </p>
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard da Loja</h1>
+      <p class="text-gray-500">Acompanhe o engajamento dos seus encartes e conversão de tráfego físico.</p>
     </div>
-    
-    <div class="flex gap-3">
-      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
-        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">file_download</mat-icon> Exportar Relatório
-      </button>
-    </div>
-  </header>
+    <button mat-flat-button class="!bg-green-600 !text-white !rounded-lg hover:!bg-green-700 shadow-sm !py-6">
+      <mat-icon class="mr-2">campaign</mat-icon> Nova Campanha Push
+    </button>
+  </div>
 
-  <!-- Tela de Carregamento -->
-  <ng-container *ngIf="loading(); else content">
-    <div class="flex flex-col justify-center items-center h-64 rounded-2xl border border-gray-100 bg-white shadow-sm">
-      <mat-spinner diameter="48"></mat-spinner>
-      <span class="mt-4 text-sm font-medium text-gray-500 animate-pulse">Buscando dados da sua loja...</span>
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <mat-spinner diameter="40" class="!text-green-600 mb-4"></mat-spinner>
+      <p class="text-gray-500 font-medium animate-pulse">Sincronizando métricas com a loja...</p>
     </div>
-  </ng-container>
-
-  <!-- Conteúdo Principal -->
-  <ng-template #content>
-    <!-- Cards de Métricas -->
+  } @else {
+    <!-- Grid de Métricas Principais -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div *ngFor="let metric of metrics()" class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between transition-transform duration-300 hover:-translate-y-1">
-        <div class="flex flex-col">
-          <p class="text-sm font-medium text-gray-500">{{ metric.title }}</p>
-          <p class="mt-1 text-3xl font-extrabold tracking-tight text-gray-900">{{ metric.value }}</p>
+      @for (metric of metrics(); track metric.title) {
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div class="p-3.5 rounded-full bg-gray-50">
+            <mat-icon [class]="metric.colorClass + ' !text-3xl !w-8 !h-8'">{{ metric.icon }}</mat-icon>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ metric.title }}</p>
+            <p class="text-2xl font-bold text-gray-900">{{ metric.value }}</p>
+          </div>
         </div>
-        <div class="rounded-full p-4 flex items-center justify-center" [ngClass]="metric.bgColor">
-          <mat-icon [ngClass]="metric.color" class="!w-8 !h-8 !text-[32px]">{{ metric.icon }}</mat-icon>
-        </div>
-      </div>
+      }
     </div>
 
-    <!-- Seção de Gráficos e Tabelas -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
-      
-      <!-- Gráfico Simulado de Vendas -->
-      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <mat-icon class="text-green-500">bar_chart</mat-icon> Receita da Semana
-          </h2>
-          <span class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">+12% vs. semana anterior</span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Gráfico de Conversão Phygital -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 flex flex-col">
+        <h2 class="text-lg font-bold text-gray-900 mb-6">Conversão: Notificações vs Visitas à Loja</h2>
+        
+        <div class="h-64 flex items-end gap-2 sm:gap-6 justify-between px-2 pt-8">
+          @for (data of chartData(); track data.day) {
+            <div class="flex flex-col items-center flex-1 gap-2 group cursor-pointer">
+              <div class="w-full flex justify-center gap-1 items-end h-48 relative">
+                <!-- Tooltip no Hover -->
+                <div class="opacity-0 group-hover:opacity-100 absolute -top-10 bg-gray-900 text-white text-xs py-1.5 px-3 rounded-lg whitespace-nowrap transition-opacity z-10 pointer-events-none shadow-lg">
+                  {{ data.pushes }} Pushes | <span class="text-green-300 font-bold">{{ data.visits }} Visitas</span>
+                </div>
+                <!-- Barra: Pushes Enviados -->
+                <div class="w-1/2 bg-orange-200 rounded-t-sm transition-all duration-500 hover:bg-orange-300" [style.height]="data.heightPush"></div>
+                <!-- Barra: Visitas Físicas -->
+                <div class="w-1/2 bg-green-500 rounded-t-sm transition-all duration-500 shadow-sm" [style.height]="data.heightVisit"></div>
+              </div>
+              <span class="text-xs font-medium text-gray-500">{{ data.day }}</span>
+            </div>
+          }
         </div>
         
-        <div class="flex-1 flex items-end justify-between gap-2 h-48 mt-auto px-2">
-          <div *ngFor="let data of salesChart()" class="flex flex-col items-center w-full h-full justify-end group cursor-pointer">
-            <div class="w-full max-w-[48px] bg-green-500 group-hover:bg-green-600 rounded-t-md transition-all duration-300 relative flex justify-center shadow-sm" [style.height]="data.height">
-              <span class="absolute -top-8 text-gray-800 text-xs font-bold bg-white px-2 py-1 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                R$ {{ data.value }}
-              </span>
-            </div>
-            <span class="text-xs font-medium text-gray-500 mt-3">{{ data.day }}</span>
-          </div>
+        <div class="flex justify-center gap-8 mt-auto pt-6 border-t border-gray-50">
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-200"></span><span class="text-xs text-gray-600 font-medium">Pushes Emitidos (Geofence)</span></div>
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-gray-600 font-medium">Visitas Registradas na Loja</span></div>
         </div>
       </div>
 
-      <!-- Lista de Produtos "Em Alta" -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <mat-icon class="text-orange-500">local_fire_department</mat-icon> Produtos em Alta
-        </h2>
-        <div class="space-y-5">
-          <div *ngFor="let product of topProducts()" class="flex items-center justify-between hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors border-b border-gray-50 last:border-0 pb-3">
+      <!-- Status de Configuração da Loja -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+        <h2 class="text-lg font-bold text-gray-900 mb-6">Status da Integração</h2>
+        <div class="space-y-4 flex-1">
+          
+          <!-- Whitelabel -->
+          <div class="flex items-center justify-between p-4 bg-green-50/50 rounded-xl border border-green-100">
             <div class="flex items-center gap-3">
-              <img [src]="product.imageUrl" alt="Produto" class="w-10 h-10 rounded-lg border border-gray-200 shadow-sm object-cover shrink-0">
-              <div class="min-w-0">
-                <p class="text-sm font-bold text-gray-900 truncate">{{ product.name }}</p>
-                <p class="text-xs text-gray-500">{{ product.category }}</p>
-              </div>
+              <mat-icon class="!text-green-600">check_circle</mat-icon>
+              <div><p class="text-sm font-bold text-green-900">Identidade Visual</p><p class="text-xs text-green-700">Logo e Cores configuradas</p></div>
             </div>
-            <div class="flex flex-col items-end shrink-0 pl-2">
-              <span class="text-sm font-bold text-gray-700">{{ product.views }} vis.</span>
-              <mat-icon class="!text-[16px] !w-4 !h-4 mt-0.5" [ngClass]="product.trend === 'up' ? 'text-green-500' : 'text-red-500'">
-                {{ product.trend === 'up' ? 'trending_up' : 'trending_down' }}
-              </mat-icon>
-            </div>
+            <button mat-icon-button class="!text-green-600"><mat-icon>edit</mat-icon></button>
           </div>
+
+          <!-- QR Code Físico (Nova Funcionalidade de Totem) -->
+          <div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-xl border border-orange-100">
+            <div class="flex items-center gap-3">
+              <mat-icon class="!text-orange-600">qr_code_scanner</mat-icon>
+              <div><p class="text-sm font-bold text-orange-900">Totem Inteligente</p><p class="text-xs text-orange-700">Aguardando impressão</p></div>
+            </div>
+            <button mat-icon-button class="!text-orange-600" title="Baixar PDF do Totem"><mat-icon>download</mat-icon></button>
+          </div>
+
         </div>
+        <button mat-button class="!w-full !mt-6 !text-gray-600 font-medium">Configurações Avançadas</button>
       </div>
     </div>
-  </ng-template>
+  }
 </div>

@@ -12,6 +12,8 @@
     </div>
   </div>
 
+  <!-- Fluxo para usuário LOGADO -->
+  @if (isAuthenticated()) {
   <div class="flex items-center gap-2">
     <!-- Botão de Notificações com Badge "Pulsante" em Laranja -->
     <button mat-icon-button class="!text-gray-500 hover:!text-green-600 transition-colors relative group">
@@ -47,4 +49,15 @@
       </button>
     </mat-menu>
   </div>
+  } @else {
+  <!-- Fluxo para usuário NÃO LOGADO (Visitante) -->
+  <div class="flex items-center gap-3">
+    <button mat-button class="!text-gray-600 hover:!text-green-600 font-medium hidden sm:inline-flex" routerLink="/login">
+      Entrar
+    </button>
+    <button mat-flat-button class="!bg-green-600 !text-white !rounded-lg hover:!bg-green-700 shadow-sm" routerLink="/register">
+      Criar Conta
+    </button>
+  </div>
+  }
 </mat-toolbar>

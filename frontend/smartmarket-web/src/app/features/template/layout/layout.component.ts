@@ -5,9 +5,8 @@ import { RouterOutlet } from '@angular/router';
 // Angular Material
 import { MatSidenavModule } from '@angular/material/sidenav';
 
-// Componentes do Layout
-import { SidebarComponent } from '../side-bar/sidebar.component';
-import { HeaderComponent } from '../header/header.component';
+import { HeaderComponent } from './header.component';
+import { SidebarComponent } from './sidebar.component';
 
 @Component({
   selector: 'app-layout',

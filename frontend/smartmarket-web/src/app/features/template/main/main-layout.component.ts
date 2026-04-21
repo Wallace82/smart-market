@@ -4,8 +4,8 @@ import { RouterOutlet } from '@angular/router';
 
 // Angular Material
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { SidebarComponent } from '../side-bar/sidebar.component';
-import { HeaderComponent } from '../header/header.component';
+import { HeaderComponent } from '../layout/header.component';
+import { SidebarComponent } from '../layout/sidebar.component';
 
 
 @Component({

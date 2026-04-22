@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PublicCatalogMockService, MockOffer, MockSupermarket, MockFlyer } from '../../public/public-catalog-mock.service';
+import { PublicCatalogMockService, MockOffer, MockSupermarket, MockFlyer } from './public-catalog-mock.service';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -26,7 +26,7 @@ export class HomeComponent implements OnInit {
   isLoading = signal<boolean>(true);
   locationGranted = signal<boolean>(false);
   userAddress = signal<string>('Buscando seu endereço...');
-  
+
   // Sinais de Dados
   offers = signal<MockOffer[]>([]);
   supermarkets = signal<MockSupermarket[]>([]);
@@ -41,7 +41,7 @@ export class HomeComponent implements OnInit {
     try {
       const loc = await this.catalogService.requestUserLocation();
       this.locationGranted.set(true);
-      
+
       // Busca o endereço real por extenso (Reverse Geocoding)
       const address = await this.catalogService.getAddressFromCoordinates(loc.lat, loc.lng);
       this.userAddress.set(address);

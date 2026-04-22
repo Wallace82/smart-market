@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './features/template/main/main-layout.component';
-import { HomeComponent } from './features/template/layout/home.component';
+import { HomeComponent } from './features/public/home.component';
 
 export const routes: Routes = [
   // ==================================================
@@ -20,6 +20,16 @@ export const routes: Routes = [
     path: 'flyer/:id',
     title: 'SmartMarket - Visualizador de Encarte',
     loadComponent: () => import('./features/manager/dashboard/flyer-viewer.component').then(m => m.FlyerViewerComponent)
+  },
+  {
+    path: 'supermarket/:id',
+    title: 'SmartMarket - Loja',
+    loadComponent: () => import('./features/public/supermarket-details/supermarket-details.component').then(m => m.SupermarketDetailsComponent)
+  },
+  {
+    path: 'offers',
+    title: 'SmartMarket - Promoções',
+    loadComponent: () => import('./features/public/offers/offers-list.component').then(m => m.OffersListComponent)
   },
   {
     path: 'login',

@@ -40,9 +40,10 @@
         </div>
       </div>
       
-      <!-- Ilustração Simbólica Mockada -->
-      <div class="hidden md:block w-72 h-72 bg-white/10 rounded-full border-4 border-white/20 shadow-2xl backdrop-blur-sm relative flex items-center justify-center p-8">
-        <mat-icon class="!text-white !w-32 !h-32 !text-[128px] opacity-80">shopping_basket</mat-icon>
+      <!-- Ilustração Principal (3D Cart com Fundo Verde) -->
+      <div class="hidden md:flex w-72 h-72 lg:w-96 lg:h-96 relative items-center justify-center -mr-8">
+        <div class="absolute inset-0 bg-white/10 blur-3xl rounded-full"></div>
+        <img src="assets/images/3d_cart_green.png" alt="Carrinho 3D" class="relative z-10 w-full h-full object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.3)] mix-blend-multiply">
       </div>
     </div>
   </section>
@@ -51,10 +52,19 @@
   <main class="max-w-7xl mx-auto px-6 lg:px-8 -mt-8 relative z-20">
     
     @if (isLoading()) {
-      <!-- Skeleton de Carregamento -->
-      <div class="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center justify-center min-h-[300px] border border-gray-100">
-        <mat-spinner diameter="48" class="!text-green-600 mb-4"></mat-spinner>
-        <p class="text-gray-500 font-medium animate-pulse">Buscando as melhores ofertas em um raio de 3km...</p>
+      <!-- Loading Animado -->
+      <div class="bg-white rounded-2xl shadow-sm p-8 flex flex-col items-center justify-center min-h-[300px] border border-gray-100 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-green-50/50 animate-pulse"></div>
+        <div class="relative z-10 flex flex-col items-center">
+          <div class="relative mb-6">
+            <mat-spinner diameter="72" class="!text-green-600"></mat-spinner>
+            <mat-icon class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 !text-green-600 !w-8 !h-8 !text-[32px] animate-bounce">storefront</mat-icon>
+          </div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2 tracking-tight">Mapeando sua região...</h3>
+          <p class="text-gray-500 font-medium max-w-sm">
+            Localizando os supermercados próximos a você e organizando os melhores descontos do dia. Aguarde um instante! 🚀
+          </p>
+        </div>
       </div>
     } @else {
       <!-- Indicador de Raio de Localização -->
@@ -80,7 +90,7 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           @for (loja of supermarkets(); track loja.id) {
-            <div class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex items-center gap-4 group">
+            <div [routerLink]="['/supermarket', loja.id]" class="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex items-center gap-4 group">
               <img [src]="loja.logoUrl" alt="Logo" class="w-16 h-16 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform">
               <div>
                 <h3 class="font-bold text-gray-900 text-lg">{{ loja.name }}</h3>

@@ -48,7 +48,14 @@ export class PublicCatalogMockService {
     { id: 'o5', productName: 'Azeite de Oliva Extra Virgem', imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80', originalPrice: 28.90, promotionalPrice: 22.90, supermarketId: '2', supermarketName: 'Mercado da Praça', category: 'Mercearia' },
     { id: 'o6', productName: 'Detergente Líquido Maçã 500ml', imageUrl: 'https://images.unsplash.com/photo-1585909695284-32d2985ac9c0?auto=format&fit=crop&w=400&q=80', originalPrice: 2.99, promotionalPrice: 1.89, supermarketId: '3', supermarketName: 'Hiper Econômico', category: 'Limpeza' },
     { id: 'o7', productName: 'Vinho Tinto Chileno Reservado', imageUrl: 'https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&w=400&q=80', originalPrice: 45.00, promotionalPrice: 29.90, supermarketId: '1', supermarketName: 'Supermercado Central', category: 'Bebidas' },
-    { id: 'o8', productName: 'Maçã Gala (Kg)', imageUrl: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=400&q=80', originalPrice: 9.90, promotionalPrice: 5.99, supermarketId: '2', supermarketName: 'Mercado da Praça', category: 'Hortifruti' }
+    { id: 'o8', productName: 'Maçã Gala (Kg)', imageUrl: 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=400&q=80', originalPrice: 9.90, promotionalPrice: 5.99, supermarketId: '2', supermarketName: 'Mercado da Praça', category: 'Hortifruti' },
+    { id: 'o9', productName: 'Arroz Agulhinha Tipo 1 5kg', imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e8ac?auto=format&fit=crop&w=400&q=80', originalPrice: 25.90, promotionalPrice: 21.90, supermarketId: '1', supermarketName: 'Supermercado Central', category: 'Mercearia' },
+    { id: 'o10', productName: 'Feijão Carioca 1kg', imageUrl: 'https://images.unsplash.com/photo-1551529834-525807d6b4f3?auto=format&fit=crop&w=400&q=80', originalPrice: 8.50, promotionalPrice: 6.99, supermarketId: '3', supermarketName: 'Hiper Econômico', category: 'Mercearia' },
+    { id: 'o11', productName: 'Leite Integral 1L', imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80', originalPrice: 5.50, promotionalPrice: 4.49, supermarketId: '2', supermarketName: 'Mercado da Praça', category: 'Laticínios' },
+    { id: 'o12', productName: 'Queijo Mussarela (Kg)', imageUrl: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=400&q=80', originalPrice: 45.00, promotionalPrice: 38.90, supermarketId: '1', supermarketName: 'Supermercado Central', category: 'Laticínios' },
+    { id: 'o13', productName: 'Sabão em Pó 1kg', imageUrl: 'https://images.unsplash.com/photo-1610555356070-d0efb6505f81?auto=format&fit=crop&w=400&q=80', originalPrice: 12.90, promotionalPrice: 9.90, supermarketId: '3', supermarketName: 'Hiper Econômico', category: 'Limpeza' },
+    { id: 'o14', productName: 'Biscoito Recheado Chocolate', imageUrl: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80', originalPrice: 3.50, promotionalPrice: 2.49, supermarketId: '1', supermarketName: 'Supermercado Central', category: 'Mercearia' },
+    { id: 'o15', productName: 'Refrigerante Cola 2L', imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=400&q=80', originalPrice: 8.90, promotionalPrice: 6.99, supermarketId: '2', supermarketName: 'Mercado da Praça', category: 'Bebidas' }
   ];
 
   private mockFlyers: MockFlyer[] = [
@@ -97,6 +104,39 @@ export class PublicCatalogMockService {
       }
     });
   }
+
+  getSupermarketById(id: string): Observable<MockSupermarket | undefined> {
+    const supermarket = this.mockSupermarkets.find(s => s.id === id);
+    return of(supermarket).pipe(delay(500));
+  }
+
+  getOffersBySupermarket(id: string): Observable<MockOffer[]> {
+    const offers = this.mockOffers.filter(o => o.supermarketId === id);
+    return of(offers).pipe(delay(500));
+  }
+
+  getAllOffers(filters?: { search?: string, category?: string, supermarketId?: string }): Observable<MockOffer[]> {
+    let filtered = [...this.mockOffers];
+    if (filters) {
+      if (filters.search) {
+        const term = filters.search.toLowerCase();
+        filtered = filtered.filter(o => o.productName.toLowerCase().includes(term));
+      }
+      if (filters.category) {
+        filtered = filtered.filter(o => o.category === filters.category);
+      }
+      if (filters.supermarketId) {
+        filtered = filtered.filter(o => o.supermarketId === filters.supermarketId);
+      }
+    }
+    return of(filtered).pipe(delay(600));
+  }
+
+  getFlyersBySupermarket(id: string): Observable<MockFlyer[]> {
+    const flyers = this.mockFlyers.filter(f => f.supermarketId === id);
+    return of(flyers).pipe(delay(500));
+  }
+
 
   async getAddressFromCoordinates(lat: number, lng: number): Promise<string> {
     try {

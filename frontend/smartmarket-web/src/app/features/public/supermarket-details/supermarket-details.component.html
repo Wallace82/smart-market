@@ -1,0 +1,127 @@
+<div class="min-h-screen bg-gray-50 pb-16">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center min-h-[60vh]">
+      <mat-spinner diameter="40" class="!text-green-600"></mat-spinner>
+      <p class="mt-4 text-gray-500 font-medium animate-pulse">Carregando informações da loja...</p>
+    </div>
+  }
+
+  <!-- Content State -->
+  @if (!isLoading() && supermarket()) {
+    <!-- Hero Section with Dynamic Background -->
+    <div class="relative pt-16 pb-24 overflow-hidden" [ngStyle]="bgStyle()">
+      <div class="absolute inset-0 bg-black/20"></div>
+      
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+        <button mat-button class="!text-white mb-6" routerLink="/">
+          <mat-icon>arrow_back</mat-icon>
+          Voltar
+        </button>
+
+        <div class="flex flex-col md:flex-row items-center gap-6">
+          <img [src]="supermarket()?.logoUrl" alt="Logo" class="w-32 h-32 rounded-2xl shadow-lg border-4 border-white object-cover">
+          <div class="text-center md:text-left text-white">
+            <h1 class="text-4xl font-black tracking-tight drop-shadow-md">{{ supermarket()?.name }}</h1>
+            <p class="mt-2 text-white/90 font-medium flex items-center justify-center md:justify-start gap-2">
+              <mat-icon class="!text-[18px] !w-4 !h-4">location_on</mat-icon>
+              A apenas {{ supermarket()?.distanceKm }} km de você
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+      
+      <!-- Encartes Section -->
+      @if (flyers().length > 0) {
+        <div class="mb-12">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Encartes Ativos</h2>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (flyer of flyers(); track flyer.id) {
+              <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer border border-gray-100" [routerLink]="['/flyer', flyer.id]">
+                <div class="relative h-48 overflow-hidden">
+                  <img [src]="flyer.imageUrl" alt="Encarte" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                  <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    Expira em {{ flyer.expiresInDays }} dias
+                  </div>
+                </div>
+                <div class="p-5">
+                  <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-green-600 transition-colors">{{ flyer.title }}</h3>
+                  <button mat-button class="!text-green-600 w-full mt-2 bg-green-50">
+                    <mat-icon>visibility</mat-icon>
+                    Ver Encarte
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Ofertas Section -->
+      @if (offers().length > 0) {
+        <div class="mb-12">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Promoções em Destaque</h2>
+          </div>
+          
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            @for (offer of offers(); track offer.id) {
+              <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group flex flex-col h-full">
+                <!-- Badge de Desconto -->
+                <div class="absolute -top-3 -right-3 bg-orange-500 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform z-10 text-sm">
+                  -{{ ((offer.originalPrice - offer.promotionalPrice) / offer.originalPrice * 100).toFixed(0) }}%
+                </div>
+
+                <div class="relative h-40 sm:h-48 mb-4 overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center p-4">
+                  <img [src]="offer.imageUrl" [alt]="offer.productName" class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500">
+                </div>
+
+                <div class="flex-grow flex flex-col justify-between">
+                  <div>
+                    <span class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1 block">{{ offer.category }}</span>
+                    <h3 class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-2 line-clamp-2" [title]="offer.productName">
+                      {{ offer.productName }}
+                    </h3>
+                  </div>
+
+                  <div class="mt-2">
+                    <p class="text-xs sm:text-sm text-gray-400 line-through mb-0.5">R$ {{ offer.originalPrice.toFixed(2) }}</p>
+                    <p class="text-lg sm:text-2xl font-black text-green-600 leading-none">
+                      <span class="text-sm font-bold mr-0.5">R$</span>{{ offer.promotionalPrice.toFixed(2) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (flyers().length === 0 && offers().length === 0) {
+        <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
+          <mat-icon class="!w-16 !h-16 !text-[64px] text-gray-300 mx-auto mb-4">storefront</mat-icon>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Nenhuma oferta no momento</h3>
+          <p class="text-gray-500">Este supermercado não possui encartes ou promoções ativas hoje.</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Error State / Not Found -->
+  @if (!isLoading() && !supermarket()) {
+    <div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <mat-icon class="!w-24 !h-24 !text-[96px] text-gray-300 mb-6">error_outline</mat-icon>
+      <h2 class="text-3xl font-black text-gray-900 mb-4">Loja não encontrada</h2>
+      <p class="text-gray-500 mb-8 max-w-md">Não conseguimos encontrar as informações deste supermercado. Ele pode ter sido removido ou o link é inválido.</p>
+      <button mat-flat-button class="!bg-green-600 !text-white !h-12 !px-8 !rounded-full font-bold shadow-md hover:!bg-green-700" routerLink="/">
+        Voltar para o Início
+      </button>
+    </div>
+  }
+</div>

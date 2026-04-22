@@ -1,4 +1,4 @@
-﻿# SmartMarket
+# SmartMarket
 
 Plataforma SaaS B2B2C que conecta supermercados a clientes via encartes digitais, promoções personalizadas e notificações por geolocalização.
 
@@ -64,6 +64,14 @@ ng serve --proxy-config proxy.conf.json
    - **Login:** `gestor@smartmarket.com`
    - **Senha:** `password`
 
+## 🎨 Design System & 🧱 Arquitetura Frontend
+
+O projeto segue diretrizes visuais e uma arquitetura modular robusta no frontend (Angular):
+* **Design System:** Baseado em Tailwind CSS (grid de 8px) e Angular Material, com paleta de cores focada no setor varejista e SaaS (Verde primário, Laranja de destaque, Azul secundário). Utiliza tipografia Inter para máxima legibilidade.
+* **Arquitetura Frontend:** Fortemente orientada a domínios de negócio (`features/`) separados do núcleo (`core/`). Cada feature (ex: `manager/flyers`) é autossuficiente, contendo suas próprias rotas, páginas, componentes, serviços e modelos, garantindo alta escalabilidade e fácil manutenção.
+
 ## Documentação Técnica
 * 📄 [Requisitos Funcionais](./docs/REQUIREMENTS.md)
 * 🏛️ [Arquitetura Técnica](./docs/architecture/ARCHITECTURE.md)
+* 🎨 [Design System](./docs/design-system.md)
+* 🧱 [Arquitetura do Frontend](./docs/frontend-architecture.md)

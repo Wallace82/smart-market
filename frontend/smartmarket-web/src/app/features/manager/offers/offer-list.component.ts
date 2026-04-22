@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-// Angular Material
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 
 export interface Offer {
   id: string;
@@ -18,14 +17,19 @@ export interface Offer {
 }
 
 @Component({
-  selector: 'app-offer-management',
+  selector: 'app-offer-list',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatTooltipModule],
-  templateUrl: './offer-management.component.html',
+  imports: [
+    CommonModule, 
+    MatIconModule, 
+    MatButtonModule, 
+    MatTooltipModule, 
+    MatMenuModule
+  ],
+  templateUrl: './offer-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OfferManagementComponent {
-  // Dados Mockados Simulando o Banco de Dados
+export class OfferListComponent {
   public offers = signal<Offer[]>([
     { id: '1', productName: 'Arroz Branco Tipo 1 5kg', category: 'Mercearia', originalPrice: '24,90', discountPrice: '19,90', status: 'Ativa', validUntil: '30/04/2026', imageUrl: 'assets/images/cache/arroz.jpg' },
     { id: '2', productName: 'Cerveja Heineken 330ml', category: 'Bebidas', originalPrice: '6,50', discountPrice: '4,99', status: 'Ativa', validUntil: '25/04/2026', imageUrl: 'assets/images/cache/cerveja.png' },
@@ -33,6 +37,6 @@ export class OfferManagementComponent {
     { id: '4', productName: 'Detergente Líquido Ypê', category: 'Limpeza', originalPrice: '2,50', discountPrice: '1,99', status: 'Expirada', validUntil: '15/04/2026', imageUrl: 'assets/images/cache/detergente.png' },
   ]);
 
-  // Contadores Reativos
   public activeOffersCount = signal(this.offers().filter(o => o.status === 'Ativa').length);
+  public totalOffersCount = signal(this.offers().length);
 }

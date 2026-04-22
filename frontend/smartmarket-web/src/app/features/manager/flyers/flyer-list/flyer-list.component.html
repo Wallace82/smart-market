@@ -1,217 +1,108 @@
-<div class="p-4 md:p-8 max-w-7xl mx-auto"> <!-- MELHORIA: Aumentar padding para mais "respiro" -->
-  <mat-card class="p-4 md:p-8 shadow-xl rounded-xl border border-gray-100"> <!-- MELHORIA: Sombra mais pronunciada, borda suave -->
-    <mat-card-title class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4"> <!-- MELHORIA: Mais espaçamento inferior -->
-      <span class="text-3xl font-extrabold text-gray-900">Meus Encartes Digitais</span> <!-- MELHORIA: Fonte mais impactante -->
-      <button mat-flat-button color="primary" routerLink="/manager/flyers/create" class="w-full sm:w-auto h-12 text-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-200"> <!-- MELHORIA: Botão maior, arredondado e com sombra -->
-        <mat-icon>add</mat-icon> Novo Encarte
-      </button>
-    </mat-card-title>
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Encartes Digitais</h1>
+      <p class="text-gray-500 mt-1">Gerencie os tabloides promocionais da sua loja e engaje seus clientes com temas sazonais.</p>
+    </div>
+    <button mat-flat-button class="!bg-green-600 !text-white !rounded-lg !px-6 !py-6">
+      <mat-icon>add_photo_alternate</mat-icon>
+      Novo Encarte
+    </button>
+  </div>
 
-    <mat-card-content>
-      <!-- Loading State -->
-      <div *ngIf="loading()">
-        <!-- MELHORIA: Skeleton Loader para Desktop (Tabela) -->
-        <div class="hidden md:block overflow-hidden rounded-lg border border-gray-200">
-          <table class="w-full animate-pulse">
-            <thead>
-              <tr class="bg-gray-50">
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
-                  <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                  <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                  <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                  <div class="h-4 bg-gray-200 rounded w-1/3"></div>
-                </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                  <div class="h-4 bg-gray-200 rounded w-1/4 ml-auto"></div>
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let i of [1,2,3,4,5]">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="h-4 bg-gray-200 rounded w-5/6"></div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="h-4 bg-gray-200 rounded w-2/3"></div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="h-4 bg-gray-200 rounded w-2/3"></div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <div class="h-4 bg-gray-200 rounded w-1/4 ml-auto"></div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <!-- MELHORIA: Skeleton Loader para Mobile (Cards) -->
-        <div class="block md:hidden space-y-4">
-          <mat-card *ngFor="let i of [1,2,3]" class="border border-gray-200 shadow-sm rounded-lg animate-pulse">
-            <div class="p-4 flex flex-col gap-3">
-              <div class="h-6 bg-gray-200 rounded w-3/4"></div>
-              <div class="h-4 bg-gray-200 rounded w-1/3"></div>
-              <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md mt-2">
-                <div class="h-4 bg-gray-200 rounded w-2/3"></div>
-                <div class="h-4 bg-gray-200 rounded w-2/3"></div>
-              </div>
-              <div class="flex justify-end gap-2 mt-2">
-                <div class="h-8 w-8 bg-gray-200 rounded-full"></div>
-                <div class="h-8 w-8 bg-gray-200 rounded-full"></div>
-              </div>
-            </div>
-          </mat-card>
-        </div>
+  <!-- Métricas Rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-purple-50 text-purple-600 rounded-xl">
+        <mat-icon>auto_awesome_mosaic</mat-icon>
       </div>
-
-      <!-- Error State -->
-      <div *ngIf="error()" class="bg-red-50 text-red-700 p-5 rounded-lg border border-red-200 flex items-center mb-6 shadow-sm"> <!-- MELHORIA: Padding, arredondamento, sombra -->
-        <mat-icon class="mr-3 text-red-500 text-3xl">error_outline</mat-icon> <!-- MELHORIA: Ícone maior e mais visível -->
-        <p class="m-0 text-lg font-medium">{{ error() }}</p> <!-- MELHORIA: Fonte maior e mais legível -->
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Total de Encartes</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ flyers().length }}</h3>
       </div>
+    </div>
 
-      <div *ngIf="!loading() && !error()">
-        <!-- Empty State -->
-        <div *ngIf="encartes().length === 0" class="text-center py-20 px-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 shadow-inner"> <!-- MELHORIA: Padding, arredondamento, sombra interna -->
-          <mat-icon class="text-7xl text-gray-400 mb-6">campaign</mat-icon> <!-- MELHORIA: Ícone maior e mais suave -->
-          <h3 class="text-2xl font-bold text-gray-800 mb-3">Você ainda não possui encartes</h3> <!-- MELHORIA: Fonte mais impactante -->
-          <p class="text-gray-600 mb-8 text-lg">Crie seu primeiro encarte digital para divulgar suas ofertas e atrair mais clientes.</p> <!-- MELHORIA: Texto mais descritivo e fonte maior -->
-          <button mat-flat-button color="primary" routerLink="/manager/flyers/create" class="h-12 text-lg rounded-lg shadow-md hover:shadow-lg transition-all duration-200"> <!-- MELHORIA: Botão maior, arredondado e com sombra -->
-            Criar Agora
-          </button>
-        </div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-green-50 text-green-600 rounded-xl">
+        <mat-icon>campaign</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Encartes Ativos</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ activeCount() }}</h3>
+      </div>
+    </div>
 
-        <!-- Data View: Tabela para Desktop, Cards para Mobile -->
-        <div *ngIf="encartes().length > 0">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-blue-50 text-blue-600 rounded-xl">
+        <mat-icon>visibility</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Visualizações Totais</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ totalViews() }}</h3>
+      </div>
+    </div>
+  </div>
 
-          <!-- View Mobile: Cards -->
-          <div class="block md:hidden space-y-4">
-            <mat-card *ngFor="let encarte of encartes()" class="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <div class="p-4 flex flex-col gap-3">
-                <div class="flex justify-between items-start">
-                  <h3 class="font-bold text-lg text-gray-800 break-words pr-2">{{ encarte.titulo }}</h3>
-                  <button mat-icon-button [matMenuTriggerFor]="menuMobile" aria-label="Ações do encarte" matTooltip="Mais ações" class="flex-shrink-0 -mt-2 -mr-2 text-gray-500 hover:text-gray-800"> <!-- MELHORIA: Tooltip e estilo de hover -->
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-1 rounded-full text-xs font-medium border" [ngClass]="getStatusClass(encarte.status)">
-                    {{ getStatusLabel(encarte.status) }}
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded-md mt-2">
-                  <div class="flex flex-col"> <!-- MELHORIA: Flex para alinhar label e valor -->
-                    <span class="block text-xs font-semibold text-gray-400 uppercase">Início</span>
-                    {{ encarte.dataInicio | date:'dd/MM/yyyy' }}
-                  </div>
-                  <div class="flex flex-col"> <!-- MELHORIA: Flex para alinhar label e valor -->
-                    <span class="block text-xs font-semibold text-gray-400 uppercase">Fim</span>
-                    {{ encarte.dataFim | date:'dd/MM/yyyy' }}
-                  </div>
-                </div>
-
-                <!-- Menu Mobile -->
-                <mat-menu #menuMobile="matMenu">
-                  <button mat-menu-item (click)="visualizarEncarte(encarte.id)">
-                    <mat-icon>visibility</mat-icon>
-                    <span>Visualizar</span>
-                  </button>
-                  <button mat-menu-item (click)="editarEncarte(encarte.id)">
-                    <mat-icon>edit</mat-icon>
-                    <span>Editar</span>
-                  </button>
-                  <mat-divider></mat-divider>
-                  <button mat-menu-item (click)="alterarStatus(encarte.id, 'PUBLICADO')" [disabled]="encarte.status === 'PUBLICADO'">
-                    <mat-icon class="text-green-600">publish</mat-icon>
-                    <span>Publicar</span>
-                  </button>
-                  <button mat-menu-item (click)="alterarStatus(encarte.id, 'ARQUIVADO')" [disabled]="encarte.status === 'ARQUIVADO'">
-                    <mat-icon class="text-orange-600">archive</mat-icon>
-                    <span>Arquivar</span>
-                  </button>
-                </mat-menu>
+  <!-- Tabela de Encartes -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
+            <th class="p-4 font-medium">Encarte</th>
+            <th class="p-4 font-medium">Tema Aplicado</th>
+            <th class="p-4 font-medium">Período de Validade</th>
+            <th class="p-4 font-medium">Desempenho</th>
+            <th class="p-4 font-medium">Status</th>
+            <th class="p-4 font-medium text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let flyer of flyers()" class="hover:bg-gray-50 transition-colors">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <img [src]="flyer.thumbnailUrl" [alt]="flyer.title" class="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-200">
+                <span class="font-bold text-gray-900">{{ flyer.title }}</span>
               </div>
-            </mat-card>
-          </div>
-
-          <!-- View Desktop: Tabela -->
-          <div class="hidden md:block overflow-hidden rounded-lg border border-gray-200 shadow-sm"> <!-- MELHORIA: Overflow hidden para bordas arredondadas, sombra leve -->
-            <table mat-table [dataSource]="encartes()" class="w-full text-left"> <!-- MELHORIA: Alinhar texto à esquerda -->
-
-              <!-- Coluna Título -->
-              <ng-container matColumnDef="titulo">
-                <th mat-header-cell *matHeaderCellDef class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"> Título </th> <!-- MELHORIA: Estilo de cabeçalho Tailwind -->
-                <td mat-cell *matCellDef="let encarte" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"> {{ encarte.titulo }} </td> <!-- MELHORIA: Estilo de célula Tailwind -->
-              </ng-container>
-
-              <!-- Coluna Data Início -->
-              <ng-container matColumnDef="dataInicio">
-                <th mat-header-cell *matHeaderCellDef class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"> Início </th>
-                <td mat-cell *matCellDef="let encarte" class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"> {{ encarte.dataInicio | date:'dd/MM/yyyy' }} </td>
-              </ng-container>
-
-              <!-- Coluna Data Fim -->
-              <ng-container matColumnDef="dataFim">
-                <th mat-header-cell *matHeaderCellDef class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"> Fim </th>
-                <td mat-cell *matCellDef="let encarte" class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"> {{ encarte.dataFim | date:'dd/MM/yyyy' }} </td>
-              </ng-container>
-
-              <!-- Coluna Status -->
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50"> Status </th>
-                <td mat-cell *matCellDef="let encarte" class="px-6 py-4 whitespace-nowrap">
-                  <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap" [ngClass]="getStatusClass(encarte.status)"> <!-- MELHORIA: Padding menor para badge -->
-                    {{ getStatusLabel(encarte.status) }}
-                  </span>
-                </td>
-              </ng-container>
-
-              <!-- Coluna Ações -->
-              <ng-container matColumnDef="acoes">
-                <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-600 bg-gray-50 text-right pr-4"> Ações </th>
-                <td mat-cell *matCellDef="let encarte" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"> <!-- MELHORIA: Estilo de célula Tailwind -->
-                  <button mat-icon-button [matMenuTriggerFor]="menuDesktop" aria-label="Ações" class="text-gray-500 hover:text-gray-800">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-                  <mat-menu #menuDesktop="matMenu">
-                    <button mat-menu-item (click)="visualizarEncarte(encarte.id)">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Visualizar</span>
-                    </button>
-                    <button mat-menu-item (click)="editarEncarte(encarte.id)">
-                      <mat-icon>edit</mat-icon>
-                      <span>Editar</span>
-                    </button>
-                    <mat-divider></mat-divider>
-                    <button mat-menu-item (click)="alterarStatus(encarte.id, 'PUBLICADO')" [disabled]="encarte.status === 'PUBLICADO'">
-                      <mat-icon class="text-green-600">publish</mat-icon>
-                      <span>Publicar</span>
-                    </button>
-                    <button mat-menu-item (click)="alterarStatus(encarte.id, 'ARQUIVADO')" [disabled]="encarte.status === 'ARQUIVADO'">
-                      <mat-icon class="text-orange-600">archive</mat-icon>
-                      <span>Arquivar</span>
-                    </button>
-                  </mat-menu>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors duration-150"></tr> <!-- MELHORIA: Transição mais suave -->
-            </table> <!-- MELHORIA: Adicionar classes de estilo para a tabela -->
-          </div>
-
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
+            </td>
+            <td class="p-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-700">
+                <mat-icon class="!text-[14px] !w-[14px] !h-[14px] text-gray-500">palette</mat-icon>
+                {{ flyer.theme }}
+              </span>
+            </td>
+            <td class="p-4 text-gray-600 text-sm">
+              <div class="flex flex-col">
+                <span>Início: <strong class="text-gray-900">{{ flyer.startDate }}</strong></span>
+                <span>Fim: <strong class="text-gray-900">{{ flyer.endDate }}</strong></span>
+              </div>
+            </td>
+            <td class="p-4">
+              <div class="flex items-center gap-2 text-sm text-gray-600" matTooltip="Total de acessos e visualizações">
+                <mat-icon class="!text-[18px] !w-[18px] !h-[18px] text-blue-500">bar_chart</mat-icon>
+                <strong>{{ flyer.views }}</strong> views
+              </div>
+            </td>
+            <td class="p-4">
+              <span class="px-3 py-1 text-xs font-bold rounded-full flex items-center w-max gap-1"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700': flyer.status === 'Ativo',
+                      'bg-blue-100 text-blue-700': flyer.status === 'Programado',
+                      'bg-gray-100 text-gray-600': flyer.status === 'Expirado'
+                    }">
+                <mat-icon class="!text-[12px] !w-[12px] !h-[12px]">{{ flyer.status === 'Ativo' ? 'play_arrow' : flyer.status === 'Programado' ? 'schedule' : 'block' }}</mat-icon>
+                {{ flyer.status }}
+              </span>
+            </td>
+            <td class="p-4 text-right">
+              <button mat-flat-button class="!bg-gray-100 !text-gray-700 hover:!bg-gray-200 !rounded-lg !font-bold">
+                Gerenciar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

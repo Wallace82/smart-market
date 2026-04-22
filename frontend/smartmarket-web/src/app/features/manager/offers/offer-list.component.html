@@ -1,0 +1,94 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Minhas Ofertas</h1>
+      <p class="text-gray-500 mt-1">Gerencie os preços promocionais dos produtos na sua loja.</p>
+    </div>
+    <button mat-flat-button class="!bg-green-600 !text-white !rounded-lg !px-6 !py-6">
+      <mat-icon>add</mat-icon>
+      Nova Oferta
+    </button>
+  </div>
+
+  <!-- Métricas Rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-blue-50 text-blue-600 rounded-xl">
+        <mat-icon>local_offer</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Total de Ofertas</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ totalOffersCount() }}</h3>
+      </div>
+    </div>
+    
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-green-50 text-green-600 rounded-xl">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Ofertas Ativas</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ activeOffersCount() }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de Ofertas -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
+            <th class="p-4 font-medium">Produto</th>
+            <th class="p-4 font-medium">Categoria</th>
+            <th class="p-4 font-medium">Preço Original</th>
+            <th class="p-4 font-medium">Preço Promocional</th>
+            <th class="p-4 font-medium">Validade</th>
+            <th class="p-4 font-medium">Status</th>
+            <th class="p-4 font-medium text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let offer of offers()" class="hover:bg-gray-50 transition-colors">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <img [src]="offer.imageUrl" [alt]="offer.productName" class="w-10 h-10 rounded-lg object-cover bg-gray-100">
+                <span class="font-bold text-gray-900">{{ offer.productName }}</span>
+              </div>
+            </td>
+            <td class="p-4 text-gray-600">{{ offer.category }}</td>
+            <td class="p-4 text-gray-400 line-through">R$ {{ offer.originalPrice }}</td>
+            <td class="p-4 font-bold text-green-600">R$ {{ offer.discountPrice }}</td>
+            <td class="p-4 text-gray-600">{{ offer.validUntil }}</td>
+            <td class="p-4">
+              <span class="px-3 py-1 text-xs font-bold rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700': offer.status === 'Ativa',
+                      'bg-blue-100 text-blue-700': offer.status === 'Programada',
+                      'bg-gray-100 text-gray-600': offer.status === 'Expirada'
+                    }">
+                {{ offer.status }}
+              </span>
+            </td>
+            <td class="p-4 text-right">
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="text-gray-400 hover:text-gray-600">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon class="text-gray-500">edit</mat-icon>
+                  <span>Editar oferta</span>
+                </button>
+                <button mat-menu-item class="!text-red-500">
+                  <mat-icon class="text-red-500">delete</mat-icon>
+                  <span>Excluir</span>
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

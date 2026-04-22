@@ -1,0 +1,118 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Campanhas Inteligentes</h1>
+      <p class="text-gray-500 mt-1">Gerencie disparos de push por proximidade (Geofencing) e atraia clientes para a loja física.</p>
+    </div>
+    <button mat-flat-button class="!bg-green-600 !text-white !rounded-lg !px-6 !py-6">
+      <mat-icon>add_alert</mat-icon>
+      Nova Campanha
+    </button>
+  </div>
+
+  <!-- Métricas Rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-orange-50 text-orange-600 rounded-xl">
+        <mat-icon>campaign</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Total de Campanhas</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ campaigns().length }}</h3>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-green-50 text-green-600 rounded-xl">
+        <mat-icon>radar</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Campanhas Ativas</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ activeCount() }}</h3>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+      <div class="p-4 bg-blue-50 text-blue-600 rounded-xl">
+        <mat-icon>storefront</mat-icon>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500 font-medium">Visitas Físicas (Conversões)</p>
+        <h3 class="text-2xl font-bold text-gray-900">{{ totalConversions() }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela de Campanhas -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
+            <th class="p-4 font-medium">Campanha</th>
+            <th class="p-4 font-medium">Público-Alvo</th>
+            <th class="p-4 font-medium">Raio (Geofence)</th>
+            <th class="p-4 font-medium">Desempenho</th>
+            <th class="p-4 font-medium">Status</th>
+            <th class="p-4 font-medium text-right">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let campaign of campaigns()" class="hover:bg-gray-50 transition-colors">
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shadow-sm border border-orange-200">
+                  <mat-icon>notifications_active</mat-icon>
+                </div>
+                <span class="font-bold text-gray-900">{{ campaign.name }}</span>
+              </div>
+            </td>
+            <td class="p-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-700">
+                <mat-icon class="!text-[14px] !w-[14px] !h-[14px] text-gray-500">group</mat-icon>
+                {{ campaign.segment }}
+              </span>
+            </td>
+            <td class="p-4 text-gray-600 font-medium">
+              <mat-icon class="align-middle !text-[18px] !w-[18px] !h-[18px] text-red-500 mr-1">location_on</mat-icon>
+              {{ campaign.radius }}
+            </td>
+            <td class="p-4">
+              <div class="flex flex-col text-sm">
+                <span class="text-gray-500">Pushes: <strong class="text-gray-900">{{ campaign.pushesSent }}</strong></span>
+                <span class="text-green-600 font-medium">Conversões: {{ campaign.conversions }}</span>
+              </div>
+            </td>
+            <td class="p-4">
+              <span class="px-3 py-1 text-xs font-bold rounded-full flex items-center w-max gap-1"
+                    [ngClass]="{
+                      'bg-green-100 text-green-700': campaign.status === 'Ativa',
+                      'bg-yellow-100 text-yellow-700': campaign.status === 'Pausada',
+                      'bg-gray-100 text-gray-600': campaign.status === 'Concluída'
+                    }">
+                <mat-icon class="!text-[12px] !w-[12px] !h-[12px]">{{ campaign.status === 'Ativa' ? 'radar' : campaign.status === 'Pausada' ? 'pause' : 'done_all' }}</mat-icon>
+                {{ campaign.status }}
+              </span>
+            </td>
+            <td class="p-4 text-right">
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="text-gray-400 hover:text-gray-600">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon class="text-gray-500">insights</mat-icon>
+                  <span>Ver Relatório</span>
+                </button>
+                <button mat-menu-item class="!text-red-500">
+                  <mat-icon class="text-red-500">stop_circle</mat-icon>
+                  <span>Encerrar Campanha</span>
+                </button>
+              </mat-menu>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -85,7 +85,13 @@ O projeto frontend em Angular é organizado de forma modular e escalável, segui
 
 *   **`features`**: Cada pasta aqui representa uma "Feature" ou módulo de negócio da aplicação, com seus próprios componentes, serviços e rotas (lazy-loaded).
     *   `admin`: Painel do administrador da plataforma.
-    *   `manager`: Painel do gestor do supermercado.
+    *   `manager`: Painel do gestor do supermercado. Subdividido por domínios:
+        *   `campaigns/`: Gestão de campanhas inteligentes de proximidade (RF-12).
+        *   `dashboard/`: Visão geral e métricas de desempenho.
+        *   `flyers/`: Criação e listagem de encartes digitais temáticos (RF-04).
+        *   `marketing/`: Funcionalidades de Growth e gestão de QR Code (RF-13).
+        *   `offers/`: Catálogo e definição de preços promocionais da loja (RF-03).
+        *   `settings/`: Configurações, como Identidade Visual/Whitelabel (RF-02).
     *   `client`: A aplicação do cliente final.
     *   `auth`: Telas de login, registro e recuperação de senha.
     *   `template`: Componentes de layout principal (Header, Sidebar, Footer).

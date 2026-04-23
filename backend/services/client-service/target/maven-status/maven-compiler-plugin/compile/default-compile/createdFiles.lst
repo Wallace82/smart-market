@@ -1,2 +1,7 @@
-com\smartmarket\client\infrastructure\adapter\in\web\HealthController.class
+com\smartmarket\client\domain\model\Cliente.class
+com\smartmarket\client\application\port\out\ClienteDomainRepository.class
+com\smartmarket\client\domain\model\ClienteStatus.class
+com\smartmarket\client\application\usecase\CadastrarClienteUseCase.class
 com\smartmarket\client\ClientServiceApplication.class
+com\smartmarket\client\application\port\in\CadastrarClientePort.class
+com\smartmarket\client\infrastructure\adapter\in\web\HealthController.class

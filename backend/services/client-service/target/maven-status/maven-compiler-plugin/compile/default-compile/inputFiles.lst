@@ -1,2 +1,7 @@
-C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\ClientServiceApplication.java
 C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\infrastructure\adapter\in\web\HealthController.java
+C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\domain\model\ClienteStatus.java
+C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\application\port\in\CadastrarClientePort.java
+C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\domain\model\Cliente.java
+C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\ClientServiceApplication.java
+C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\application\usecase\CadastrarClienteUseCase.java
+C:\Users\Foton\git\smart-market\backend\services\client-service\src\main\java\com\smartmarket\client\application\port\out\ClienteDomainRepository.java

@@ -13,8 +13,16 @@ C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\ja
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\persistence\SupermercadoRepository.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\storage\minio\MinioBrandImageStorageServiceImpl.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\storage\minio\MinioConfig.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\CreatePlanRequest.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\CreateSubscriptionRequest.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\PagedSupermarketResponse.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\PageMetadata.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\PlanResponse.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\SubscriptionResponse.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\SupermercadoRequest.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\SupermercadoResponse.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\dto\UpdateSupermarketStatusRequest.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\HealthController.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\PlanController.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\web\SupermercadoController.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\SupermarketServiceApplication.java

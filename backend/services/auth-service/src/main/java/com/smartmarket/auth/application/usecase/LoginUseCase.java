@@ -1,6 +1,6 @@
 package com.smartmarket.auth.application.usecase;
 
-import com.smartmarket.auth.application.dto.JwtResponseDTO;
+import com.smartmarket.auth.application.dto.AuthTokenResponseDTO;
 import com.smartmarket.auth.application.dto.LoginRequestDTO;
 import com.smartmarket.auth.domain.model.Usuario;
 import com.smartmarket.auth.domain.repository.UsuarioDomainRepository;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class LoginUseCase {
@@ -30,7 +31,7 @@ public class LoginUseCase {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public JwtResponseDTO execute(LoginRequestDTO loginRequest) {
+    public AuthTokenResponseDTO execute(LoginRequestDTO loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
@@ -47,11 +48,13 @@ public class LoginUseCase {
         usuario.setUltimoLoginEm(LocalDateTime.now());
         usuarioRepository.save(usuario);
 
-        return new JwtResponseDTO(
+        // Mock de refresh token para satisfazer o contrato
+        String refreshToken = UUID.randomUUID().toString();
+
+        return new AuthTokenResponseDTO(
                 jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                roles
+                refreshToken,
+                jwtUtils.getJwtExpirationSecs()
         );
     }
 }

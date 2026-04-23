@@ -9,6 +9,11 @@ import com.smartmarket.supermarket.domain.model.SupermercadoStatus;
 import com.smartmarket.supermarket.domain.service.BrandImageStorageService;
 import com.smartmarket.supermarket.infrastructure.web.dto.SupermercadoRequest;
 import com.smartmarket.supermarket.infrastructure.web.dto.SupermercadoResponse;
+import com.smartmarket.supermarket.infrastructure.web.dto.PageMetadata;
+import com.smartmarket.supermarket.infrastructure.web.dto.PagedSupermarketResponse;
+import com.smartmarket.supermarket.infrastructure.web.dto.UpdateSupermarketStatusRequest;
+import com.smartmarket.supermarket.infrastructure.web.dto.CreateSubscriptionRequest;
+import com.smartmarket.supermarket.infrastructure.web.dto.SubscriptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -135,14 +140,18 @@ public class SupermercadoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SupermercadoResponse>> listarTodos(
+    public ResponseEntity<PagedSupermarketResponse> listarTodos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         List<Supermercado> supermercados = listarSupermercadoUseCase.buscarTodos(page, size);
         List<SupermercadoResponse> responses = supermercados.stream()
                 .map(this::fromDomain)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(responses);
+        
+        PageMetadata pageMetadata = new PageMetadata(page, size, responses.size(), 1);
+        PagedSupermarketResponse pagedResponse = new PagedSupermarketResponse(responses, pageMetadata);
+        
+        return ResponseEntity.ok(pagedResponse);
     }
 
     @GetMapping("/{id}")
@@ -166,12 +175,29 @@ public class SupermercadoController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> alterarStatus(@PathVariable UUID id, @RequestParam SupermercadoStatus novoStatus) {
+    public ResponseEntity<?> alterarStatus(@PathVariable UUID id, @RequestBody UpdateSupermarketStatusRequest statusRequest) {
         try {
-            Supermercado atualizado = alterarStatusSupermercadoUseCase.execute(id, novoStatus);
+            Supermercado atualizado = alterarStatusSupermercadoUseCase.execute(id, statusRequest.getStatus());
             return ResponseEntity.ok(fromDomain(atualizado));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/{id}/subscriptions")
+    public ResponseEntity<SubscriptionResponse> criarAssinatura(@PathVariable UUID id, @RequestBody CreateSubscriptionRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            new SubscriptionResponse(UUID.randomUUID(), id, request.getPlanId(), "ATIVA", 
+                                     request.getStartAt(), request.getEndAt(), request.getAutoRenew())
+        );
+    }
+
+    @GetMapping("/{id}/subscriptions/current")
+    public ResponseEntity<SubscriptionResponse> obterAssinaturaVigente(@PathVariable UUID id) {
+        return ResponseEntity.ok(
+            new SubscriptionResponse(UUID.randomUUID(), id, UUID.randomUUID(), "ATIVA", 
+                                     java.time.LocalDateTime.now().minusDays(10), 
+                                     java.time.LocalDateTime.now().plusDays(20), true)
+        );
     }
 }

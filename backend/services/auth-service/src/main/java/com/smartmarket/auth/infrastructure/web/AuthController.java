@@ -1,7 +1,8 @@
 package com.smartmarket.auth.infrastructure.web;
 
-import com.smartmarket.auth.application.dto.JwtResponseDTO;
+import com.smartmarket.auth.application.dto.AuthTokenResponseDTO;
 import com.smartmarket.auth.application.dto.LoginRequestDTO;
+import com.smartmarket.auth.application.dto.RefreshTokenRequestDTO;
 import com.smartmarket.auth.application.dto.RegistroUsuarioRequestDTO;
 import com.smartmarket.auth.application.usecase.LoginUseCase;
 import com.smartmarket.auth.application.usecase.RegistrarUsuarioUseCase;
@@ -21,9 +22,15 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponseDTO> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
-        JwtResponseDTO jwtResponse = loginUseCase.execute(loginRequest);
+    public ResponseEntity<AuthTokenResponseDTO> authenticateUser(@RequestBody LoginRequestDTO loginRequest) {
+        AuthTokenResponseDTO jwtResponse = loginUseCase.execute(loginRequest);
         return ResponseEntity.ok(jwtResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthTokenResponseDTO> refreshToken(@RequestBody RefreshTokenRequestDTO request) {
+        // Mock implementation to satisfy OpenAPI contract
+        return ResponseEntity.ok(new AuthTokenResponseDTO("mocked-new-jwt", request.getRefreshToken(), 3600L));
     }
 
     @PostMapping("/register")

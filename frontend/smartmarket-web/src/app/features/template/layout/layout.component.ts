@@ -16,10 +16,9 @@ import { SidebarComponent } from './sidebar.component';
     RouterOutlet,
     MatSidenavModule,
     HeaderComponent,
-    SidebarComponent,
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LayoutComponent {}
+export class LayoutComponent { }

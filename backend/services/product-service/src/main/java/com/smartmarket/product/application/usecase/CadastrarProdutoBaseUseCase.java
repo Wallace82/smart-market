@@ -1,8 +1,8 @@
 package com.smartmarket.product.application.usecase;
 
 import com.smartmarket.product.domain.model.ProdutoBase;
-import com.smartmarket.product.domain.repository.ProdutoBaseDomainRepository;
-import com.smartmarket.product.infrastructure.storage.ImageStorageService;
+import com.smartmarket.product.application.port.out.ProdutoBaseDomainRepository;
+import com.smartmarket.product.infrastructure.adapter.out.storage.ImageStorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,3 +45,5 @@ public class CadastrarProdutoBaseUseCase {
         return ".jpg";
     }
 }
+
+

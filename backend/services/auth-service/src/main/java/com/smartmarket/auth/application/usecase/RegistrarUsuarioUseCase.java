@@ -5,8 +5,8 @@ import com.smartmarket.auth.domain.model.Papel;
 import com.smartmarket.auth.domain.model.PapelNome;
 import com.smartmarket.auth.domain.model.Usuario;
 import com.smartmarket.auth.domain.model.UsuarioStatus;
-import com.smartmarket.auth.domain.repository.PapelDomainRepository;
-import com.smartmarket.auth.domain.repository.UsuarioDomainRepository;
+import com.smartmarket.auth.application.port.out.PapelDomainRepository;
+import com.smartmarket.auth.application.port.out.UsuarioDomainRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -54,3 +54,4 @@ public class RegistrarUsuarioUseCase {
         usuarioRepository.save(usuario);
     }
 }
+

@@ -2,8 +2,8 @@ package com.smartmarket.product.application.usecase;
 
 import com.smartmarket.product.domain.model.OfertaSupermercado;
 import com.smartmarket.product.domain.model.ProdutoBase;
-import com.smartmarket.product.domain.repository.OfertaDomainRepository;
-import com.smartmarket.product.domain.repository.ProdutoBaseDomainRepository;
+import com.smartmarket.product.application.port.out.OfertaDomainRepository;
+import com.smartmarket.product.application.port.out.ProdutoBaseDomainRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,3 +45,4 @@ public class CriarOfertaUseCase {
         return ofertaRepository.save(oferta);
     }
 }
+

@@ -2,8 +2,8 @@ package com.smartmarket.product.application.usecase;
 
 import com.smartmarket.product.domain.model.EncarteDigital;
 import com.smartmarket.product.domain.model.EncarteItem;
-import com.smartmarket.product.domain.repository.EncarteDigitalDomainRepository;
-import com.smartmarket.product.domain.repository.OfertaSupermercadoDomainRepository;
+import com.smartmarket.product.application.port.out.EncarteDigitalDomainRepository;
+import com.smartmarket.product.application.port.out.OfertaSupermercadoDomainRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -68,3 +68,4 @@ public class AtualizarEncarteDigitalUseCase {
         return encarteDigitalRepository.save(encarteExistente);
     }
 }
+

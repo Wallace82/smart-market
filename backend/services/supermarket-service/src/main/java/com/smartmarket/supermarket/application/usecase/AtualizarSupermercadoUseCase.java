@@ -1,7 +1,7 @@
 package com.smartmarket.supermarket.application.usecase;
 
 import com.smartmarket.supermarket.domain.model.Supermercado;
-import com.smartmarket.supermarket.domain.repository.SupermercadoDomainRepository;
+import com.smartmarket.supermarket.application.port.out.SupermercadoDomainRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,3 +35,4 @@ public class AtualizarSupermercadoUseCase {
         return repository.save(supermercadoExistente);
     }
 }
+

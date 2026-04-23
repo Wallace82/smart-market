@@ -1,7 +1,7 @@
 package com.smartmarket.product.application.usecase;
 
 import com.smartmarket.product.domain.model.TemaEncarte;
-import com.smartmarket.product.domain.repository.TemaEncarteDomainRepository;
+import com.smartmarket.product.application.port.out.TemaEncarteDomainRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -27,3 +27,4 @@ public class AtualizarTemaEncarteUseCase {
         return repository.save(temaExistente);
     }
 }
+

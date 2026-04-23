@@ -1,7 +1,7 @@
 package com.smartmarket.product.application.usecase;
 
 import com.smartmarket.product.domain.model.TemaEncarte;
-import com.smartmarket.product.domain.repository.TemaEncarteDomainRepository;
+import com.smartmarket.product.application.port.out.TemaEncarteDomainRepository;
 import com.smartmarket.product.domain.service.ThemeAssetStorageService;
 import org.springframework.stereotype.Service;
 
@@ -35,3 +35,4 @@ public class UploadTemaAssetUseCase {
         return temaAtualizado;
     }
 }
+

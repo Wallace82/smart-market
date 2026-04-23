@@ -1,8 +1,8 @@
 package com.smartmarket.auth.config;
 
-import com.smartmarket.auth.infrastructure.security.AuthEntryPointJwt;
-import com.smartmarket.auth.infrastructure.security.AuthTokenFilter;
-import com.smartmarket.auth.infrastructure.security.UserDetailsServiceImpl;
+import com.smartmarket.auth.infrastructure.adapter.out.security.AuthEntryPointJwt;
+import com.smartmarket.auth.infrastructure.adapter.out.security.AuthTokenFilter;
+import com.smartmarket.auth.infrastructure.adapter.out.security.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -69,3 +69,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

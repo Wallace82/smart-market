@@ -1,7 +1,7 @@
 package com.smartmarket.product.application.usecase;
 
 import com.smartmarket.product.domain.model.EncarteDigital;
-import com.smartmarket.product.domain.repository.EncarteDigitalDomainRepository;
+import com.smartmarket.product.application.port.out.EncarteDigitalDomainRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,3 +29,4 @@ public class ListarEncartesDigitaisUseCase {
         return repository.findBySupermercadoId(supermercadoId);
     }
 }
+

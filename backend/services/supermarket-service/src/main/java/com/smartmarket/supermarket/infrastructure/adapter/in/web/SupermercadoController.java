@@ -1,0 +1,204 @@
+package com.smartmarket.supermarket.infrastructure.adapter.in.web;
+
+import com.smartmarket.supermarket.application.usecase.AlterarStatusSupermercadoUseCase;
+import com.smartmarket.supermarket.application.usecase.CadastrarSupermercadoUseCase;
+import com.smartmarket.supermarket.application.usecase.ListarSupermercadoUseCase;
+import com.smartmarket.supermarket.application.usecase.AtualizarSupermercadoUseCase;
+import com.smartmarket.supermarket.domain.model.Supermercado;
+import com.smartmarket.supermarket.domain.model.SupermercadoStatus;
+import com.smartmarket.supermarket.domain.service.BrandImageStorageService;
+import com.smartmarket.supermarket.application.dto.SupermercadoRequest;
+import com.smartmarket.supermarket.application.dto.SupermercadoResponse;
+import com.smartmarket.supermarket.application.dto.PageMetadata;
+import com.smartmarket.supermarket.application.dto.PagedSupermarketResponse;
+import com.smartmarket.supermarket.application.dto.UpdateSupermarketStatusRequest;
+import com.smartmarket.supermarket.application.dto.CreateSubscriptionRequest;
+import com.smartmarket.supermarket.application.dto.SubscriptionResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/v1/supermercados")
+public class SupermercadoController {
+
+    private final CadastrarSupermercadoUseCase cadastrarSupermercadoUseCase;
+    private final AlterarStatusSupermercadoUseCase alterarStatusSupermercadoUseCase;
+    private final ListarSupermercadoUseCase listarSupermercadoUseCase;
+    private final AtualizarSupermercadoUseCase atualizarSupermercadoUseCase;
+    private final BrandImageStorageService brandImageStorageService;
+
+    public SupermercadoController(CadastrarSupermercadoUseCase cadastrarSupermercadoUseCase,
+                                  AlterarStatusSupermercadoUseCase alterarStatusSupermercadoUseCase,
+                                  ListarSupermercadoUseCase listarSupermercadoUseCase,
+                                  AtualizarSupermercadoUseCase atualizarSupermercadoUseCase,
+                                  BrandImageStorageService brandImageStorageService) {
+        this.cadastrarSupermercadoUseCase = cadastrarSupermercadoUseCase;
+        this.alterarStatusSupermercadoUseCase = alterarStatusSupermercadoUseCase;
+        this.listarSupermercadoUseCase = listarSupermercadoUseCase;
+        this.atualizarSupermercadoUseCase = atualizarSupermercadoUseCase;
+        this.brandImageStorageService = brandImageStorageService;
+    }
+
+    // Helper method to convert Request DTO to Domain Model
+    private Supermercado toDomain(SupermercadoRequest request) {
+        Supermercado supermercado = new Supermercado();
+        supermercado.setNomeFantasia(request.getNomeFantasia());
+        supermercado.setCnpj(request.getCnpj());
+        supermercado.setEndereco(request.getEndereco());
+        supermercado.setLatitude(request.getLatitude());
+        supermercado.setLongitude(request.getLongitude());
+        supermercado.setRaioAtuacao(request.getRaioAtuacao());
+        supermercado.setGestorId(request.getGestorId());
+        supermercado.setUrlLogomarca(request.getUrlLogomarca());
+        supermercado.setCorPrimariaHex(request.getCorPrimariaHex());
+        supermercado.setCorSecundariaHex(request.getCorSecundariaHex());
+        return supermercado;
+    }
+
+    // Helper method to convert Domain Model to Response DTO
+    private SupermercadoResponse fromDomain(Supermercado supermercado) {
+        return new SupermercadoResponse(
+                supermercado.getId(),
+                supermercado.getNomeFantasia(),
+                supermercado.getCnpj(),
+                supermercado.getStatus(),
+                supermercado.getEndereco(),
+                supermercado.getLatitude(),
+                supermercado.getLongitude(),
+                supermercado.getRaioAtuacao(),
+                supermercado.getGestorId(),
+                supermercado.getUrlLogomarca(),
+                supermercado.getCorPrimariaHex(),
+                supermercado.getCorSecundariaHex(),
+                supermercado.getCriadoEm(),
+                supermercado.getAtualizadoEm()
+        );
+    }
+
+    @PostMapping
+    public ResponseEntity<?> cadastrar(@RequestBody SupermercadoRequest request) {
+        try {
+            Supermercado supermercadoToSave = toDomain(request);
+            Supermercado salvo = cadastrarSupermercadoUseCase.execute(supermercadoToSave);
+            return ResponseEntity.status(HttpStatus.CREATED).body(fromDomain(salvo));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> atualizar(@PathVariable UUID id, @RequestBody SupermercadoRequest request) {
+        try {
+            Supermercado supermercadoToUpdate = toDomain(request);
+            Supermercado atualizado = atualizarSupermercadoUseCase.execute(id, supermercadoToUpdate);
+            return ResponseEntity.ok(fromDomain(atualizado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/upload-logomarca")
+    public ResponseEntity<?> uploadLogomarca(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest().body("O arquivo da logomarca não pode ser vazio.");
+            }
+
+            // O método buscarPorId já lança IllegalArgumentException se não encontrado
+            Supermercado supermercadoExistente = listarSupermercadoUseCase.buscarPorId(id);
+
+            // Deleta a logomarca antiga, se existir
+            if (supermercadoExistente.getUrlLogomarca() != null && !supermercadoExistente.getUrlLogomarca().isEmpty()) {
+                brandImageStorageService.delete(supermercadoExistente.getUrlLogomarca());
+            }
+
+            String newLogoUrl = brandImageStorageService.upload(
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType()
+            );
+
+            // Atualiza a URL da logomarca no supermercado
+            supermercadoExistente.setUrlLogomarca(newLogoUrl);
+            Supermercado atualizado = atualizarSupermercadoUseCase.execute(id, supermercadoExistente);
+
+            return ResponseEntity.ok(fromDomain(atualizado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar o arquivo: " + e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao fazer upload da logomarca: " + e.getMessage());
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<PagedSupermarketResponse> listarTodos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        List<Supermercado> supermercados = listarSupermercadoUseCase.buscarTodos(page, size);
+        List<SupermercadoResponse> responses = supermercados.stream()
+                .map(this::fromDomain)
+                .collect(Collectors.toList());
+        
+        PageMetadata pageMetadata = new PageMetadata(page, size, responses.size(), 1);
+        PagedSupermarketResponse pagedResponse = new PagedSupermarketResponse(responses, pageMetadata);
+        
+        return ResponseEntity.ok(pagedResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarPorId(@PathVariable UUID id) {
+        try {
+            // O método buscarPorId já lança IllegalArgumentException se não encontrado
+            Supermercado supermercado = listarSupermercadoUseCase.buscarPorId(id);
+            return ResponseEntity.ok(fromDomain(supermercado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/gestor/{gestorId}")
+    public ResponseEntity<List<SupermercadoResponse>> buscarPorGestor(@PathVariable UUID gestorId) {
+        List<Supermercado> supermercados = listarSupermercadoUseCase.buscarPorGestorId(gestorId);
+        List<SupermercadoResponse> responses = supermercados.stream()
+                .map(this::fromDomain)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> alterarStatus(@PathVariable UUID id, @RequestBody UpdateSupermarketStatusRequest statusRequest) {
+        try {
+            Supermercado atualizado = alterarStatusSupermercadoUseCase.execute(id, statusRequest.getStatus());
+            return ResponseEntity.ok(fromDomain(atualizado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/subscriptions")
+    public ResponseEntity<SubscriptionResponse> criarAssinatura(@PathVariable UUID id, @RequestBody CreateSubscriptionRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            new SubscriptionResponse(UUID.randomUUID(), id, request.getPlanId(), "ATIVA", 
+                                     request.getStartAt(), request.getEndAt(), request.getAutoRenew())
+        );
+    }
+
+    @GetMapping("/{id}/subscriptions/current")
+    public ResponseEntity<SubscriptionResponse> obterAssinaturaVigente(@PathVariable UUID id) {
+        return ResponseEntity.ok(
+            new SubscriptionResponse(UUID.randomUUID(), id, UUID.randomUUID(), "ATIVA", 
+                                     java.time.LocalDateTime.now().minusDays(10), 
+                                     java.time.LocalDateTime.now().plusDays(20), true)
+        );
+    }
+}
+

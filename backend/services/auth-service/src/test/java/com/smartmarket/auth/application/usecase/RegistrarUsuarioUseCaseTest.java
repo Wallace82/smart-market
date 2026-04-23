@@ -4,8 +4,8 @@ import com.smartmarket.auth.application.dto.RegistroUsuarioRequestDTO;
 import com.smartmarket.auth.domain.model.Papel;
 import com.smartmarket.auth.domain.model.PapelNome;
 import com.smartmarket.auth.domain.model.Usuario;
-import com.smartmarket.auth.domain.repository.PapelDomainRepository;
-import com.smartmarket.auth.domain.repository.UsuarioDomainRepository;
+import com.smartmarket.auth.application.port.out.PapelDomainRepository;
+import com.smartmarket.auth.application.port.out.UsuarioDomainRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +46,7 @@ class RegistrarUsuarioUseCaseTest {
         when(usuarioRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(request.getSenha())).thenReturn("encodedPassword");
         
-        Papel papel = new Papel(null, PapelNome.ROLE_GESTOR);
+        Papel papel = new Papel(null, PapelNome.ROLE_GESTOR, "Gestor");
         when(papelRepository.findByNome(PapelNome.ROLE_GESTOR)).thenReturn(Optional.of(papel));
 
         // Act
@@ -73,3 +73,4 @@ class RegistrarUsuarioUseCaseTest {
         verify(usuarioRepository, never()).save(any());
     }
 }
+

@@ -3,9 +3,9 @@ package com.smartmarket.auth.application.usecase;
 import com.smartmarket.auth.application.dto.AuthTokenResponseDTO;
 import com.smartmarket.auth.application.dto.LoginRequestDTO;
 import com.smartmarket.auth.domain.model.Usuario;
-import com.smartmarket.auth.domain.repository.UsuarioDomainRepository;
-import com.smartmarket.auth.infrastructure.security.JwtUtils;
-import com.smartmarket.auth.infrastructure.security.UserDetailsImpl;
+import com.smartmarket.auth.application.port.out.UsuarioDomainRepository;
+import com.smartmarket.auth.infrastructure.adapter.out.security.JwtUtils;
+import com.smartmarket.auth.infrastructure.adapter.out.security.UserDetailsImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +62,8 @@ class LoginUseCaseTest {
         UserDetailsImpl userDetails = new UserDetailsImpl(
                 usuario.getId(),
                 usuario.getEmail(),
-                usuario.getSenha(),
+                usuario.getSenhaHash(),
+                usuario.getStatus(),
                 Collections.singletonList(authority)
         );
 
@@ -105,3 +106,4 @@ class LoginUseCaseTest {
         verifyNoInteractions(jwtUtils, usuarioRepository);
     }
 }
+

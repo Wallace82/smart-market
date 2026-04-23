@@ -1,7 +1,7 @@
 package com.smartmarket.supermarket.application.usecase;
 
 import com.smartmarket.supermarket.domain.model.Supermercado;
-import com.smartmarket.supermarket.domain.repository.SupermercadoDomainRepository;
+import com.smartmarket.supermarket.application.port.out.SupermercadoDomainRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -86,3 +86,4 @@ class ListarSupermercadoUseCaseTest {
         assertThat(result.get(0).getGestorId()).isEqualTo(gestorId);
     }
 }
+

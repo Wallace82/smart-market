@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
 
 export interface MockSupermarket {
@@ -34,6 +34,9 @@ export interface MockFlyer {
 })
 export class PublicCatalogMockService {
 
+  public userSelectedAddress = signal<string | null>(null);
+  public userSelectedRadius = signal<number>(3); // Default 3km
+
   private mockSupermarkets: MockSupermarket[] = [
     { id: '1', name: 'Supermercado Central', distanceKm: 0.8, logoUrl: 'https://ui-avatars.com/api/?name=SC&background=16a34a&color=fff&size=128', primaryColor: '#16a34a' },
     { id: '2', name: 'Mercado da Praça', distanceKm: 1.5, logoUrl: 'https://ui-avatars.com/api/?name=MP&background=0284c7&color=fff&size=128', primaryColor: '#0284c7' },
@@ -67,7 +70,8 @@ export class PublicCatalogMockService {
   ];
 
   getNearbySupermarkets(lat: number, lng: number): Observable<MockSupermarket[]> {
-    const nearby = this.mockSupermarkets.filter(s => s.distanceKm <= 3.0);
+    const radius = this.userSelectedRadius();
+    const nearby = this.mockSupermarkets.filter(s => s.distanceKm <= radius);
     return of(nearby).pipe(delay(800)); // Simula latência de 800ms
   }
 

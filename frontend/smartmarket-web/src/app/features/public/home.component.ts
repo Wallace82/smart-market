@@ -26,6 +26,7 @@ export class HomeComponent implements OnInit {
   isLoading = signal<boolean>(true);
   locationGranted = signal<boolean>(false);
   userAddress = signal<string>('Buscando seu endereço...');
+  userRadius = this.catalogService.userSelectedRadius;
 
   // Sinais de Dados
   offers = signal<MockOffer[]>([]);
@@ -42,9 +43,15 @@ export class HomeComponent implements OnInit {
       const loc = await this.catalogService.requestUserLocation();
       this.locationGranted.set(true);
 
-      // Busca o endereço real por extenso (Reverse Geocoding)
-      const address = await this.catalogService.getAddressFromCoordinates(loc.lat, loc.lng);
-      this.userAddress.set(address);
+      // Check if user set a custom address, otherwise use geolocation
+      const customAddress = this.catalogService.userSelectedAddress();
+      if (customAddress) {
+        this.userAddress.set(customAddress);
+      } else {
+        // Busca o endereço real por extenso (Reverse Geocoding)
+        const address = await this.catalogService.getAddressFromCoordinates(loc.lat, loc.lng);
+        this.userAddress.set(address);
+      }
 
       this.catalogService.getTrendingOffersNearby().subscribe(data => this.offers.set(data));
       this.catalogService.getActiveFlyersNearby().subscribe(data => this.flyers.set(data));

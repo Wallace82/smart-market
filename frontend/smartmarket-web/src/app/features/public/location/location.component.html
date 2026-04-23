@@ -1,0 +1,84 @@
+<div class="bg-gray-50 min-h-screen py-12 px-6">
+  <div class="max-w-md mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8 cursor-pointer text-gray-500 hover:text-gray-900 transition-colors w-fit" routerLink="/">
+      <mat-icon>arrow_back</mat-icon>
+      <span class="font-medium">Voltar para Home</span>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-green-600 to-green-500 p-8 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-white/10 blur-2xl rounded-full"></div>
+        <mat-icon class="!text-white !w-16 !h-16 !text-[64px] mb-4 relative z-10 drop-shadow-md">location_on</mat-icon>
+        <h1 class="text-3xl font-extrabold text-white mb-2 relative z-10 tracking-tight">Onde você está?</h1>
+        <p class="text-green-50 font-medium relative z-10">
+          Encontre os melhores supermercados e ofertas pertinho de você.
+        </p>
+      </div>
+
+      <div class="p-8">
+        <!-- Busca de CEP -->
+        <div class="mb-6">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Qual o seu CEP?</label>
+          <div class="flex gap-3">
+            <input 
+              type="text" 
+              [(ngModel)]="cep" 
+              (keyup.enter)="searchCep()"
+              placeholder="00000-000" 
+              maxlength="9"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-xl focus:ring-green-500 focus:border-green-500 block w-full p-4 transition-all">
+            <button 
+              mat-flat-button 
+              class="!bg-green-600 hover:!bg-green-700 !text-white !rounded-xl !px-6 !h-[60px] shadow-sm transition-all"
+              (click)="searchCep()"
+              [disabled]="isLoading()">
+              @if (isLoading()) {
+                <mat-spinner diameter="24" class="!text-white"></mat-spinner>
+              } @else {
+                <mat-icon>search</mat-icon>
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Raio de Busca -->
+        <div class="mb-6">
+          <label class="block text-sm font-bold text-gray-700 mb-2">Raio de Busca (KM)</label>
+          <select 
+            [(ngModel)]="radius" 
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-xl focus:ring-green-500 focus:border-green-500 block w-full p-4 transition-all">
+            <option [ngValue]="1">1 KM (Apenas a pé)</option>
+            <option [ngValue]="3">3 KM (Bairro)</option>
+            <option [ngValue]="5">5 KM (Região)</option>
+            <option [ngValue]="10">10 KM (Longo alcance)</option>
+          </select>
+        </div>
+
+        <!-- Resultado do Endereço -->
+        @if (address()) {
+          <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-8 animate-fade-in-up">
+            <p class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Endereço Encontrado</p>
+            <p class="text-gray-900 font-bold text-lg leading-tight">{{ address()?.logradouro }}</p>
+            <p class="text-gray-600">{{ address()?.bairro }} - {{ address()?.localidade }}/{{ address()?.uf }}</p>
+          </div>
+        }
+
+        <!-- Botão Salvar -->
+        <button 
+          mat-flat-button 
+          class="w-full !bg-orange-500 hover:!bg-orange-600 !text-white !rounded-xl !py-6 !text-lg font-bold shadow-lg transition-all"
+          [disabled]="!address() || isSaving()"
+          (click)="saveLocation()">
+          @if (isSaving()) {
+            <mat-spinner diameter="24" class="!text-white mx-auto"></mat-spinner>
+          } @else {
+            <mat-icon class="mr-2">check_circle</mat-icon> Confirmar Endereço
+          }
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -12,6 +12,11 @@ export const routes: Routes = [
     title: 'SmartMarket - Ofertas Perto de Você',
   },
   {
+    path: 'location',
+    title: 'SmartMarket - Alterar Localização',
+    loadComponent: () => import('./features/public/location/location.component').then(m => m.LocationComponent)
+  },
+  {
     path: 'flyers',
     title: 'SmartMarket - Todos os Encartes',
     loadComponent: () => import('./features/public/flyers/flyer-list.component').then(m => m.FlyerListComponent)

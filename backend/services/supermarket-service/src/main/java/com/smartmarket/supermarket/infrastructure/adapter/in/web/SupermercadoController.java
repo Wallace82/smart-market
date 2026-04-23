@@ -94,7 +94,7 @@ public class SupermercadoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable UUID id, @RequestBody SupermercadoRequest request) {
+    public ResponseEntity<?> atualizar(@PathVariable("id") UUID id, @RequestBody SupermercadoRequest request) {
         try {
             Supermercado supermercadoToUpdate = toDomain(request);
             Supermercado atualizado = atualizarSupermercadoUseCase.execute(id, supermercadoToUpdate);
@@ -105,7 +105,7 @@ public class SupermercadoController {
     }
 
     @PostMapping("/{id}/upload-logomarca")
-    public ResponseEntity<?> uploadLogomarca(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadLogomarca(@PathVariable("id") UUID id, @RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("O arquivo da logomarca não pode ser vazio.");
@@ -141,8 +141,8 @@ public class SupermercadoController {
 
     @GetMapping
     public ResponseEntity<PagedSupermarketResponse> listarTodos(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
         List<Supermercado> supermercados = listarSupermercadoUseCase.buscarTodos(page, size);
         List<SupermercadoResponse> responses = supermercados.stream()
                 .map(this::fromDomain)
@@ -155,7 +155,7 @@ public class SupermercadoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarPorId(@PathVariable UUID id) {
+    public ResponseEntity<?> buscarPorId(@PathVariable("id") UUID id) {
         try {
             // O método buscarPorId já lança IllegalArgumentException se não encontrado
             Supermercado supermercado = listarSupermercadoUseCase.buscarPorId(id);
@@ -166,7 +166,7 @@ public class SupermercadoController {
     }
 
     @GetMapping("/gestor/{gestorId}")
-    public ResponseEntity<List<SupermercadoResponse>> buscarPorGestor(@PathVariable UUID gestorId) {
+    public ResponseEntity<List<SupermercadoResponse>> buscarPorGestor(@PathVariable("gestorId") UUID gestorId) {
         List<Supermercado> supermercados = listarSupermercadoUseCase.buscarPorGestorId(gestorId);
         List<SupermercadoResponse> responses = supermercados.stream()
                 .map(this::fromDomain)
@@ -175,7 +175,7 @@ public class SupermercadoController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> alterarStatus(@PathVariable UUID id, @RequestBody UpdateSupermarketStatusRequest statusRequest) {
+    public ResponseEntity<?> alterarStatus(@PathVariable("id") UUID id, @RequestBody UpdateSupermarketStatusRequest statusRequest) {
         try {
             Supermercado atualizado = alterarStatusSupermercadoUseCase.execute(id, statusRequest.getStatus());
             return ResponseEntity.ok(fromDomain(atualizado));
@@ -185,7 +185,7 @@ public class SupermercadoController {
     }
 
     @PostMapping("/{id}/subscriptions")
-    public ResponseEntity<SubscriptionResponse> criarAssinatura(@PathVariable UUID id, @RequestBody CreateSubscriptionRequest request) {
+    public ResponseEntity<SubscriptionResponse> criarAssinatura(@PathVariable("id") UUID id, @RequestBody CreateSubscriptionRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             new SubscriptionResponse(UUID.randomUUID(), id, request.getPlanId(), "ATIVA", 
                                      request.getStartAt(), request.getEndAt(), request.getAutoRenew())
@@ -193,7 +193,7 @@ public class SupermercadoController {
     }
 
     @GetMapping("/{id}/subscriptions/current")
-    public ResponseEntity<SubscriptionResponse> obterAssinaturaVigente(@PathVariable UUID id) {
+    public ResponseEntity<SubscriptionResponse> obterAssinaturaVigente(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(
             new SubscriptionResponse(UUID.randomUUID(), id, UUID.randomUUID(), "ATIVA", 
                                      java.time.LocalDateTime.now().minusDays(10), 

@@ -4,23 +4,76 @@ import com.smartmarket.product.domain.model.EncarteDigital;
 import com.smartmarket.product.domain.model.EncarteItem;
 import com.smartmarket.product.infrastructure.adapter.out.persistence.EncarteDigitalEntity;
 import com.smartmarket.product.infrastructure.adapter.out.persistence.EncarteItemEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface EncarteDigitalMapper {
+import java.util.stream.Collectors;
 
-    @Mapping(target = "itens", source = "itens")
-    EncarteDigitalEntity toEntity(EncarteDigital domain);
+@Component
+public class EncarteDigitalMapper {
 
-    @Mapping(target = "itens", source = "itens")
-    EncarteDigital toDomain(EncarteDigitalEntity entity);
+    public EncarteDigitalEntity toEntity(EncarteDigital domain) {
+        if (domain == null) return null;
+        EncarteDigitalEntity entity = new EncarteDigitalEntity();
+        entity.setId(domain.getId());
+        entity.setSupermercadoId(domain.getSupermercadoId());
+        entity.setTemaId(domain.getTemaId());
+        entity.setTitulo(domain.getTitulo());
+        entity.setDataInicio(domain.getDataInicio());
+        entity.setDataFim(domain.getDataFim());
+        entity.setStatus(domain.getStatus());
+        entity.setCriadoEm(domain.getCriadoEm());
+        entity.setAtualizadoEm(domain.getAtualizadoEm());
 
-    @Mapping(target = "encarteDigital", ignore = true)
-    EncarteItemEntity toItemEntity(EncarteItem domain);
+        if (domain.getItens() != null) {
+            entity.setItens(domain.getItens().stream().map(this::toItemEntity).collect(Collectors.toList()));
+            entity.getItens().forEach(item -> item.setEncarteDigital(entity));
+        }
 
-    @Mapping(target = "encarteId", source = "encarteDigital.id")
-    EncarteItem toItemDomain(EncarteItemEntity entity);
+        return entity;
+    }
+
+    public EncarteDigital toDomain(EncarteDigitalEntity entity) {
+        if (entity == null) return null;
+        EncarteDigital domain = new EncarteDigital();
+        domain.setId(entity.getId());
+        domain.setSupermercadoId(entity.getSupermercadoId());
+        domain.setTemaId(entity.getTemaId());
+        domain.setTitulo(entity.getTitulo());
+        domain.setDataInicio(entity.getDataInicio());
+        domain.setDataFim(entity.getDataFim());
+        domain.setStatus(entity.getStatus());
+        domain.setCriadoEm(entity.getCriadoEm());
+        domain.setAtualizadoEm(entity.getAtualizadoEm());
+
+        if (entity.getItens() != null) {
+            domain.setItens(entity.getItens().stream().map(this::toItemDomain).collect(Collectors.toList()));
+        }
+
+        return domain;
+    }
+
+    public EncarteItemEntity toItemEntity(EncarteItem domain) {
+        if (domain == null) return null;
+        EncarteItemEntity entity = new EncarteItemEntity();
+        entity.setId(domain.getId());
+        entity.setOfertaId(domain.getOfertaId());
+        entity.setOrdemExibicao(domain.getOrdemExibicao());
+        entity.setDestaque(domain.isDestaque());
+        // encarteDigital is set in toEntity
+        return entity;
+    }
+
+    public EncarteItem toItemDomain(EncarteItemEntity entity) {
+        if (entity == null) return null;
+        EncarteItem domain = new EncarteItem();
+        domain.setId(entity.getId());
+        if (entity.getEncarteDigital() != null) {
+            domain.setEncarteId(entity.getEncarteDigital().getId());
+        }
+        domain.setOfertaId(entity.getOfertaId());
+        domain.setOrdemExibicao(entity.getOrdemExibicao());
+        domain.setDestaque(entity.isDestaque());
+        return domain;
+    }
 }
 

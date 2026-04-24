@@ -15,7 +15,9 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  token: string;
+  accessToken: string;
+  refreshToken?: string;
+  expiresIn?: number;
 }
 
 @Injectable({
@@ -34,18 +36,18 @@ export class AuthService {
   }
 
   login(credentials: LoginCredentials): Observable<LoginResponse> {
-    // Adapta o payload para o formato que o backend atual espera (usando 'senha')
+    // Adapta o payload para o formato que o backend atual espera (usando 'password')
     const payload = {
       email: credentials.email,
-      senha: credentials.password
+      password: credentials.password
     };
 
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, payload).pipe(
       tap(response => {
         console.log('Resposta do servidor:', response);
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-          this.decodificarToken(response.token);
+        if (response.accessToken) {
+          localStorage.setItem('token', response.accessToken);
+          this.decodificarToken(response.accessToken);
         }
       })
     );
@@ -80,8 +82,8 @@ export class AuthService {
       // Em produção, usar uma lib como jwt-decode
       const payload = JSON.parse(atob(token.split('.')[1]));
       this._user.set({
-        id: payload.userId || payload.sub,
-        email: payload.email,
+        id: payload.id || payload.userId || payload.sub,
+        email: payload.sub || payload.email,
         roles: payload.roles || []
       });
     } catch (e) {

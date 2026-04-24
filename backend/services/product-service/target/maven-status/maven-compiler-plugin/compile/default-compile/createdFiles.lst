@@ -23,7 +23,6 @@ com\smartmarket\product\application\usecase\UploadTemaAssetUseCase.class
 com\smartmarket\product\infrastructure\adapter\in\web\EncarteDigitalController.class
 com\smartmarket\product\application\port\in\CriarEncarteDigitalPort.class
 com\smartmarket\product\application\dto\EncarteItemRequest.class
-com\smartmarket\product\infrastructure\adapter\in\web\mapper\EncarteDigitalWebMapperImpl.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\mapper\EncarteDigitalMapper.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\EncarteDigitalRepositoryAdapter.class
 com\smartmarket\product\domain\service\ThemeAssetStorageService.class
@@ -41,7 +40,6 @@ com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\TemaEncar
 com\smartmarket\product\application\dto\TemaEncarteResponse.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\OfertaSupermercadoEntity.class
 com\smartmarket\product\application\port\out\TemaEncarteDomainRepository.class
-com\smartmarket\product\infrastructure\adapter\out\persistence\mapper\EncarteDigitalMapperImpl.class
 com\smartmarket\product\infrastructure\config\SecurityConfig.class
 com\smartmarket\product\application\usecase\CadastrarProdutoBaseUseCase.class
 com\smartmarket\product\application\usecase\ListarProdutoBaseUseCase.class

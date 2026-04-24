@@ -13,9 +13,9 @@ ON CONFLICT (nome) DO NOTHING;
 
 -- 1.2 Inserir Usuários (Senha padrão para todos: "password")
 INSERT INTO auth.usuarios (id, nome, email, senha_hash, status, criado_em)
-VALUES ('11111111-1111-1111-1111-111111111111', 'Gestor Modelo', 'gestor@smartmarket.com', '$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W', 'ATIVO', now()),
-       ('11111111-1111-1111-1111-111111111112', 'Admin Plataforma', 'admin@smartmarket.com', '$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W', 'ATIVO', now()),
-       ('11111111-1111-1111-1111-111111111113', 'Cliente Exemplo', 'cliente@smartmarket.com', '$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W', 'ATIVO', now())
+VALUES ('11111111-1111-1111-1111-111111111111', 'Gestor Modelo', 'gestor@smartmarket.com', '$2a$10$Y50UaMFOxteibQEYfV30hOx886sh6DCHvT7G4I2AoxjF6FqG2v.eC', 'ATIVO', now()),
+       ('11111111-1111-1111-1111-111111111112', 'Admin Plataforma', 'admin@smartmarket.com', '$2a$10$Y50UaMFOxteibQEYfV30hOx886sh6DCHvT7G4I2AoxjF6FqG2v.eC', 'ATIVO', now()),
+       ('11111111-1111-1111-1111-111111111113', 'Cliente Exemplo', 'cliente@smartmarket.com', '$2a$10$Y50UaMFOxteibQEYfV30hOx886sh6DCHvT7G4I2AoxjF6FqG2v.eC', 'ATIVO', now())
 ON CONFLICT (email) DO UPDATE SET senha_hash = EXCLUDED.senha_hash;
 
 -- 1.3 Vincular Usuários aos Papeis correspondentes

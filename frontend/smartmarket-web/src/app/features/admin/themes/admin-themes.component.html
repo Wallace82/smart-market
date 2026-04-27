@@ -2,11 +2,78 @@
   <div class="flex justify-between items-center mb-8">
     <div>
       <h1 class="text-3xl font-black text-gray-900 tracking-tight">Temas Sazonais</h1>
-      <p class="text-gray-500">Configuração visual da plataforma para datas comemorativas (Mock).</p>
+      <p class="text-gray-500">Controle da identidade visual dos encartes para datas comemorativas.</p>
+    </div>
+    <div class="flex gap-3">
+      <button class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] text-white font-bold px-4 py-2 rounded-md transition-colors flex items-center gap-2 shadow-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Criar Tema
+      </button>
     </div>
   </div>
-  <div class="bg-white p-12 text-center rounded-xl border border-gray-200">
-    <h2 class="text-xl font-bold text-gray-400">Em Breve</h2>
-    <p class="text-gray-500 mt-2">Esta funcionalidade está sendo desenvolvida.</p>
+
+  <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let theme of themes" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col transition-transform hover:-translate-y-1">
+      
+      <!-- Cabeçalho do Card com as cores do tema -->
+      <div class="h-24 p-4 relative" [style.backgroundColor]="theme.secondaryColor" [style.borderTop]="'4px solid ' + theme.primaryColor">
+        <div class="absolute top-4 right-4">
+          <span *ngIf="theme.status === 'active'" class="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase shadow-sm border border-green-200">Ativo</span>
+          <span *ngIf="theme.status === 'scheduled'" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase shadow-sm border border-blue-200">Agendado</span>
+          <span *ngIf="theme.status === 'draft'" class="bg-gray-200 text-gray-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase shadow-sm border border-gray-300">Rascunho</span>
+          <span *ngIf="theme.status === 'archived'" class="bg-gray-100 text-gray-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase shadow-sm border border-gray-200">Arquivado</span>
+        </div>
+        <!-- Ícone circular com a cor primária -->
+        <div class="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-md absolute -bottom-7 left-6 border-4 border-white" [style.backgroundColor]="theme.primaryColor">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+        </div>
+      </div>
+
+      <!-- Corpo do Card -->
+      <div class="p-6 pt-10 flex-1 flex flex-col">
+        <h3 class="text-xl font-bold text-gray-900 mb-1">{{ theme.name }}</h3>
+        <p class="text-sm font-medium text-[color:var(--color-primary)] mb-4">{{ theme.event }}</p>
+        
+        <div class="space-y-3 mb-6 flex-1">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Início
+            </span>
+            <span class="font-medium text-gray-900">{{ theme.startDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500 flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Término
+            </span>
+            <span class="font-medium text-gray-900">{{ theme.endDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
+            <span class="text-gray-500 flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              Uso em Lojas
+            </span>
+            <span class="font-bold text-gray-900">{{ theme.supermarketCount }}</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2 mt-auto pt-4 border-t border-gray-100">
+          <button [routerLink]="['/admin/themes', theme.id, 'edit']" class="flex-1 bg-white border border-gray-300 text-gray-700 font-medium py-2 rounded hover:bg-gray-50 transition-colors text-sm">Editar Layout</button>
+          <button class="px-3 bg-white border border-gray-300 text-gray-400 hover:text-[color:var(--color-primary)] rounded transition-colors" title="Mais opções">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add New Theme Card Placeholder -->
+    <div class="bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:bg-gray-100 hover:border-[color:var(--color-primary)] transition-colors min-h-[350px] group">
+      <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm mb-4 group-hover:text-[color:var(--color-primary)] transition-colors">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      </div>
+      <h3 class="text-lg font-bold text-gray-900 group-hover:text-[color:var(--color-primary)] transition-colors">Novo Tema</h3>
+      <p class="text-sm text-gray-500 mt-2 max-w-[200px]">Crie um pacote visual customizado para o próximo grande evento do ano.</p>
+    </div>
   </div>
 </div>

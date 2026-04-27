@@ -37,5 +37,9 @@ export const ADMIN_ROUTES: Routes = [
   {
     path: 'themes',
     loadComponent: () => import('./themes/admin-themes.component').then(m => m.AdminThemesComponent)
+  },
+  {
+    path: 'themes/:id/edit',
+    loadComponent: () => import('./themes/editor/theme-editor.component').then(m => m.ThemeEditorComponent)
   }
 ];

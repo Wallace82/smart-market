@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -24,7 +25,8 @@ export interface Flyer {
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
-    MatTooltipModule
+    MatTooltipModule,
+    RouterModule
   ],
   templateUrl: './flyer-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

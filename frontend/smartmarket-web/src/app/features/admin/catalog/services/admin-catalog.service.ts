@@ -79,6 +79,6 @@ export class AdminCatalogService {
         status: 'active',
         usageCount: 950
       }
-    ]).pipe(delay(600));
+    ]);
   }
 }

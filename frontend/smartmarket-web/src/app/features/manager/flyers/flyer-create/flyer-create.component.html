@@ -1,131 +1,153 @@
-<div class="flex flex-col lg:flex-row gap-8 p-6">
-  <!-- Formulário de Criação do Encarte -->
-  <div class="flex-1 space-y-6">
-    <mat-card class="p-6 shadow-lg rounded-lg">
-      <mat-card-title class="text-2xl font-bold mb-6 text-gray-800">Criar Novo Encarte Digital</mat-card-title>
-      <mat-card-content>
-        <form [formGroup]="form" (ngSubmit)="salvar()" class="space-y-6">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Título do Encarte</mat-label>
-            <input matInput formControlName="titulo" placeholder="Ex: Ofertas de Natal">
-            <mat-error *ngIf="form.get('titulo')?.invalid && form.get('titulo')?.touched">
-              Título é obrigatório.
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Tema Sazonal</mat-label>
-            <mat-select formControlName="temaId">
-              <mat-option [value]="null">Nenhum Tema (Padrão)</mat-option>
-              <mat-option *ngFor="let tema of temas()" [value]="tema.id">
-                {{ tema.nome }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Data de Início</mat-label>
-              <input matInput [matDatepicker]="pickerInicio" formControlName="dataInicio">
-              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
-              <mat-datepicker #pickerInicio></mat-datepicker>
-              <mat-error *ngIf="form.get('dataInicio')?.invalid && form.get('dataInicio')?.touched">
-                Data de Início é obrigatória.
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label>Data de Fim</mat-label>
-              <input matInput [matDatepicker]="pickerFim" formControlName="dataFim">
-              <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
-              <mat-datepicker #pickerFim></mat-datepicker>
-              <mat-error *ngIf="form.get('dataFim')?.invalid && form.get('dataFim')?.touched">
-                Data de Fim é obrigatória.
-              </mat-error>
-            </mat-form-field>
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Seleção de Ofertas -->
-    <mat-card class="p-6 shadow-lg rounded-lg">
-      <mat-card-title class="text-xl font-bold mb-4 text-gray-800">Selecionar Ofertas</mat-card-title>
-      <mat-card-content>
-        <div class="max-h-96 overflow-y-auto border rounded-md p-2">
-          <mat-list>
-            <mat-list-item *ngFor="let oferta of ofertasDisponiveis()" class="border-b last:border-b-0 hover:bg-gray-50 transition">
-              <div class="flex items-center w-full">
-                <mat-checkbox (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="mr-4"></mat-checkbox>
-                <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="h-10 w-10 object-cover rounded-md mr-4 shadow-sm">
-                <div class="flex-grow">
-                  <h4 class="font-medium text-gray-800">{{ oferta.nomeProduto }}</h4>
-                  <p class="text-sm text-gray-600">Preço: {{ oferta.preco | currency:'BRL' }} / {{ oferta.unidadeMedida }}</p>
-                </div>
-              </div>
-            </mat-list-item>
-          </mat-list>
-          <div *ngIf="ofertasDisponiveis().length === 0" class="text-center text-gray-500 py-4">
-            Nenhuma oferta disponível para seleção.
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <div class="flex justify-end mt-6">
-      <button mat-flat-button color="primary" type="button" (click)="salvar()" [disabled]="form.invalid || loading() || ofertasSelecionadas().length === 0" class="px-8 py-3 text-lg">
-        <mat-icon *ngIf="loading()" class="animate-spin">loop</mat-icon>
-        {{ loading() ? 'Criando Encarte...' : 'Publicar Encarte' }}
-      </button>
+<div class="p-6 max-w-7xl mx-auto font-sans">
+  <div class="flex items-center gap-4 mb-8">
+    <button routerLink="/manager/flyers" class="w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Novo Encarte Digital</h1>
+      <p class="text-gray-500 mt-1">Configure o tabloide, selecione ofertas e veja o preview em tempo real.</p>
     </div>
   </div>
 
-  <!-- Preview do Encarte -->
-  <div class="lg:w-96 flex-shrink-0">
-    <mat-card class="p-6 shadow-lg rounded-lg sticky top-6">
-      <mat-card-title class="text-xl font-bold mb-6 text-gray-800 text-center">Prévia do Encarte</mat-card-title>
-      <mat-card-content>
-        <div class="w-full min-h-[500px] border rounded-lg overflow-hidden flex flex-col shadow-inner" [ngStyle]="previewStyle">
-          <!-- Header da Prévia (Logo e Cores) -->
-          <div class="p-4 flex flex-col items-center justify-center text-center shadow-md"
-               [style.background-color]="supermarket()?.corPrimariaHex || '#f0f0f0'"
-               [style.color]="supermarket()?.corSecundariaHex || '#333'">
-            <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="max-h-16 object-contain mb-2">
-            <h2 class="text-lg font-bold uppercase tracking-wider">{{ form.get('titulo')?.value || 'Novo Encarte' }}</h2>
-          </div>
-
-          <!-- Conteúdo da Prévia (Ofertas) -->
-          <div class="flex-1 p-4 overflow-y-auto space-y-4">
-            <div class="text-center text-xs font-medium uppercase text-gray-600 mb-4 bg-white/70 py-1 rounded-full">
-              Válido: {{ form.get('dataInicio')?.value | date:'shortDate' }} - {{ form.get('dataFim')?.value | date:'shortDate' }}
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Esquerda: Formulário -->
+    <div class="flex-1 space-y-6">
+      <form [formGroup]="form" class="space-y-6">
+        
+        <!-- Configurações Básicas -->
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+          <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <mat-icon class="text-gray-400">settings</mat-icon>
+            Configurações Básicas
+          </h2>
+          
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">Título do Encarte</label>
+              <input type="text" formControlName="titulo" placeholder="Ex: Ofertas de Natal" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow">
             </div>
 
-            <div *ngFor="let oferta of ofertasSelecionadas()" class="bg-white p-3 rounded-lg shadow-sm border-l-4"
-                 [style.border-color]="supermarket()?.corPrimariaHex || '#ccc'">
-              <div class="flex gap-3">
-                <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="h-12 w-12 object-cover rounded shadow-sm">
-                <div class="flex-grow">
-                  <h4 class="text-sm font-bold text-gray-800 leading-tight">{{ oferta.nomeProduto }}</h4>
-                  <div class="flex items-baseline gap-1 mt-1">
-                    <span class="text-xs text-gray-500">R$</span>
-                    <span class="text-lg font-black text-red-600 leading-none">{{ oferta.preco | number:'1.2-2' }}</span>
-                    <span class="text-[10px] text-gray-400 uppercase">/ {{ oferta.unidadeMedida }}</span>
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-1">Tema Sazonal</label>
+              <select formControlName="temaId" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow bg-white">
+                <option [value]="null">Nenhum Tema (Padrão)</option>
+                <option *ngFor="let tema of temas()" [value]="tema.id">{{ tema.nome }}</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Data de Início</label>
+                <input type="date" formControlName="dataInicio" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Data de Fim</label>
+                <input type="date" formControlName="dataFim" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seleção de Ofertas -->
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <mat-icon class="text-gray-400">local_offer</mat-icon>
+              Selecionar Ofertas
+            </h2>
+            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">
+              {{ ofertasSelecionadas().length }} selecionadas
+            </span>
+          </div>
+
+          <div class="max-h-[400px] overflow-y-auto pr-2 space-y-3">
+            <div *ngIf="ofertasDisponiveis().length === 0" class="text-center py-10 border-2 border-dashed border-gray-200 rounded-xl">
+              <mat-icon class="text-gray-400 text-4xl mb-2">inventory_2</mat-icon>
+              <p class="text-gray-500 font-medium">Nenhuma oferta disponível na sua loja.</p>
+            </div>
+
+            <label *ngFor="let oferta of ofertasDisponiveis()" class="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors" [class.border-green-500]="ofertasSelecionadas().includes(oferta)" [class.bg-green-50]="ofertasSelecionadas().includes(oferta)">
+              <input type="checkbox" (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500">
+              
+              <div class="ml-4 flex items-center gap-4 flex-1">
+                <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="w-12 h-12 rounded object-cover border border-gray-200 bg-white">
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 leading-tight">{{ oferta.nomeProduto }}</h4>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-sm font-black text-red-600">{{ oferta.preco | currency:'BRL' }}</span>
+                    <span class="text-xs text-gray-500 uppercase font-medium">/ {{ oferta.unidadeMedida }}</span>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div *ngIf="ofertasSelecionadas().length === 0" class="text-center text-gray-400 py-12 px-6 bg-white/50 rounded-lg border-2 border-dashed">
-              Selecione ofertas para ver o preview aqui.
-            </div>
-          </div>
-
-          <!-- Footer da Prévia -->
-          <div class="p-2 text-[10px] text-center bg-black/5 backdrop-blur-sm text-gray-600">
-            Powered by SmartMarket
+            </label>
           </div>
         </div>
-      </mat-card-content>
-    </mat-card>
+
+        <!-- Botão Salvar -->
+        <div class="flex justify-end pt-4">
+          <button type="button" (click)="salvar()" [disabled]="form.invalid || loading() || ofertasSelecionadas().length === 0" 
+                  class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-xl shadow-sm transition-colors text-lg flex items-center gap-2">
+            <mat-icon *ngIf="loading()" class="animate-spin">loop</mat-icon>
+            <mat-icon *ngIf="!loading()">publish</mat-icon>
+            {{ loading() ? 'Processando...' : 'Publicar Encarte' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Direita: Preview Live -->
+    <div class="lg:w-[400px] flex-shrink-0">
+      <div class="sticky top-6">
+        <div class="bg-gray-100 rounded-[2.5rem] p-4 shadow-2xl border-8 border-gray-900 relative h-[700px] flex flex-col">
+          
+          <!-- Notch Fake -->
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-5 bg-gray-900 rounded-b-xl z-50"></div>
+
+          <div class="w-full h-full rounded-2xl overflow-hidden flex flex-col bg-white shadow-inner relative" [ngStyle]="previewStyle">
+            
+            <!-- Header do Encarte Preview -->
+            <div class="p-6 pt-10 text-center relative z-10"
+                 [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+              <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="max-h-12 object-contain mx-auto mb-3 filter drop-shadow-sm">
+              <h2 class="text-white text-xl font-black uppercase tracking-wide leading-tight">{{ form.get('titulo')?.value || 'Novo Encarte' }}</h2>
+            </div>
+
+            <!-- Faixa de Validade -->
+            <div class="bg-black/80 text-white text-[10px] uppercase font-bold text-center py-1.5 z-10 relative">
+              Válido: {{ form.get('dataInicio')?.value | date:'dd/MM/yyyy' }} até {{ form.get('dataFim')?.value | date:'dd/MM/yyyy' }}
+            </div>
+
+            <!-- Área de Produtos -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 z-10 relative">
+              
+              <div *ngIf="ofertasSelecionadas().length === 0" class="text-center mt-10">
+                <div class="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <mat-icon class="text-gray-400">touch_app</mat-icon>
+                </div>
+                <p class="text-gray-500 text-sm font-medium">Selecione ofertas ao lado para visualizar aqui.</p>
+              </div>
+
+              <!-- Produto Card Preview -->
+              <div *ngFor="let oferta of ofertasSelecionadas()" class="bg-white p-3 rounded-xl shadow-sm border-2 border-transparent relative overflow-hidden group"
+                   [style.border-color]="supermarket()?.corPrimariaHex || '#e5e7eb'">
+                <div class="flex gap-3 relative z-10">
+                  <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" class="w-16 h-16 object-cover rounded-lg bg-gray-50 border border-gray-100">
+                  <div class="flex-1 flex flex-col justify-center">
+                    <h4 class="text-sm font-bold text-gray-800 leading-tight mb-1 line-clamp-2">{{ oferta.nomeProduto }}</h4>
+                    <div class="flex items-baseline gap-1 mt-auto">
+                      <span class="text-xs font-bold text-gray-500">R$</span>
+                      <span class="text-xl font-black text-red-600 leading-none">{{ oferta.preco | number:'1.2-2' }}</span>
+                      <span class="text-[10px] text-gray-400 uppercase font-bold">/ {{ oferta.unidadeMedida }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

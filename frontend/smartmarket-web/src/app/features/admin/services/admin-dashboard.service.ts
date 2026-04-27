@@ -27,7 +27,7 @@ export class AdminDashboardService {
       monthlyRevenue: 12500.90,
       activeSubscriptions: 145,
       churnRate: 2.5
-    }).pipe(delay(600));
+    });
   }
 
   getSubscriptions(): Observable<SubscriptionData[]> {
@@ -37,6 +37,6 @@ export class AdminDashboardService {
       { supermarketName: 'Mini Mercado Central', planName: 'Básico', status: 'trialing', price: 149.90, renewalDate: '2026-05-10T00:00:00' },
       { supermarketName: 'Rede Econômica', planName: 'Premium', status: 'canceled', price: 599.90, renewalDate: '2026-04-20T00:00:00' },
       { supermarketName: 'Atacadão do Bairro', planName: 'Pro', status: 'pending', price: 299.90, renewalDate: '2026-05-05T00:00:00' }
-    ]).pipe(delay(800));
+    ]);
   }
 }

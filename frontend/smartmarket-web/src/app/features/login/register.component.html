@@ -105,10 +105,15 @@
             </ng-template>
           </button>
 
-          <div class="text-center mt-4 text-[color:var(--color-text-body)]">
-            Já possui uma conta? 
-            <a routerLink="/login" class="font-bold text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)] hover:underline transition-colors">
-              Fazer Login
+          <div class="text-center mt-4 flex flex-col gap-2 text-[color:var(--color-text-body)]">
+            <div>
+              Já possui uma conta? 
+              <a routerLink="/login" class="font-bold text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)] hover:underline transition-colors">
+                Fazer Login
+              </a>
+            </div>
+            <a routerLink="/planos" *ngIf="accountType() === 'supermarket'" class="text-sm font-bold text-[color:var(--color-accent)] hover:underline transition-colors">
+              Descubra os planos disponíveis para sua loja
             </a>
           </div>
         </form>

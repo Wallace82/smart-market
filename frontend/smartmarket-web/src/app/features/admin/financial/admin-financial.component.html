@@ -1,0 +1,71 @@
+<div class="p-6 max-w-7xl mx-auto font-sans">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Dashboard Financeiro</h1>
+      <p class="text-gray-500">Visão geral do faturamento e métricas SaaS.</p>
+    </div>
+    <div class="flex gap-4">
+      <a routerLink="/admin/financeiro" class="bg-gray-200 text-gray-800 font-bold px-4 py-2 rounded-md transition-colors">Visão Geral</a>
+      <a routerLink="/admin/assinaturas" class="text-gray-600 hover:text-[color:var(--color-primary)] font-bold px-4 py-2 transition-colors">Assinaturas</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)]"></div>
+  </div>
+
+  <div *ngIf="!loading && data" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Card 1 -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Receita Mensal (MRR)</h3>
+      <div class="mt-2 flex items-baseline">
+        <span class="text-3xl font-black text-gray-900">R$ {{ data.monthlyRevenue.toFixed(2).replace('.', ',') }}</span>
+      </div>
+      <p class="text-sm text-[color:var(--color-primary)] mt-2 font-medium flex items-center">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+        +12.5% este mês
+      </p>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Receita Anual Estimada</h3>
+      <div class="mt-2 flex items-baseline">
+        <span class="text-3xl font-black text-gray-900">R$ {{ (data.monthlyRevenue * 12).toFixed(2).replace('.', ',') }}</span>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Assinaturas Ativas</h3>
+      <div class="mt-2 flex items-baseline">
+        <span class="text-3xl font-black text-gray-900">{{ data.activeSubscriptions }}</span>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Churn Rate</h3>
+      <div class="mt-2 flex items-baseline">
+        <span class="text-3xl font-black text-red-600">{{ data.churnRate }}%</span>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">Média de cancelamentos</p>
+    </div>
+  </div>
+  
+  <div *ngIf="!loading && data" class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+    <h3 class="text-lg font-bold text-gray-900 mb-6">Receita por Período (Mockado)</h3>
+    <div class="h-64 flex items-end gap-4 justify-between border-b border-gray-200 pb-4 relative">
+       <!-- Mocking a bar chart -->
+       <div class="w-full bg-gray-100 rounded-t-md h-[40%] hover:bg-green-100 transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded">Nov</div></div>
+       <div class="w-full bg-gray-100 rounded-t-md h-[55%] hover:bg-green-100 transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded">Dez</div></div>
+       <div class="w-full bg-gray-100 rounded-t-md h-[45%] hover:bg-green-100 transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded">Jan</div></div>
+       <div class="w-full bg-gray-100 rounded-t-md h-[70%] hover:bg-green-100 transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded">Fev</div></div>
+       <div class="w-full bg-gray-100 rounded-t-md h-[85%] hover:bg-green-100 transition-colors relative group"><div class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded">Mar</div></div>
+       <div class="w-full bg-[color:var(--color-primary)] rounded-t-md h-[100%] transition-colors relative group opacity-90 hover:opacity-100"><div class="hidden group-hover:block absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded">Abr</div></div>
+    </div>
+    <div class="flex justify-between mt-2 text-sm text-gray-500 font-medium px-2">
+      <span>Nov</span><span>Dez</span><span>Jan</span><span>Fev</span><span>Mar</span><span class="text-[color:var(--color-primary)]">Abr</span>
+    </div>
+  </div>
+</div>

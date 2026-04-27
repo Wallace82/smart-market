@@ -1,0 +1,82 @@
+<div class="min-h-screen bg-gray-50 flex flex-col font-sans">
+  <!-- Navbar Pública -->
+  <nav class="bg-white shadow-sm py-4 px-6 sm:px-12 flex justify-between items-center">
+    <div class="flex items-center gap-2 cursor-pointer" routerLink="/">
+      <div class="w-8 h-8 rounded bg-green-600 flex items-center justify-center text-white font-black text-xl">S</div>
+      <span class="text-xl font-black text-gray-900 tracking-tight">Smart<span class="text-green-600">Market</span></span>
+    </div>
+    <div class="flex gap-4">
+      <a routerLink="/login" class="text-gray-600 hover:text-green-600 font-medium px-4 py-2 transition-colors">Entrar</a>
+      <a routerLink="/register" class="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors shadow-sm">Criar Conta</a>
+    </div>
+  </nav>
+
+  <main class="flex-grow flex flex-col items-center py-16 px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <h1 class="text-4xl sm:text-5xl font-black text-gray-900 mb-6 tracking-tight">Planos que acompanham o crescimento do seu supermercado</h1>
+      <p class="text-xl text-gray-600">Evolua seu marketing e leve mais clientes para dentro da sua loja. Experimente grátis hoje.</p>
+    </div>
+
+    <div *ngIf="loading" class="flex justify-center items-center h-64 w-full">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+    </div>
+
+    <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto w-full">
+      <div *ngFor="let plan of plans" 
+            class="bg-white rounded-2xl p-8 relative flex flex-col transition-transform hover:-translate-y-2 hover:shadow-xl duration-300"
+            [ngClass]="plan.highlight ? 'border-2 border-green-500 shadow-lg' : 'border border-gray-200 shadow-sm'">
+        
+        <div *ngIf="plan.highlight" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-sm font-bold uppercase tracking-wide">
+          Mais Escolhido
+        </div>
+
+        <div class="mb-8">
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ plan.name }}</h3>
+          <p class="text-gray-600 min-h-[48px]">{{ plan.description }}</p>
+        </div>
+
+        <div class="mb-8">
+          <div class="flex items-baseline text-5xl font-black text-gray-900">
+            <span class="text-2xl text-gray-500 mr-1">R$</span>
+            {{ plan.price.toFixed(2).replace('.', ',') }}
+            <span class="text-lg text-gray-500 font-medium ml-1">/mês</span>
+          </div>
+          <p class="text-sm text-green-600 font-medium mt-2" *ngIf="plan.trialDays > 0">
+            + {{ plan.trialDays }} dias de teste grátis
+          </p>
+        </div>
+
+        <ul class="flex-1 space-y-4 mb-8 text-gray-600">
+          <li class="flex items-center">
+            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span *ngIf="plan.maxOffers < 9000">Até <strong>{{ plan.maxOffers }} ofertas</strong> publicáveis</span>
+            <span *ngIf="plan.maxOffers >= 9000"><strong>Ofertas Ilimitadas</strong></span>
+          </li>
+          <li class="flex items-center">
+            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span><strong>{{ plan.maxPushNotifications }} envios</strong> de Push Notifications /mês</span>
+          </li>
+          <li class="flex items-center" [ngClass]="plan.allowCustomerPreferences ? '' : 'opacity-50 line-through'">
+            <svg *ngIf="plan.allowCustomerPreferences" class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg *ngIf="!plan.allowCustomerPreferences" class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <span>Acesso às preferências dos clientes</span>
+          </li>
+          <li class="flex items-center">
+            <svg class="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span>Suporte {{ plan.highlight ? 'Prioritário' : 'Horário Comercial' }}</span>
+          </li>
+        </ul>
+
+        <button [routerLink]="['/register']" [queryParams]="{ plan: plan.id }" 
+                class="w-full py-3 px-4 rounded-lg font-bold transition-colors"
+                [ngClass]="plan.highlight ? 'bg-green-600 text-white hover:bg-green-700 shadow-md' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'">
+          Começar Agora
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-white border-t border-gray-200 py-8 text-center text-gray-500 text-sm">
+    <p>&copy; 2026 SmartMarket. Todos os direitos reservados.</p>
+  </footer>
+</div>

@@ -59,4 +59,6 @@ Quando requisitado para debugar ou programar:
 4.  Resolver problemas de RxJS (Subscription leaks).
 5.  Solucionar conflitos de CSS / Tailwind e otimizar para SEO e Acessibilidade (Tags Semânticas, Alt Texts, etc).
 
+6.  **Arquivos Separados (Obrigatório):** TODO componente Angular deve possuir seus arquivos `.ts` e `.html` estritamente separados. É estritamente proibido utilizar `template:` (inline template) dentro do arquivo TypeScript, devendo-se utilizar apenas `templateUrl`.
+
 Seja rigoroso com a organização e não entregue componentes monolíticos. Todo código deve ser altamente componentizado e esteticamente impecável.

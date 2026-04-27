@@ -1,0 +1,50 @@
+<div class="p-6 max-w-7xl mx-auto font-sans">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Gestão de Assinaturas</h1>
+      <p class="text-gray-500">Monitoramento de clientes e planos do SmartMarket.</p>
+    </div>
+    <div class="flex gap-4">
+      <a routerLink="/admin/financeiro" class="text-gray-600 hover:text-[color:var(--color-primary)] font-bold px-4 py-2 transition-colors">Visão Geral</a>
+      <a routerLink="/admin/assinaturas" class="bg-gray-200 text-gray-800 font-bold px-4 py-2 rounded-md transition-colors">Assinaturas</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)]"></div>
+  </div>
+
+  <div *ngIf="!loading" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wide">Supermercado</th>
+          <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wide">Plano</th>
+          <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wide">Valor (Mensal)</th>
+          <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wide">Status</th>
+          <th class="p-4 text-sm font-semibold text-gray-600 uppercase tracking-wide">Próxima Renovação</th>
+          <th class="p-4 text-sm font-semibold text-gray-600 text-right uppercase tracking-wide">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sub of subs" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+          <td class="p-4">
+            <span class="font-bold text-gray-900">{{ sub.supermarketName }}</span>
+          </td>
+          <td class="p-4 font-medium text-gray-600">{{ sub.planName }}</td>
+          <td class="p-4 text-gray-600">R$ {{ sub.price.toFixed(2).replace('.', ',') }}</td>
+          <td class="p-4">
+            <span *ngIf="sub.status === 'active'" class="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase">Ativo</span>
+            <span *ngIf="sub.status === 'trialing'" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase">Trial</span>
+            <span *ngIf="sub.status === 'pending'" class="bg-orange-100 text-orange-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase">Pendente</span>
+            <span *ngIf="sub.status === 'canceled'" class="bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase">Cancelado</span>
+          </td>
+          <td class="p-4 text-gray-500 text-sm">{{ sub.renewalDate | date:'dd/MM/yyyy' }}</td>
+          <td class="p-4 text-right">
+            <button class="text-[color:var(--color-secondary)] hover:underline font-medium text-sm transition-colors">Ver Detalhes</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

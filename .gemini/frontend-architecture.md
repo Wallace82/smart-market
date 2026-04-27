@@ -20,9 +20,11 @@ src/app/
   core/
   features/
     admin/
+      billing/
     client/
     login/
     manager/
+      billing/
       campaigns/
       dashboard/
       flyers/

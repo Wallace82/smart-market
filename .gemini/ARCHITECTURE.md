@@ -85,7 +85,9 @@ O projeto frontend em Angular é organizado de forma modular e escalável, segui
 
 *   **`features`**: Cada pasta aqui representa uma "Feature" ou módulo de negócio da aplicação, com seus próprios componentes, serviços e rotas (lazy-loaded).
     *   `admin`: Painel do administrador da plataforma.
+        *   `billing/`: Criação de planos, dashboard financeiro e gestão de assinaturas (RF-16).
     *   `manager`: Painel do gestor do supermercado. Subdividido por domínios:
+        *   `billing/`: Contratação de planos, faturas e controle de limites (RF-16).
         *   `campaigns/`: Gestão de campanhas inteligentes de proximidade (RF-12).
         *   `dashboard/`: Visão geral e métricas de desempenho.
         *   `flyers/`: Criação e listagem de encartes digitais temáticos (RF-04).
@@ -128,12 +130,14 @@ Utilizada para comandos de **Escrita** ou processos que não exigem resposta em 
 ```mermaid
 graph TD
     Client(Cliente - App Mobile/Web) -->|HTTPS/REST| Gateway(API Gateway)
+    Webhook(Gateway de Pagamentos) -->|Webhooks| Gateway
     
     Gateway -->|Roteamento Seguro| Auth(Auth Service)
     Gateway -->|Roteamento Seguro| Supermarket(Supermarket Service)
     Gateway -->|Roteamento Seguro| Product(Product Service)
     Gateway -->|Roteamento Seguro| Customer(Client Service)
     Gateway -->|Ping Localização / QR Code| Notification(Notification Service)
+    Gateway -->|Pagamentos e Planos| Billing(Billing Service)
     
     Auth -.->|Validação Síncrona JWT| Gateway
     
@@ -141,9 +145,11 @@ graph TD
     Supermarket -->|Publica: LojaAtualizada| RabbitMQ
     Customer -->|Publica: ProdutoVisualizado| RabbitMQ
     Notification -->|Publica: GeofenceEntry / QRScanned| RabbitMQ
+    Billing -->|Publica: AssinaturaAtiva / LimiteAtingido| RabbitMQ
     
     RabbitMQ -->|Consome Evento| Notification(Notification Service)
     RabbitMQ -->|Consome Evento| Recommendation(Recommendation Service)
+    RabbitMQ -->|Consome Evento| Supermarket
     
     Product -->|Upload/Leitura de Imagens| MinIO[(MinIO Object Storage)]
     Supermarket -->|Upload/Leitura de Logos| MinIO
@@ -154,6 +160,7 @@ graph TD
     Customer --- DB_Cust[(PostgreSQL Client)]
     Notification --- DB_Notif[(PostgreSQL Notif)]
     Recommendation --- DB_Rec[(PostgreSQL Recom)]
+    Billing --- DB_Bill[(PostgreSQL Billing)]
     
     Notification --- Redis[(Redis Geospatial)]
     Product --- Redis

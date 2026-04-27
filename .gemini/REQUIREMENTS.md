@@ -1,7 +1,7 @@
-﻿﻿﻿﻿# 📋 SmartMarket — Documento de Requisitos
+﻿﻿# 📋 SmartMarket — Documento de Requisitos
 
-> **Versão:** 1.6.0
-> **Data:** 2025-07-29
+> **Versão:** 1.7.0
+> **Data:** 2026-04-27
 > **Status:** MVP - Backend & Frontend Implementados
 > **Equipe:** 3 desenvolvedores
 
@@ -24,6 +24,7 @@
 13. [Diferencial Estratégico: Canal de Aquisição Físico-Digital (Totem QR Code)](#13-diferencial-estratégico-canal-de-aquisição-físico-digital-totem-qr-code)
 14. [Diferencial Estratégico: Acesso Público e Experiência sem Fricção (Product-Led Growth)](#14-diferencial-estratégico-acesso-público-e-experiência-sem-fricção-product-led-growth)
 15. [Estratégia de Cache em Múltiplas Camadas (Alta Performance)](#15-estratégia-de-cache-em-múltiplas-camadas-alta-performance)
+16. [Módulo de Assinatura e Billing (Planos para Supermercados)](#16-módulo-de-assinatura-e-billing-planos-para-supermercados)
 
 ---
 
@@ -291,7 +292,7 @@ Um totem físico, posicionado estrategicamente na entrada do supermercado, conte
 
 ### 13.6. Requisitos de Negócio e Material de Apoio
 *   **RN-13.6.1 - Guia de Design do Totem:** A plataforma SmartMarket deve fornecer aos supermercados um guia de identidade visual para a construção do totem, com especificações de cores, logo e tipografia, garantindo consistência da marca.
-*   **RN-13.6.2 - Slogans Recomendados:** Sugerir frases de impacto para o totem, como: "Aponte, Economize e Ajude o Planeta" ou "Seu Encarte Agora é Digital. Rápido e Ecológico".
+*   **RN-13.6.2 - Slogans Recomendados:** Sugerir frases de impacto para o totem, como: "Encarte Digital — Consciência Ambiental", "Aponte, Economize e Ajude o Planeta" ou "Seu Encarte Agora é Digital. Rápido e Ecológico".
 
 ### 🛠️ Diferenciais e Evolução (Growth Features)
 Para maximizar o impacto deste canal, as seguintes evoluções devem ser consideradas no roadmap:
@@ -368,3 +369,61 @@ Para suportar o alto volume de tráfego gerado pela vitrine pública (acessos an
 *   **RF-15.4.1:** Para evitar que o usuário enxergue preços inconsistentes, a invalidação do Redis deve ser ativa e não apenas por expiração de tempo (TTL).
 *   **RF-15.4.2:** Após o banco de dados (PostgreSQL) registrar a alteração de uma oferta ou encarte, o serviço de origem deve publicar um evento (ex: `OfferPriceChangedEvent`) no RabbitMQ.
 *   **RF-15.4.3:** O listener deste evento cuidará do "Eviction" (despejo) exato no cache regional (`Geohash`) do produto/encarte recém-alterado.
+
+---
+
+## 16. Módulo de Assinatura e Billing (Planos para Supermercados)
+
+### 🚀 Visão de Negócio
+O SmartMarket passa a operar com monetização direta via plataforma através de planos de assinatura (Pacotes de Ofertas). O objetivo é transformar a plataforma em um SaaS escalável, garantindo flexibilidade para a criação de novos pacotes, permitindo cobrança recorrente automatizada e controlando o uso de recursos do sistema por parte dos supermercados.
+
+### 16.1. Requisitos Funcionais (RF-16)
+
+#### 📦 Gestão de Planos (Admin)
+*   **RF-16.1.1:** O sistema deve permitir que o administrador crie pacotes de forma dinâmica, definindo: Nome do plano, Descrição, Valor e Tipo de cobrança (Mensal, Semestral, Anual).
+*   **RF-16.1.2:** Cada plano deve permitir a configuração de limites:
+    *   Quantidade máxima de push notifications permitidas.
+    *   Quantidade máxima de ofertas que o supermercado pode publicar simultaneamente ou por período.
+    *   Acesso (Sim/Não) à funcionalidade de visualização de preferências dos clientes.
+*   **RF-16.1.3:** O Admin deve poder editar, desativar ou criar novos planos para o futuro. Planos desativados não afetarão assinantes atuais, mas não estarão disponíveis para novas assinaturas.
+
+#### 🛍️ Contratação e Experiência do Supermercado (Gestor)
+*   **RF-16.1.4:** A tela "Conheça nossos planos" deve ser acessível a partir da tela de login e também dentro do painel do gestor.
+*   **RF-16.1.5:** A tela de planos deve exibir os pacotes disponíveis de forma clara, com um quadro comparativo de funcionalidades e botão de contratação (Call to Action).
+*   **RF-16.1.6:** O supermercado (Gestor) deve poder visualizar o plano atual contratado, status da assinatura, limites de uso (consumidos vs. disponíveis) e histórico de pagamentos.
+
+#### 💳 Pagamentos e Billing
+*   **RF-16.1.7:** A plataforma deve integrar um gateway de pagamentos para processamento direto, suportando os métodos: PIX, Cartão de Crédito e Boleto.
+*   **RF-16.1.8:** O sistema deve processar assinatura recorrente e renovação automática para métodos que suportem (Cartão de Crédito).
+*   **RF-16.1.9:** O sistema deve controlar o status da assinatura de cada supermercado: *Ativa*, *Pendente* (aguardando pagamento), *Cancelada* ou *Expirada*.
+
+#### 📊 Dashboard Financeiro (Admin)
+*   **RF-16.1.10:** O administrador deve ter acesso a um Dashboard Financeiro contendo: Receita total e por período, ranking de planos mais vendidos, e métricas de supermercados ativos vs. inativos (Churn rate).
+*   **RF-16.1.11:** O administrador deve poder visualizar uma lista completa de supermercados com o respectivo plano atual, histórico financeiro e controle manual do status da assinatura (caso necessário).
+
+### 16.2. Requisitos Não Funcionais (RNF-16)
+*   **RNF-16.2.1:** **Segurança Financeira:** O sistema deve possuir integração segura com o Gateway de Pagamentos, não armazenando dados sensíveis de cartão de crédito no banco de dados próprio (conformidade com PCI-DSS).
+*   **RNF-16.2.2:** **Alta Disponibilidade e Resiliência:** O processamento de Webhooks (retorno de status de pagamento pelo Gateway) deve ser assíncrono (usando RabbitMQ) e idempotente, garantindo que o status da assinatura seja atualizado mesmo em cenários de falha temporária.
+
+### 16.3. Regras de Negócio (RN-16)
+*   **RN-16.3.1:** Supermercados sem um plano "Ativo" devem ter acesso restrito ao painel, permitindo apenas a gestão da conta e regularização financeira (contratação/renovação de plano).
+*   **RN-16.3.2:** Quando o supermercado atingir o limite do plano (ex: cota de disparos de Push Notification atingida ou cota de ofertas no ar), as funcionalidades excedentes deverão ser bloqueadas automaticamente na interface, sugerindo o "Upgrade" de plano.
+*   **RN-16.3.3:** Todo o consumo de recursos (ofertas publicadas, pushes enviados) deve ser registrado no sistema (Billing/Analytics) para auditoria e limitação das cotas.
+*   **RN-16.3.4:** O downgrade ou cancelamento de um plano manterá o acesso atual até o final do ciclo já pago.
+
+### 16.4. Fluxos Principais
+1.  **Fluxo de Contratação:** Gestor acessa tela de Planos ➔ Escolhe o pacote e ciclo de cobrança ➔ Insere dados de pagamento (ex: PIX) ➔ Sistema aguarda Webhook ➔ Pagamento confirmado ➔ Status da assinatura muda para "Ativa" ➔ Limites do plano são provisionados.
+2.  **Fluxo de Consumo e Bloqueio:** Gestor tenta criar nova oferta ➔ Sistema valida no backend se o limite do plano foi atingido ➔ Se "Sim", retorna erro de limite excedido e a UI exibe modal de Upsell ➔ Se "Não", a oferta é criada e o contador de uso incrementa.
+3.  **Fluxo de Renovação / Inadimplência:** Ciclo do plano vence ➔ Sistema tenta cobrança no Cartão ou emite novo boleto/PIX ➔ Se falhar ou não pago no vencimento, status muda para "Pendente" ➔ Após X dias (período de carência), muda para "Expirada/Inativa" e suspende o acesso operacional da loja.
+
+### 16.5. Casos de Uso (UC)
+*   **UC-01 - Configurar Planos:** Ator: Admin. Descrição: Criar novo plano "Premium" anual com acesso total a métricas.
+*   **UC-02 - Assinar Plano:** Ator: Gestor. Descrição: Selecionar o plano "Pro", escolher cartão de crédito e efetivar o pagamento.
+*   **UC-03 - Acompanhar Receita:** Ator: Admin. Descrição: Acessar o dashboard para verificar o faturamento recorrente (MRR) do mês.
+*   **UC-04 - Controlar Limites:** Ator: Sistema. Descrição: Bloquear o botão "Enviar Push" de um supermercado no plano "Básico" que já enviou suas 2 notificações do mês.
+
+### 💡 16.6. Sugestões de Melhorias (Growth & Diferenciais)
+*   **Período de Testes (Free Trial):** Implementar modelo "Trial de 14 dias" no plano mais completo para acelerar a adoção inicial por novos supermercados.
+*   **Upsell Contextual (In-App):** Quando o supermercado tentar ver a área de "Preferências de Clientes" (mas seu plano não permitir), mostrar um botão de "Faça Upgrade em 1 clique" direto na tela bloqueada.
+*   **Módulo de Cobrança Adicional (Add-ons):** Em vez de obrigar a mudança de plano, permitir que o supermercado compre "Pacotes Extras de Push" de forma avulsa.
+*   **Planos Corporativos (Redes Múltiplas Lojas):** Planejar arquitetura para no futuro permitir um "Plano Multi-Loja", gerando desconto na mensalidade para supermercados que cadastrarem filiais em um único CNPJ base.

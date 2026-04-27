@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Billing Service API
+  description: API responsável pelo gerenciamento de planos SaaS, limites de uso, pagamentos e assinaturas dos supermercados na plataforma SmartMarket.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Servidor de Desenvolvimento Local
+
+tags:
+  - name: Plans
+    description: Gerenciamento dos pacotes e planos de assinatura
+  - name: Subscriptions
+    description: Operações de contratação e verificação de assinatura por supermercado
+
+paths:
+  /api/v1/plans:
+    get:
+      summary: Lista todos os planos ativos
+      description: Retorna uma lista com os planos SaaS disponíveis (Premium, Pro, Básico, etc.) que estão com status `active = true`.
+      tags:
+        - Plans
+      responses:
+        '200':
+          description: Sucesso. Lista de planos retornada.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlanDTO'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      summary: Cria um novo plano de assinatura
+      description: Permite ao Administrador criar um novo pacote com limites específicos de ofertas e pushes.
+      tags:
+        - Plans
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequestDTO'
+      responses:
+        '201':
+          description: Plano criado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanDTO'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/v1/subscriptions/supermarket/{supermarketId}:
+    get:
+      summary: Consulta a assinatura ativa de um supermercado
+      description: Retorna os detalhes da assinatura atual de um supermercado, incluindo limites consumidos, validade e o plano vinculado.
+      tags:
+        - Subscriptions
+      parameters:
+        - name: supermarketId
+          in: path
+          required: true
+          description: UUID do supermercado.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Assinatura encontrada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDTO'
+        '404':
+          description: O supermercado não possui nenhuma assinatura ativa ou em período de trial.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/v1/subscriptions/supermarket/{supermarketId}/subscribe:
+    post:
+      summary: Assinar ou contratar um plano
+      description: Vincula um supermercado a um plano específico. Se o plano possuir trial, entra em status `trialing`, caso contrário entra como `pending` aguardando pagamento.
+      tags:
+        - Subscriptions
+      parameters:
+        - name: supermarketId
+          in: path
+          required: true
+          description: UUID do supermercado assinante.
+          schema:
+            type: string
+            format: uuid
+        - name: planId
+          in: query
+          required: true
+          description: UUID do plano desejado.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Assinatura criada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDTO'
+        '400':
+          description: Erro de validação (Ex. O supermercado já possui um plano ativo).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  schemas:
+    PlanDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Plano Premium Anual"
+        description:
+          type: string
+          example: "Acesso total a relatórios, pushes ilimitados e multi-lojas."
+        price:
+          type: number
+          format: double
+          example: 999.90
+        billingCycle:
+          type: string
+          enum: [monthly, semiannual, annual]
+          example: "annual"
+        maxOffers:
+          type: integer
+          example: 500
+        maxPushNotifications:
+          type: integer
+          example: 10
+        allowCustomerPreferences:
+          type: boolean
+          example: true
+        trialDays:
+          type: integer
+          example: 14
+        active:
+          type: boolean
+          example: true
+
+    PlanRequestDTO:
+      type: object
+      required:
+        - name
+        - price
+        - billingCycle
+        - maxOffers
+        - maxPushNotifications
+      properties:
+        name:
+          type: string
+          example: "Plano Startup"
+        description:
+          type: string
+          example: "Plano de entrada para mercados locais."
+        price:
+          type: number
+          format: double
+          example: 149.90
+        billingCycle:
+          type: string
+          enum: [monthly, semiannual, annual]
+          example: "monthly"
+        maxOffers:
+          type: integer
+          example: 100
+        maxPushNotifications:
+          type: integer
+          example: 2
+        allowCustomerPreferences:
+          type: boolean
+          example: false
+        trialDays:
+          type: integer
+          example: 7
+
+    SubscriptionDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        plan:
+          $ref: '#/components/schemas/PlanDTO'
+        status:
+          type: string
+          enum: [active, pending, canceled, expired, trialing]
+          example: "trialing"
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+        renewalDate:
+          type: string
+          format: date-time
+        autoRenew:
+          type: boolean
+          example: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "O supermercado já possui uma assinatura ativa."
+        path:
+          type: string
+          example: "/api/v1/subscriptions/supermarket/123/subscribe"
+
+  responses:
+    UnauthorizedError:
+      description: Token de acesso ausente ou inválido.
+    ForbiddenError:
+      description: Usuário autenticado não possui permissão (roles) para acessar este recurso.
+    BadRequestError:
+      description: Payload inválido ou regras de negócio violadas.
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

@@ -1,78 +1,185 @@
-import { ChangeDetectionStrategy, Component, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 // Angular Material
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-interface Hotspot {
-  x: number; // Porcentagem horizontal
-  y: number; // Porcentagem vertical
-  productName: string;
-  price: number;
-  oldPrice?: number;
-  category: string;
-}
-
-interface FlyerPage {
-  id: number;
-  imageUrl: string;
-  hotspots: Hotspot[];
-}
+// Services & Models
+import { EncarteService } from '@core/services/encarte.service';
+import { SupermarketService } from '@core/services/supermarket.service';
+import { OfertaService, OfertaSupermercado } from '@core/services/oferta.service';
+import { EncarteDigitalResponse, TemaEncarteResponse } from '@core/models/encarte.model';
+import { SupermarketResponse } from '@core/models/supermarket.model';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-flyer-viewer',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule, MatButtonModule, MatTooltipModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    MatIconModule, 
+    MatButtonModule, 
+    MatTooltipModule,
+    MatProgressSpinnerModule
+  ],
   templateUrl: './flyer-viewer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FlyerViewerComponent {
+export class FlyerViewerComponent implements OnInit {
   
-  // Mocks do Encarte (Simulando o retorno do backend)
-  supermarketName = signal('Supermercado Central');
-  flyerTitle = signal('Especial Churrasco & Bebidas');
+  // Estado do Encarte
+  encarte = signal<EncarteDigitalResponse | null>(null);
+  supermarket = signal<SupermarketResponse | null>(null);
+  tema = signal<TemaEncarteResponse | null>(null);
+  ofertas = signal<OfertaSupermercado[]>([]);
+  
+  loading = signal(true);
+  error = signal(false);
 
-  pages = signal<FlyerPage[]>([
-    {
-      id: 1,
-      // Imagem ilustrativa simulando uma página de encarte de churrasco
-      imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1000&q=80',
-      hotspots: [
-        { x: 35, y: 45, productName: 'Picanha Bovina Maturada', price: 65.90, oldPrice: 89.90, category: 'Açougue' },
-        { x: 75, y: 65, productName: 'Cerveja Artesanal IPA', price: 12.99, oldPrice: 18.90, category: 'Bebidas' }
-      ]
-    },
-    {
-      id: 2,
-      // Imagem ilustrativa simulando hortifruti
-      imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80',
-      hotspots: [
-        { x: 50, y: 50, productName: 'Maçã Fuji Premium (Kg)', price: 8.99, category: 'Hortifruti' },
-        { x: 20, y: 80, productName: 'Uva Palmer (Bandeja)', price: 12.50, oldPrice: 15.00, category: 'Hortifruti' }
-      ]
-    }
-  ]);
+  constructor(
+    private route: ActivatedRoute,
+    private encarteService: EncarteService,
+    private supermarketService: SupermarketService,
+    private ofertaService: OfertaService
+  ) {}
 
-  // Controle de Navegação
-  currentPageIndex = signal(0);
-  currentPage = computed(() => this.pages()[this.currentPageIndex()]);
-
-  nextPage() {
-    if (this.currentPageIndex() < this.pages().length - 1) {
-      this.currentPageIndex.update(i => i + 1);
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.carregarEncarte(id);
+    } else {
+      this.error.set(true);
+      this.loading.set(false);
     }
   }
 
-  prevPage() {
-    if (this.currentPageIndex() > 0) {
-      this.currentPageIndex.update(i => i - 1);
-    }
+  private carregarEncarte(id: string): void {
+    this.loading.set(true);
+    
+    this.encarteService.buscarEncartePorId(id).subscribe({
+      next: (encarte) => {
+        this.encarte.set(encarte);
+        this.carregarDadosComplementares(encarte);
+      },
+      error: () => {
+        // Fallback para demonstração se o ID for mock ou falhar
+        if (id.includes('mock')) {
+          this.carregarMock();
+        } else {
+          this.error.set(true);
+          this.loading.set(false);
+        }
+      }
+    });
   }
 
-  saveOffer(hotspot: Hotspot) {
-    console.log('Oferta salva na lista do usuário: ', hotspot);
+  private carregarDadosComplementares(encarte: EncarteDigitalResponse): void {
+    const requests: any = {
+      supermarket: this.supermarketService.buscarPorId(encarte.supermercadoId),
+      ofertas: this.ofertaService.buscarPorSupermercado(encarte.supermercadoId)
+    };
+
+    if (encarte.temaId) {
+      requests.tema = this.encarteService.listarTemas().pipe(
+        catchError(() => of([])),
+        // Simplificação: busca o tema na lista
+        computed(() => requests.tema) // placeholder
+      );
+    }
+
+    forkJoin(requests).subscribe({
+      next: (res: any) => {
+        this.supermarket.set(res.supermarket);
+        
+        // Se houver tema, filtra da lista (mock ou real)
+        if (encarte.temaId) {
+          this.encarteService.listarTemas().subscribe(temas => {
+            const t = temas.find(tema => tema.id === encarte.temaId);
+            this.tema.set(t || null);
+          });
+        }
+
+        // Filtra apenas as ofertas que pertencem ao encarte
+        const ofertasDoEncarte = res.ofertas.filter((o: OfertaSupermercado) => 
+          encarte.itens?.some(item => item.ofertaId === o.id)
+        );
+        this.ofertas.set(ofertasDoEncarte);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      }
+    });
   }
-}
+
+  private carregarMock(): void {
+    // Simulação idêntica ao preview da criação
+    this.supermarket.set({
+      id: 'm1',
+      nomeFantasia: 'Supermercado Central',
+      corPrimariaHex: '#16a34a',
+      urlLogomarca: 'https://cdn-icons-png.flaticon.com/512/3724/3724720.png'
+    } as any);
+
+    this.tema.set({
+      id: 't1',
+      nome: 'Ofertas de Natal',
+      urlBackgroundDecorativo: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?q=80&w=1000&auto=format&fit=crop',
+      corFundoHex: '#fff5f5'
+    } as any);
+
+    this.encarte.set({
+      titulo: 'Ofertas Especiais',
+      dataInicio: new Date().toISOString(),
+      dataFim: new Date(Date.now() + 86400000 * 7).toISOString()
+    } as any);
+
+    this.ofertas.set([
+      { id: 'o1', nomeProduto: 'Arroz Agulhinha Tipo 1 - 5kg', preco: 29.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o2', nomeProduto: 'Feijão Carioca Kicaldo - 1kg', preco: 8.45, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1551462147-37885acc3c41?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o3', nomeProduto: 'Óleo de Soja Liza - 900ml', preco: 6.89, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o4', nomeProduto: 'Café Melitta Vácuo - 500g', preco: 18.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o5', nomeProduto: 'Leite Integral Italac - 1L', preco: 4.59, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1563636619-e9107daaf021?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o6', nomeProduto: 'Detergente Ipê Neutro - 500ml', preco: 2.25, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1584622781564-1d9876a13d1e?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o7', nomeProduto: 'Picanha Bovina Fatiada (kg)', preco: 69.90, unidadeMedida: 'KG', urlImagem: 'https://images.unsplash.com/photo-1558030006-45c675171f65?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o8', nomeProduto: 'Cerveja Heineken Long Neck 330ml', preco: 6.49, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1618885472179-5e474019f2a9?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o9', nomeProduto: 'Banana Prata Premium (kg)', preco: 5.98, unidadeMedida: 'KG', urlImagem: 'https://images.unsplash.com/photo-1571771894821-ad9902d83f4e?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o10', nomeProduto: 'Açúcar Cristal Delta - 5kg', preco: 16.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o11', nomeProduto: 'Sabão em Pó Omo 1.6kg', preco: 24.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1605648916361-9bc12ad6a569?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o12', nomeProduto: 'Papel Higiênico Neve 12 rolos', preco: 19.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o13', nomeProduto: 'Maionese Hellmanns 500g', preco: 11.45, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1585325701166-38209ef8a191?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o14', nomeProduto: 'Refrigerante Coca-Cola 2L', preco: 9.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1622708782596-13d9744f9900?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o15', nomeProduto: 'Biscoito Recheado Passatempo', preco: 2.99, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1558961312-5034fab3930e?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o16', nomeProduto: 'Coração de Frango (kg)', preco: 22.90, unidadeMedida: 'KG', urlImagem: 'https://images.unsplash.com/photo-1606411594919-482466d97e20?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o17', nomeProduto: 'Tomate Italiano (kg)', preco: 7.45, unidadeMedida: 'KG', urlImagem: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o18', nomeProduto: 'Vinho Tinto Chileno 750ml', preco: 39.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o19', nomeProduto: 'Shampoo Dove 400ml', preco: 18.50, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?q=80&w=200&auto=format&fit=crop' },
+      { id: 'o20', nomeProduto: 'Sabonete Rexona 84g', preco: 2.15, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1610555356070-d0efb6505f81?q=80&w=200&auto=format&fit=crop' }
+    ] as any);
+
+    this.loading.set(false);
+  }
+
+  get viewerStyle() {
+    const t = this.tema();
+    const s = this.supermarket();
+    const isDark = t?.id === 't4' || t?.nome?.toLowerCase().includes('black');
+    
+    return {
+      'background-image': t?.urlBackgroundDecorativo 
+        ? `linear-gradient(${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}, ${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}), url(${t.urlBackgroundDecorativo})` 
+        : 'none',
+      'background-size': 'cover',
+      'background-position': 'center',
+      'background-color': t?.corFundoHex || '#f8fafc',
+      'border-top': `12px solid ${s?.corPrimariaHex || '#16a34a'}`,
+      'color': isDark ? '#ffffff' : '#1f2937'
+    };
+  }
+}

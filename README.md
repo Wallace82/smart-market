@@ -26,9 +26,12 @@ smartmarket/
 - **Core**: AuthService, SupermarketService, EncarteService, OfertaService (todos usando Signals).
 - **Manager Features**: 
     - Gestão de Identidade Visual (Upload de Logo, Seleção de Cores Hex).
-    - Listagem, Criação e Edição de Encartes Digitais com Temas Sazonais.
+    - Criação de Encartes com **Smartphone Preview** (Visualização em tempo real).
+    - Busca inteligente e seleção de ofertas.
 - **Client Features**:
-    - Visualizador de Encarte Imersivo (Layout de Tabloide Profissional).
+    - Visualizador de Encarte Imersivo em **Estilo Tabloide de Varejo**.
+    - Layout responsivo (1 a 4 colunas) com selos de preço dinâmicos.
+    - Rodapé informativo com dados de contato e validade.
 
 ## Como Executar
 
@@ -55,7 +58,7 @@ Get-Content .\infra\scripts\seed_data.sql | docker exec -i smartmarket-postgres 
 
 ### 4. Executar o Frontend
 1. Vá para `frontend/smartmarket-web`
-2. Instale as dependências (caso não tenha feito): `npm install`
+2. Instale as dependências: `npm install`
 3. Inicie com a configuração de proxy:
 ```bash
 ng serve --proxy-config proxy.conf.json
@@ -67,11 +70,10 @@ ng serve --proxy-config proxy.conf.json
 ## 🎨 Design System & 🧱 Arquitetura Frontend
 
 O projeto segue diretrizes visuais e uma arquitetura modular robusta no frontend (Angular):
-* **Design System:** Baseado em Tailwind CSS (grid de 8px) e Angular Material, com paleta de cores focada no setor varejista e SaaS (Verde primário, Laranja de destaque, Azul secundário). Utiliza tipografia Inter para máxima legibilidade.
-* **Arquitetura Frontend:** Fortemente orientada a domínios de negócio (`features/`) separados do núcleo (`core/`). Cada feature (ex: `manager/flyers`) é autossuficiente, contendo suas próprias rotas, páginas, componentes, serviços e modelos, garantindo alta escalabilidade e fácil manutenção.
+* **Design System:** Focado em conversão e experiência de varejo, utilizando Tailwind CSS e Angular Material. [Veja mais detalhes aqui](./docs/design-system.md).
+* **Arquitetura Frontend:** Orientada a domínios (`features/`) e reatividade com Signals. [Veja mais detalhes aqui](./docs/frontend-architecture.md).
 
 ## Documentação Técnica
 * 📄 [Requisitos Funcionais](./docs/REQUIREMENTS.md)
-* 🏛️ [Arquitetura Técnica](./docs/architecture/ARCHITECTURE.md)
 * 🎨 [Design System](./docs/design-system.md)
 * 🧱 [Arquitetura do Frontend](./docs/frontend-architecture.md)

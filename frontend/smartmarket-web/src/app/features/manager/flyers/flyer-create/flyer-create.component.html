@@ -1,15 +1,25 @@
 <div class="p-6 max-w-7xl mx-auto font-sans">
   <div class="flex items-center gap-4 mb-8">
-    <button routerLink="/manager/flyers" class="w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">
+    <button routerLink="/manager/flyers" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <div>
+    <div class="flex-1">
       <h1 class="text-3xl font-black text-gray-900 tracking-tight">Novo Encarte Digital</h1>
       <p class="text-gray-500 mt-1">Configure o tabloide, selecione ofertas e veja o preview em tempo real.</p>
     </div>
+    <button *ngIf="encarteId()" (click)="visualizarPublico()" 
+            class="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-100 hover:border-green-500 hover:text-green-600 text-gray-600 font-bold rounded-2xl transition-all shadow-sm hover:shadow-md">
+      <mat-icon>visibility</mat-icon>
+      Visualizar Público
+    </button>
   </div>
 
-  <div class="flex flex-col lg:flex-row gap-8">
+  <div *ngIf="dataLoading()" class="flex flex-col items-center justify-center py-20">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="mt-4 text-gray-500 font-medium animate-pulse">Carregando dados da loja...</p>
+  </div>
+
+  <div *ngIf="!dataLoading()" class="flex flex-col lg:flex-row gap-8">
     <!-- Esquerda: Formulário -->
     <div class="flex-1 space-y-6">
       <form [formGroup]="form" class="space-y-6">
@@ -17,19 +27,19 @@
         <!-- Configurações Básicas -->
         <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
           <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <mat-icon class="text-gray-400">settings</mat-icon>
+            <mat-icon class="text-green-500">settings</mat-icon>
             Configurações Básicas
           </h2>
           
           <div class="space-y-5">
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-1">Título do Encarte</label>
-              <input type="text" formControlName="titulo" placeholder="Ex: Ofertas de Natal" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow">
+              <input type="text" formControlName="titulo" placeholder="Ex: Ofertas de Natal" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
             </div>
 
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-1">Tema Sazonal</label>
-              <select formControlName="temaId" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow bg-white">
+              <select formControlName="temaId" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
                 <option [value]="null">Nenhum Tema (Padrão)</option>
                 <option *ngFor="let tema of temas()" [value]="tema.id">{{ tema.nome }}</option>
               </select>
@@ -38,11 +48,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Data de Início</label>
-                <input type="date" formControlName="dataInicio" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow">
+                <input type="date" formControlName="dataInicio" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
               </div>
               <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Data de Fim</label>
-                <input type="date" formControlName="dataFim" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-shadow">
+                <input type="date" formControlName="dataFim" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
               </div>
             </div>
           </div>
@@ -50,101 +60,168 @@
 
         <!-- Seleção de Ofertas -->
         <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <mat-icon class="text-gray-400">local_offer</mat-icon>
+              <mat-icon class="text-green-500">local_offer</mat-icon>
               Selecionar Ofertas
             </h2>
-            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">
-              {{ ofertasSelecionadas().length }} selecionadas
-            </span>
+            <div class="flex items-center gap-3">
+              <div class="relative flex-1 md:w-64">
+                <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</mat-icon>
+                <input type="text" (input)="updateSearch($event)" placeholder="Filtrar ofertas..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all">
+              </div>
+              <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0">
+                {{ ofertasSelecionadas().length }} selecionadas
+              </span>
+            </div>
           </div>
 
-          <div class="max-h-[400px] overflow-y-auto pr-2 space-y-3">
-            <div *ngIf="ofertasDisponiveis().length === 0" class="text-center py-10 border-2 border-dashed border-gray-200 rounded-xl">
-              <mat-icon class="text-gray-400 text-4xl mb-2">inventory_2</mat-icon>
-              <p class="text-gray-500 font-medium">Nenhuma oferta disponível na sua loja.</p>
+          <div class="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+            <div *ngIf="ofertasFiltradas().length === 0" class="text-center py-10 border-2 border-dashed border-gray-100 rounded-2xl">
+              <mat-icon class="text-gray-300 text-5xl mb-2">inventory_2</mat-icon>
+              <p class="text-gray-400 font-medium">Nenhuma oferta encontrada.</p>
             </div>
 
-            <label *ngFor="let oferta of ofertasDisponiveis()" class="flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors" [class.border-green-500]="ofertasSelecionadas().includes(oferta)" [class.bg-green-50]="ofertasSelecionadas().includes(oferta)">
-              <input type="checkbox" (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500">
+            <label *ngFor="let oferta of ofertasFiltradas()" 
+                   class="flex items-center p-4 border rounded-2xl cursor-pointer hover:shadow-md transition-all group relative overflow-hidden" 
+                   [class.border-green-500]="ofertasSelecionadas().includes(oferta)" 
+                   [class.bg-green-50/30]="ofertasSelecionadas().includes(oferta)"
+                   [class.border-gray-100]="!ofertasSelecionadas().includes(oferta)">
               
-              <div class="ml-4 flex items-center gap-4 flex-1">
-                <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="w-12 h-12 rounded object-cover border border-gray-200 bg-white">
-                <div class="flex-1">
-                  <h4 class="font-bold text-gray-900 leading-tight">{{ oferta.nomeProduto }}</h4>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-sm font-black text-red-600">{{ oferta.preco | currency:'BRL' }}</span>
-                    <span class="text-xs text-gray-500 uppercase font-medium">/ {{ oferta.unidadeMedida }}</span>
+              <div class="absolute left-0 top-0 w-1 h-full bg-green-500 transition-transform origin-left" [class.scale-x-0]="!ofertasSelecionadas().includes(oferta)"></div>
+
+              <input type="checkbox" (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="w-5 h-5 text-green-600 rounded-lg border-gray-300 focus:ring-green-500 z-10">
+              
+              <div class="ml-4 flex items-center gap-4 flex-1 z-10">
+                <div class="w-14 h-14 rounded-xl overflow-hidden bg-white border border-gray-100 flex-shrink-0">
+                  <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="w-full h-full object-cover">
+                  <div *ngIf="!oferta.urlImagem" class="w-full h-full flex items-center justify-center bg-gray-50">
+                    <mat-icon class="text-gray-300">image</mat-icon>
                   </div>
                 </div>
+                <div class="flex-1">
+                  <h4 class="font-bold text-gray-900 leading-tight group-hover:text-green-700 transition-colors">{{ oferta.nomeProduto }}</h4>
+                  <div class="flex items-center gap-3 mt-1">
+                    <span class="text-lg font-black text-gray-900">{{ oferta.preco | currency:'BRL' }}</span>
+                    <span class="text-xs text-gray-400 uppercase font-bold tracking-wider">/ {{ oferta.unidadeMedida }}</span>
+                  </div>
+                </div>
+                <mat-icon *ngIf="ofertasSelecionadas().includes(oferta)" class="text-green-500">check_circle</mat-icon>
               </div>
             </label>
           </div>
         </div>
 
         <!-- Botão Salvar -->
-        <div class="flex justify-end pt-4">
+        <div class="flex justify-end pt-4 gap-4">
+          <button *ngIf="encarteId()" type="button" (click)="visualizarPublico()"
+                  class="border-2 border-gray-200 hover:border-green-500 hover:text-green-600 text-gray-600 font-bold py-4 px-8 rounded-2xl transition-all text-lg flex items-center gap-2 bg-white shadow-sm">
+            <mat-icon>open_in_new</mat-icon>
+            Ver Online
+          </button>
+
           <button type="button" (click)="salvar()" [disabled]="form.invalid || loading() || ofertasSelecionadas().length === 0" 
-                  class="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-xl shadow-sm transition-colors text-lg flex items-center gap-2">
+                  class="bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-green-200 transition-all text-lg flex items-center gap-3 transform hover:-translate-y-1 active:translate-y-0">
             <mat-icon *ngIf="loading()" class="animate-spin">loop</mat-icon>
             <mat-icon *ngIf="!loading()">publish</mat-icon>
-            {{ loading() ? 'Processando...' : 'Publicar Encarte' }}
+            {{ loading() ? 'Processando...' : (encarteId() ? 'Atualizar Encarte' : 'Publicar Encarte Digital') }}
           </button>
         </div>
       </form>
     </div>
 
-    <!-- Direita: Preview Live -->
-    <div class="lg:w-[400px] flex-shrink-0">
+    <!-- Direita: Preview Live (Smartphone Mockup) -->
+    <div class="lg:w-[420px] flex-shrink-0">
       <div class="sticky top-6">
-        <div class="bg-gray-100 rounded-[2.5rem] p-4 shadow-2xl border-8 border-gray-900 relative h-[700px] flex flex-col">
-          
-          <!-- Notch Fake -->
-          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-5 bg-gray-900 rounded-b-xl z-50"></div>
-
-          <div class="w-full h-full rounded-2xl overflow-hidden flex flex-col bg-white shadow-inner relative" [ngStyle]="previewStyle">
+        <div class="relative mx-auto">
+          <!-- Smartphone Outer Shell -->
+          <div class="bg-gray-900 rounded-[3rem] p-4 shadow-2xl border-[12px] border-gray-800 relative h-[780px] w-full flex flex-col overflow-hidden">
             
-            <!-- Header do Encarte Preview -->
-            <div class="p-6 pt-10 text-center relative z-10"
-                 [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
-              <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="max-h-12 object-contain mx-auto mb-3 filter drop-shadow-sm">
-              <h2 class="text-white text-xl font-black uppercase tracking-wide leading-tight">{{ form.get('titulo')?.value || 'Novo Encarte' }}</h2>
-            </div>
-
-            <!-- Faixa de Validade -->
-            <div class="bg-black/80 text-white text-[10px] uppercase font-bold text-center py-1.5 z-10 relative">
-              Válido: {{ form.get('dataInicio')?.value | date:'dd/MM/yyyy' }} até {{ form.get('dataFim')?.value | date:'dd/MM/yyyy' }}
-            </div>
-
-            <!-- Área de Produtos -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-3 z-10 relative">
+            <!-- Speaker/Notch -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-50"></div>
+            
+            <!-- Screen Content -->
+            <div class="w-full h-full rounded-[2rem] overflow-hidden flex flex-col bg-white shadow-inner relative" [ngStyle]="previewStyle">
               
-              <div *ngIf="ofertasSelecionadas().length === 0" class="text-center mt-10">
-                <div class="w-16 h-16 bg-white/50 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <mat-icon class="text-gray-400">touch_app</mat-icon>
+              <!-- Content Overlay (for themes) -->
+              <div class="absolute inset-0 pointer-events-none opacity-20" *ngIf="currentTheme()?.urlBackgroundDecorativo"></div>
+
+              <!-- Header do Encarte Preview -->
+              <div class="p-8 pt-12 text-center relative z-10"
+                   [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+                <div class="w-20 h-20 bg-white rounded-2xl p-2 mx-auto mb-4 shadow-lg transform -rotate-3 border-2 border-white">
+                  <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
+                  <mat-icon *ngIf="!supermarket()?.urlLogomarca" class="text-green-500 w-full h-full flex items-center justify-center text-4xl">store</mat-icon>
                 </div>
-                <p class="text-gray-500 text-sm font-medium">Selecione ofertas ao lado para visualizar aqui.</p>
+                <h2 class="text-white text-2xl font-black uppercase tracking-tighter leading-none drop-shadow-md">
+                  {{ form.get('titulo')?.value || 'Nossas Ofertas' }}
+                </h2>
+                <div class="w-12 h-1 bg-white/40 mx-auto mt-3 rounded-full"></div>
               </div>
 
-              <!-- Produto Card Preview -->
-              <div *ngFor="let oferta of ofertasSelecionadas()" class="bg-white p-3 rounded-xl shadow-sm border-2 border-transparent relative overflow-hidden group"
-                   [style.border-color]="supermarket()?.corPrimariaHex || '#e5e7eb'">
-                <div class="flex gap-3 relative z-10">
-                  <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" class="w-16 h-16 object-cover rounded-lg bg-gray-50 border border-gray-100">
-                  <div class="flex-1 flex flex-col justify-center">
-                    <h4 class="text-sm font-bold text-gray-800 leading-tight mb-1 line-clamp-2">{{ oferta.nomeProduto }}</h4>
-                    <div class="flex items-baseline gap-1 mt-auto">
-                      <span class="text-xs font-bold text-gray-500">R$</span>
-                      <span class="text-xl font-black text-red-600 leading-none">{{ oferta.preco | number:'1.2-2' }}</span>
-                      <span class="text-[10px] text-gray-400 uppercase font-bold">/ {{ oferta.unidadeMedida }}</span>
+              <!-- Faixa de Validade -->
+              <div class="bg-gray-900 text-white text-[10px] uppercase font-black tracking-widest text-center py-2 z-20 relative">
+                <span class="opacity-60">Válido:</span> 
+                {{ (form.get('dataInicio')?.value | date:'dd/MM') || '00/00' }} 
+                <span class="mx-1 opacity-40">→</span> 
+                {{ (form.get('dataFim')?.value | date:'dd/MM') || '00/00' }}
+              </div>
+
+              <!-- Área de Produtos -->
+              <div class="flex-1 overflow-y-auto p-4 space-y-4 z-10 relative custom-scrollbar">
+                
+                <div *ngIf="ofertasSelecionadas().length === 0" class="text-center mt-20 p-6">
+                  <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-gray-200">
+                    <mat-icon class="text-gray-300 text-3xl">touch_app</mat-icon>
+                  </div>
+                  <p class="text-gray-400 text-sm font-bold uppercase tracking-tight">Selecione ofertas ao lado</p>
+                  <p class="text-gray-300 text-xs mt-1">O seu encarte aparecerá aqui instantaneamente</p>
+                </div>
+
+                <!-- Produto Card Preview -->
+                <div *ngFor="let oferta of ofertasSelecionadas()" 
+                     class="bg-white p-4 rounded-2xl shadow-md border-2 relative overflow-hidden group transform transition-all hover:scale-[1.02]"
+                     [style.border-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+                  
+                  <div class="absolute -right-2 -top-2 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center transform rotate-12 z-20 shadow-lg">
+                    <span class="text-white font-black text-xs">OFERTA</span>
+                  </div>
+
+                  <div class="flex gap-4 relative z-10">
+                    <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+                      <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                      <h4 class="text-sm font-black text-gray-800 leading-tight line-clamp-2">{{ oferta.nomeProduto }}</h4>
+                      <div class="flex items-end gap-1 mt-2">
+                        <div class="flex flex-col">
+                          <span class="text-[10px] font-bold text-gray-400 uppercase leading-none">Apenas</span>
+                          <div class="flex items-baseline gap-0.5">
+                            <span class="text-xs font-black text-red-600">R$</span>
+                            <span class="text-2xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                          </div>
+                        </div>
+                        <span class="text-[10px] text-gray-400 uppercase font-black mb-1">/ {{ oferta.unidadeMedida }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- Footer do Flyer -->
+                <div class="py-10 text-center opacity-30" *ngIf="ofertasSelecionadas().length > 0">
+                  <mat-icon class="text-gray-400">qr_code_2</mat-icon>
+                  <p class="text-[10px] font-bold uppercase mt-1">Escaneie para ver mais</p>
+                </div>
+              </div>
+
+              <!-- Barra Inferior Fake -->
+              <div class="h-14 border-t border-gray-100 flex items-center justify-around px-6 bg-white/80 backdrop-blur-md z-20">
+                <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                <div class="w-12 h-1 bg-gray-200 rounded-full"></div>
+                <div class="w-2 h-2 rounded-full bg-gray-200"></div>
               </div>
 
             </div>
-
           </div>
         </div>
       </div>

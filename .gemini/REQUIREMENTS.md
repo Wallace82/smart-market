@@ -1,8 +1,8 @@
-﻿﻿# 📋 SmartMarket — Documento de Requisitos
+﻿# 📋 SmartMarket — Documento de Requisitos (MVP)
 
-> **Versão:** 1.7.0
-> **Data:** 2026-04-27
-> **Status:** MVP - Backend & Frontend Implementados
+> **Versão:** 2.0.0
+> **Data:** 2026-05-03
+> **Status:** MVP — Escopo Validável
 > **Equipe:** 3 desenvolvedores
 
 ---
@@ -11,20 +11,16 @@
 
 1. [Visão Geral do Produto](#1-visão-geral-do-produto)
 2. [Perfis de Usuário](#2-perfis-de-usuário)
-3. [Requisitos Funcionais](#3-requisitos-funcionais)
-4. [Requisitos Não Funcionais](#4-requisitos-não-funcionais)
-5. [Arquitetura](#5-arquitetura)
-6. [Stack Tecnológica](#6-stack-tecnológica)
-7. [Roadmap Macro](#7-roadmap-macro)
-8. [Glossário](#8-glossário)
-9. [Modelagem de Domínio](#9-modelagem-de-domínio)
-10. [Definição dos Microserviços](#10-definição-dos-microserviços)
-11. [Estrutura dos Projetos](#11-estrutura-dos-projetos)
-12. [Diferencial Estratégico: Marketing Inteligente por Proximidade](#12-diferencial-estratégico-marketing-inteligente-por-proximidade)
-13. [Diferencial Estratégico: Canal de Aquisição Físico-Digital (Totem QR Code)](#13-diferencial-estratégico-canal-de-aquisição-físico-digital-totem-qr-code)
-14. [Diferencial Estratégico: Acesso Público e Experiência sem Fricção (Product-Led Growth)](#14-diferencial-estratégico-acesso-público-e-experiência-sem-fricção-product-led-growth)
-15. [Estratégia de Cache em Múltiplas Camadas (Alta Performance)](#15-estratégia-de-cache-em-múltiplas-camadas-alta-performance)
-16. [Módulo de Assinatura e Billing (Planos para Supermercados)](#16-módulo-de-assinatura-e-billing-planos-para-supermercados)
+3. [Requisitos Funcionais (MVP)](#3-requisitos-funcionais-mvp)
+4. [Requisitos Não Funcionais (MVP)](#4-requisitos-não-funcionais-mvp)
+5. [Modelagem de Domínio](#5-modelagem-de-domínio)
+6. [Arquitetura Simplificada (Monólito Modular)](#6-arquitetura-simplificada-monólito-modular)
+7. [Stack Tecnológica](#7-stack-tecnológica)
+8. [Roadmap MVP](#8-roadmap-mvp)
+9. [Glossário](#9-glossário)
+10. [Diferencial: Canal Físico-Digital (QR Code)](#10-diferencial-canal-físico-digital-qr-code)
+11. [Diferencial: Acesso Público sem Fricção (PLG)](#11-diferencial-acesso-público-sem-fricção-plg)
+12. [🧾 Backlog (Fase Pós-MVP)](#12--backlog-fase-pós-mvp)
 
 ---
 
@@ -32,7 +28,7 @@
 
 ### 1.1 Descrição
 
-O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que conecta supermercados a seus clientes por meio de encartes digitais, promoções personalizadas e notificações por geolocalização. O sistema opera com um catálogo base unificado de produtos e permite a personalização visual da loja virtual do supermercado, incluindo temas para encartes sazonais.
+O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que conecta supermercados a seus clientes por meio de encartes digitais, promoções personalizadas e filtros por geolocalização. O sistema opera com um catálogo base unificado de produtos e permite a personalização visual da loja virtual do supermercado (Whitelabel), incluindo temas para encartes sazonais.
 
 ### 1.2 Problema que Resolve
 
@@ -43,22 +39,29 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | Trabalho manual e duplicado no cadastro de produtos | Perda de tempo dos gestores de supermercado |
 | Falta de flexibilidade para o cliente final | Dificuldade em montar lista de compras mais barata |
 | Descaracterização da marca do supermercado no app | Sensação de distanciamento e falta de confiança pelo cliente |
-| Baixo engajamento em datas comemorativas | Dificuldade em criar campanhas temáticas rapidamente |
 
-### 1.3 Proposta de Valor
+### 1.3 Proposta de Valor (MVP)
 
-*   **Para CLIENTES:** Promoções do supermercado mais próximo + recomendações personalizadas.
-*   **Para SUPERMERCADOS:** Catálogo de produtos pronto + atração de clientes + **Tabloide Digital Temático e Whitelabel (Identidade Visual Própria e Temas Sazonais)**.
-*   **Para o NEGÓCIO:** SaaS com modelo de assinatura por supermercado + catálogo padronizado e limpo.
+*   **Para CLIENTES:** Visualizar promoções e encartes do supermercado mais próximo de forma rápida e sem fricção.
+*   **Para SUPERMERCADOS:** Catálogo de produtos pronto + atração de clientes + **Tabloide Digital Whitelabel com Temas Sazonais**.
+*   **Para o NEGÓCIO:** Validar se supermercados veem valor na plataforma e se consumidores adotam o encarte digital.
 
-### 1.4 Identificação do Produto
+### 1.4 Hipóteses a Validar no MVP
+
+| # | Hipótese | Métrica de Validação |
+|---|---|---|
+| H1 | Supermercados veem valor em encartes digitais | Nº de gestores que criam encartes ativamente |
+| H2 | Consumidores acessam e navegam nos encartes | Nº de visualizações de encartes e tempo de sessão |
+| H3 | A experiência digital substitui o encarte físico | Feedback qualitativo + taxa de retorno de usuários |
+
+### 1.5 Identificação do Produto
 
 | Item | Detalhe |
 |---|---|
 | **Nome** | SmartMarket |
 | **Tipo** | Web Responsiva + APIs REST |
 | **Modelo de Negócio** | SaaS B2B2C |
-| **Fase Atual** | MVP — Backend & Frontend Implementados |
+| **Fase Atual** | MVP — Escopo Validável |
 
 ---
 
@@ -68,362 +71,359 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 
 | Perfil | Descrição | Acesso Principal |
 |---|---|---|
-| **Admin** (ROLE_ADMIN) | Gestor total da plataforma SmartMarket. Responsável pelo negócio SaaS, pelo Catálogo Global e pelos **Temas Base**. | Painel administrativo global (Backoffice). |
-| **Gestor Supermercado** (ROLE_GESTOR) | Responsável pela operação comercial de um ou mais supermercados. Adiciona ofertas e cria encartes usando sua marca e **temas**. | Painel do estabelecimento (Dashboard Loja). |
-| **Cliente** (ROLE_CLIENTE) | Usuário final (consumidor) das promoções. | App web responsivo / Mobile-first. |
+| **Admin** (ROLE_ADMIN) | Gestor total da plataforma SmartMarket. Responsável pelo Catálogo Global e pelos **Temas Base**. | Painel administrativo (Backoffice). |
+| **Gestor Supermercado** (ROLE_GESTOR) | Responsável pela operação comercial de um supermercado. Adiciona ofertas e cria encartes usando sua marca e **temas**. | Painel do estabelecimento (Dashboard Loja). |
+| **Cliente** (Anônimo ou ROLE_CLIENTE) | Consumidor que visualiza promoções e encartes. **Não precisa de login para navegar.** | App web responsivo / Mobile-first. |
 
-### 2.2 Especificação dos Dashboards
+### 2.2 Especificação dos Dashboards (MVP)
 
 #### 1. Dashboard Admin (Visão Global)
-*   Gestão de Catálogo (Aprovação de produtos e imagens).
+*   Gestão de Catálogo (CRUD de produtos e categorias).
 *   Gestão de Supermercados (Aprovação de novos parceiros).
 *   **Gestão de Temas Sazonais:** Criar temas globais (ex: Natal, Black Friday) com backgrounds e cores.
 
 #### 2. Dashboard Gestor Supermercado (Visão da Loja)
 *   **Personalização de Loja:** Configuração de Logomarca, Cor Primária e Secundária.
-*   Gestão de Ofertas (Preços dos produtos na sua loja).
-*   **Gestão de Encartes Digitais:** Listagem, Criação e Edição de tabloides digitais escolhendo um Tema Sazonal.
+*   Gestão de Ofertas (Selecionar produtos do catálogo e definir preço promocional).
+*   **Gestão de Encartes Digitais:** Criar encartes escolhendo um Tema Sazonal e uma lista de Ofertas.
+*   **QR Code da Loja:** Visualizar e baixar QR Code que aponta para o encarte ativo.
 
 #### 3. Visão do Cliente (App)
-*   Home com promoções geolocalizadas.
-*   **Visualização de Tabloide Imersiva:** Renderização do encarte com as cores da loja + elementos gráficos do tema sazonal.
+*   Home com supermercados e ofertas filtrados por proximidade.
+*   Visualização imersiva do encarte digital (tablóide) com identidade visual da loja.
+*   Acesso 100% público — sem login obrigatório.
 
 ---
 
-## 3. Requisitos Funcionais
+## 3. Requisitos Funcionais (MVP)
 
 ### 3.1 RF-01 — Autenticação e Segurança
-*   **RF-01.1:** O sistema deve permitir login via E-mail/Senha para os três perfis.
+*   **RF-01.1:** O sistema deve permitir login via E-mail/Senha para Admin e Gestor.
 *   **RF-01.2:** Uso de JWT para sessões stateless.
-*   **RF-01.3:** Uso de Signals para estado reativo do usuário no Frontend.
-*   **RF-01.4:** O acesso a páginas protegidas sem autenticação deve redirecionar o usuário para a tela de login.
-*   **RF-01.5:** A vitrine do cliente final (ofertas, produtos e encartes) deve ter **acesso público**, permitindo a navegação tanto para usuários logados quanto não logados (anônimos).
+*   **RF-01.3:** O acesso a páginas protegidas (Admin/Gestor) sem autenticação deve redirecionar para login.
+*   **RF-01.4:** A vitrine do cliente final (ofertas, produtos e encartes) deve ter **acesso público**, permitindo navegação para usuários logados e anônimos.
 
 ### 3.2 RF-02 — Gestão de Supermercados (Whitelabel)
-*   **RF-02.1:** O Admin deve cadastrar/aprovar supermercados.
+*   **RF-02.1:** O Admin deve poder cadastrar e aprovar supermercados.
 *   **RF-02.2:** O Gestor deve poder fazer upload da **Logomarca** (MinIO).
 *   **RF-02.3:** O Gestor deve definir a **Paleta de Cores** (Primária e Secundária).
+*   **RF-02.4:** O Gestor deve poder configurar as coordenadas geográficas (latitude/longitude) e endereço da loja.
 
-### 3.3 RF-03 — Catálogo e Ofertas
-*   **RF-03.1:** O Admin mantém o Catálogo Global de Produtos.
-*   **RF-03.2:** O Gestor seleciona produtos do catálogo e define o preço de oferta para sua loja.
-*   **RF-03.3:** O Cliente (logado ou não logado) deve poder visualizar os produtos e ofertas disponíveis.
-*   **RF-03.4:** O Cliente deve poder aplicar diversos filtros na busca de ofertas (por categoria, faixa de preço, supermercado, etc.).
+### 3.3 RF-03 — Catálogo de Produtos
+*   **RF-03.1:** O Admin mantém o Catálogo Global de Produtos (CRUD com nome, imagem, categoria).
+*   **RF-03.2:** Produtos são organizados por categorias (ex: Carnes, Bebidas, Hortifruti).
+*   **RF-03.3:** Imagens de produtos são armazenadas no MinIO.
 
-### 3.4 RF-04 — Encartes Virtuais Temáticos
-*   **RF-04.1:** O Admin cadastra **Temas Sazonais** (Assets gráficos e cores de fundo).
-*   **RF-04.2:** O Gestor cria um **Encarte Digital** associando um Tema e uma lista de Ofertas.
-*   **RF-04.3:** O sistema gera um preview do encarte mesclando Whitelabel (Loja) + Tema (Sazonal).
-*   **RF-04.4:** O Cliente (logado ou não logado) deve poder visualizar o encarte completo (tablóide digital) do supermercado de forma imersiva.
+### 3.4 RF-04 — Gestão de Ofertas
+*   **RF-04.1:** O Gestor seleciona produtos do Catálogo Global e define o preço promocional para sua loja.
+*   **RF-04.2:** Cada oferta possui data de início e fim (validade).
+*   **RF-04.3:** O Cliente (logado ou anônimo) visualiza as ofertas ativas de um supermercado.
+*   **RF-04.4:** O Cliente pode filtrar ofertas por categoria e faixa de preço.
 
-### 3.5 RF-05 — Notificações e Geolocalização
-*   **RF-05.1:** O sistema deve capturar a **geolocalização do usuário** (via permissão de GPS do navegador/dispositivo ou entrada manual de CEP).
-*   **RF-05.2:** Disparo de notificações push (RabbitMQ) quando o cliente entra no raio de atuação de um supermercado com ofertas ativas.
-*   **RF-05.3:** **Busca por proximidade:** O sistema deve permitir a aplicação de filtros em um raio de localização configurável (ex: ofertas a num raio de 5km, 10km).
-*   **RF-05.4:** **Exibição de supermercados próximos:** A vitrine principal deve priorizar automaticamente e destacar os estabelecimentos fisicamente mais próximos do usuário.
-*   **RF-05.5:** **Personalização de ofertas por região:** O catálogo exibido para o cliente deve ser dinâmico, exibindo apenas encartes e produtos disponíveis na sua região de cobertura.
+### 3.5 RF-05 — Encartes Digitais (Tablóide)
+*   **RF-05.1:** O Admin cadastra **Temas Sazonais** (background decorativo e cor de fundo).
+*   **RF-05.2:** O Gestor cria um **Encarte Digital** associando: um Tema, um título, datas de vigência e uma lista de Ofertas.
+*   **RF-05.3:** O sistema gera uma visualização do encarte mesclando Whitelabel da Loja + Tema Sazonal.
+*   **RF-05.4:** O Cliente (logado ou anônimo) visualiza o encarte completo de forma imersiva e mobile-first.
+*   **RF-05.5:** O encarte possui status: Rascunho, Ativo e Encerrado.
 
-### 3.6 RF-06 — Coleta de Dados e Estatísticas (Analytics)
-*   **RF-06.1:** O sistema deve ser orientado a dados (data-driven), coletando métricas de engajamento de forma contínua.
-*   **RF-06.2:** Registro de **produtos mais visualizados** e **ofertas mais clicadas**.
-*   **RF-06.3:** Rastreamento contínuo das **preferências dos usuários** e **histórico de navegação**.
-*   **RF-06.4:** Monitoramento analítico dos **filtros mais utilizados** nas telas de busca.
-*   **RF-06.5:** Medição do **tempo de permanência nas telas** e no consumo visual dos encartes digitais.
-*   **RF-06.6:** Captura da **localização dos acessos** (mediante permissão do usuário) para gerar mapas de calor de interesse.
+### 3.6 RF-06 — Geolocalização (Simplificada)
+*   **RF-06.1:** Ao carregar a vitrine, o app solicita permissão de GPS via prompt nativo do navegador.
+*   **RF-06.2:** Se a permissão for concedida, o sistema filtra supermercados e ofertas em um **raio padrão de 3 km**.
+*   **RF-06.3:** Se a permissão for negada, o usuário pode informar seu **CEP ou Bairro manualmente** para obter resultados filtrados.
+*   **RF-06.4:** A vitrine deve priorizar supermercados mais próximos do usuário.
+
+> **Fora do escopo MVP:** Tracking em background, geofencing, triggers em tempo real, notificações push por proximidade.
+
+### 3.7 RF-07 — QR Code por Loja
+*   **RF-07.1:** O painel do Gestor deve exibir um QR Code único e permanente para sua loja, pronto para impressão.
+*   **RF-07.2:** O QR Code redireciona para o encarte digital ativo da loja no momento do escaneamento.
+*   **RF-07.3:** A página de destino é pública, de carregamento rápido e sem exigência de login.
+*   **RF-07.4:** O QR Code deve conter parâmetro de rastreamento (ex: `?utm_source=totem`) para identificar acessos de origem física.
+
+### 3.8 RF-08 — Métricas Básicas (Analytics Essencial)
+*   **RF-08.1:** Registrar número de **visualizações por encarte**.
+*   **RF-08.2:** Registrar número de **escaneamentos do QR Code** (por parâmetro UTM).
+*   **RF-08.3:** Exibir no Dashboard do Gestor: encartes publicados, total de visualizações e acessos via QR Code.
+
+> **Fora do escopo MVP:** Heatmaps, funis de conversão, tracking de sessão anônima, analytics comportamental avançado, footfall attribution.
 
 ---
 
-## 4. Requisitos Não Funcionais
+## 4. Requisitos Não Funcionais (MVP)
 
 ### 4.1 RNF-01 — Performance
-*   Tempo de resposta das APIs < 200ms para 95% das requisições.
-*   Carregamento do encarte no mobile em < 2 segundos.
+*   Tempo de resposta das APIs < 300ms para 95% das requisições.
+*   Carregamento do encarte no mobile em < 3 segundos (conexão 4G).
 
-### 4.2 RNF-02 — Escalabilidade
-*   Arquitetura de Microserviços para escala independente.
-*   Uso de Cache (Redis) para catálogo e ofertas frequentes.
-
-### 4.3 RNF-03 — Armazenamento de Arquivos (MinIO)
+### 4.2 RNF-02 — Armazenamento de Arquivos (MinIO)
 *   `smartmarket-products`: Imagens de produtos.
 *   `smartmarket-brands`: Logomarcas dos supermercados.
-*   `smartmarket-themes`: Assets decorativos de campanhas sazonais.
+*   `smartmarket-themes`: Assets decorativos de temas sazonais.
+
+### 4.3 RNF-03 — Segurança
+*   Autenticação via JWT com expiração de token configurável.
+*   Controle de acesso baseado em roles (ROLE_ADMIN, ROLE_GESTOR).
+*   Rotas públicas não exigem autenticação (vitrine, encartes, QR Code).
+
+### 4.4 RNF-04 — Privacidade (LGPD)
+*   Exibir modal de aceite de Termos de Uso e Política de Privacidade na criação de conta.
+*   No prompt de localização, exibir texto explicativo: *"Usamos sua localização apenas para mostrar as melhores ofertas perto de você."*
+*   Não armazenar dados de localização bruta do usuário no MVP.
+
+### 4.5 RNF-05 — Compatibilidade
+*   Funcionamento pleno em Chrome e Safari (últimas 2 versões) em iOS e Android.
+*   Design mobile-first com responsividade para desktop.
 
 ---
 
-## 5. Modelagem de Domínio (V1.6)
+## 5. Modelagem de Domínio (MVP)
 
 | Entidade | Atributos Principais |
 |---|---|
-| **Supermercado** | id, nome, cnpj, status, urlLogomarca, corPrimariaHex, corSecundariaHex |
+| **User** | id, email, senha (hash), role, nome |
+| **Supermercado** | id, nome, cnpj, status, urlLogomarca, corPrimariaHex, corSecundariaHex, latitude, longitude, endereco |
 | **TemaEncarte** | id, nome, urlBackgroundDecorativo, corFundoHex, ativo |
-| **EncarteDigital** | id, supermercadoId, temaId, titulo, dataInicio, dataFim, status |
+| **Categoria** | id, nome |
 | **ProdutoBase** | id, nome, urlImagem, categoriaId |
-| **Oferta** | id, supermercadoId, produtoBaseId, preco |
+| **Oferta** | id, supermercadoId, produtoBaseId, preco, dataInicio, dataFim, ativa |
+| **EncarteDigital** | id, supermercadoId, temaId, titulo, dataInicio, dataFim, status (RASCUNHO, ATIVO, ENCERRADO) |
+| **EncarteOferta** | id, encarteId, ofertaId (tabela associativa) |
 
 ---
 
-## 6. Stack Tecnológica
+## 6. Arquitetura Simplificada (Monólito Modular)
+
+### 6.1 Justificativa
+
+Para o MVP com uma equipe de 3 desenvolvedores, a arquitetura de microserviços introduz **complexidade operacional desnecessária** (múltiplos deploys, databases separados, comunicação inter-serviço, service discovery). Um **monólito modular** oferece:
+
+- Desenvolvimento mais ágil e deploys simplificados.
+- Separação lógica clara entre domínios (módulos internos).
+- Facilidade de refatoração futura para microserviços, se validado.
+
+### 6.2 Estrutura de Módulos
+
+```
+smartmarket-api/
+├── auth/          → Autenticação, JWT, controle de roles
+├── supermarket/   → Cadastro de lojas, Whitelabel, coordenadas
+├── catalog/       → Catálogo global de produtos e categorias
+├── offer/         → Ofertas por supermercado
+├── flyer/         → Encartes digitais e temas sazonais
+├── geo/           → Filtro de proximidade (raio simples)
+├── analytics/     → Métricas básicas (contadores de views)
+└── storage/       → Integração com MinIO (upload de imagens)
+```
+
+### 6.3 Banco de Dados
+
+- Um **único banco PostgreSQL** com schemas separados por módulo (quando necessário).
+- Migração de schema via **Flyway**.
+
+### 6.4 Diagrama de Alto Nível
+
+```
+┌──────────────────────────────────────────────────┐
+│                 Frontend Angular                  │
+│          (Mobile-First / SPA / Signals)           │
+└──────────────────┬───────────────────────────────┘
+                   │ HTTP REST (JSON)
+┌──────────────────▼───────────────────────────────┐
+│              smartmarket-api                       │
+│   ┌─────────┬──────────┬────────┬──────────┐     │
+│   │  auth   │ catalog  │ offer  │  flyer   │     │
+│   ├─────────┼──────────┼────────┼──────────┤     │
+│   │ super-  │   geo    │analyt- │ storage  │     │
+│   │ market  │          │  ics   │ (MinIO)  │     │
+│   └─────────┴──────────┴────────┴──────────┘     │
+└──────────────────┬───────────────────────────────┘
+                   │
+          ┌────────┼────────┐
+          ▼        ▼        ▼
+     PostgreSQL  MinIO    Redis
+      (dados)   (imgs)  (cache)
+```
+
+---
+
+## 7. Stack Tecnológica
 
 | Camada | Tecnologia |
 |---|---|
 | **Backend** | Java 21 LTS + Spring Boot 3.4.x |
 | **Frontend** | Angular 18+ + Tailwind CSS + Angular Material + Signals |
-| **API Gateway** | Spring Cloud Gateway |
 | **Segurança** | Spring Security + JWT |
-| **Banco de Dados** | PostgreSQL 16 (Database-per-service) |
-| **Object Storage** | MinIO (Object Storage compatível com S3) |
-| **Mensageria** | RabbitMQ (Comunicação Assíncrona e Eventos) |
+| **Banco de Dados** | PostgreSQL 16 (banco único) |
+| **Object Storage** | MinIO (compatível com S3) |
+| **Cache** | Redis (cache de catálogo e ofertas + dados geoespaciais) |
 | **Migração de BD** | Flyway |
-| **Observabilidade** | Prometheus + Grafana + Spring Boot Actuator |
 | **Containerização** | Docker + Docker Compose |
 
----
-
-## 7. Roadmap Macro
-
-1.  **Fase 1 (Concluída):** Fundamentos de Segurança e Auth-Service.
-2.  **Fase 2 (Concluída):** Supermarket-Service com Whitelabel e Product-Service com Encartes Temáticos.
-3.  **Fase 3 (Concluída):** Frontend Angular (Portal Admin e Gestor).
-4.  **Fase 4 (Em andamento):** App Cliente (Mobile First) e Geolocalização.
-5.  **Fase 5:** Notificações Push e Analytics.
+> **Removido do MVP:** API Gateway dedicado (Spring Cloud Gateway), RabbitMQ, Prometheus/Grafana (observabilidade), arquitetura database-per-service.
 
 ---
 
-## 8. Glossário
+## 8. Roadmap MVP
+
+| Fase | Escopo | Status |
+|---|---|---|
+| **Fase 1** | Auth (JWT + Roles) + Cadastro de Supermercados (Whitelabel) | ✅ Concluída |
+| **Fase 2** | Catálogo de Produtos + Ofertas + Temas + Encartes Digitais | ✅ Concluída |
+| **Fase 3** | Frontend Admin e Gestor (Dashboards) | ✅ Concluída |
+| **Fase 4** | Vitrine Pública (Mobile-First) + Geolocalização Simples + QR Code | 🔄 Em andamento |
+| **Fase 5** | Métricas Básicas + Polish + Validação com Supermercados Piloto | ⬜ Planejada |
+
+---
+
+## 9. Glossário
 
 *   **Whitelabel:** Capacidade do sistema de assumir a identidade visual do cliente (supermercado).
 *   **Sazonal:** Relativo a épocas específicas do ano (Natal, Páscoa, etc).
 *   **Encarte Digital:** Tabloide de ofertas visualizado em dispositivos digitais.
 *   **MinIO:** Servidor de armazenamento de objetos de alta performance.
+*   **PLG (Product-Led Growth):** Estratégia onde o produto é o principal vetor de aquisição de clientes.
+*   **Monólito Modular:** Aplicação única com separação lógica interna por módulos de domínio.
 
 ---
 
-## 10. Definição dos Microserviços
+## 10. Diferencial: Canal Físico-Digital (QR Code)
 
-*   **auth-service:** Centraliza usuários e permissões.
-*   **supermarket-service:** Cadastro de lojas e dados de Whitelabel.
-*   **product-service:** Catálogo global, Ofertas, Temas e Encartes.
-*   **client-service:** Perfil do consumidor e listas de compras.
-*   **notification-service:** Orquestração de Pushes e E-mails.
-*   **recommendation-service:** IA para sugestão de ofertas baseadas no perfil.
+### 🌱 Visão de Negócio
 
----
+Esta funcionalidade cria uma ponte entre o ambiente físico do supermercado e a plataforma digital. Um totem ou cartaz na entrada da loja contém um QR Code dinâmico. Ao escanear, o cliente acessa instantaneamente o encarte digital — sem login, sem instalação.
 
-## 12. Diferencial Estratégico: Marketing Inteligente por Proximidade
+### 10.1 Experiência do Usuário
+*   **Interação Instantânea:** Apontar a câmera → abrir o encarte. Sem barreiras.
+*   **Navegação Mobile-First:** Visualização otimizada com gestos intuitivos de zoom e scroll.
+*   **Acesso Público:** Sem exigência de cadastro ou login (RF-01.4).
 
-### 🏪 Visão de Negócio
-Esta funcionalidade posiciona o SmartMarket não apenas como um repositório de encartes, mas como uma **plataforma inteligente de divulgação e atração de tráfego físico (Drive-to-Store)**. Trata-se de um canal direto de marketing para o supermercado, altamente segmentado, baseado em dados reais de intenção de compra e focado em alta conversão.
+### 10.2 Benefício para o Supermercado
+*   Substituição do encarte de papel por acesso digital imediato.
+*   Posicionamento moderno e ecologicamente consciente.
+*   Rastreamento de acessos via parâmetro UTM.
 
-### 12.1. Funcionalidade: Marketing Inteligente por Proximidade
-Um ecossistema automatizado que conecta a localização em tempo real do consumidor com seu histórico de preferências, disparando gatilhos de marketing (Push Notifications) exatos no momento em que ele está fisicamente propício a realizar uma compra.
-
-### 12.2. Requisitos Funcionais (Coleta e Campanhas)
-*   **RF-12.2.1:** O sistema deve monitorar e registrar a navegação do usuário no aplicativo (cliques em produtos, encartes abertos, buscas realizadas e tempo de tela).
-*   **RF-12.2.2:** O sistema deve taguear automaticamente os interesses do usuário baseado no engajamento (ex: afinidade com "Cervejas Artesanais", "Itens de Churrasco", "Fraldas e Bebês").
-*   **RF-12.2.3:** O Gestor do Supermercado deve poder criar "Campanhas Inteligentes" no painel, definindo regras de segmentação (ex: "Enviar para usuários que favoritaram carne e estão a 1km da loja").
-*   **RF-12.2.4:** A configuração da campanha deve permitir a definição de: Produto/Encarte alvo, Mensagem Customizada (Copy), Preço Promocional e Raio de Alcance (ex: 500m, 1km, 3km).
-
-### 12.3. Requisitos de Geolocalização
-*   **RF-12.3.1:** O aplicativo móvel deve capturar e atualizar a localização (Latitude/Longitude) do usuário em background, otimizando o consumo de bateria.
-*   **RF-12.3.2:** O backend (via `notification-service` e Redis Geospatial) deve calcular a proximidade radial entre as coordenadas do usuário e as coordenadas dos supermercados parceiros.
-*   **RF-12.3.3:** O sistema deve gerar eventos (triggers) automáticos de *Geofencing* quando o usuário realizar "Entry" (entrar no raio) ou "Exit" (sair do raio) de uma zona configurada pela campanha.
-
-### 12.4. Requisitos de Personalização
-*   **RF-12.4.1:** O motor de recomendação deve cruzar a geolocalização do usuário com seu perfil de interesses para validar se uma notificação deve ser enviada.
-*   **RF-12.4.2:** O sistema deve suportar variáveis dinâmicas no texto do Push (ex: `"Olá {Nome}, a Picanha que você olhou ontem está em oferta a 500 metros daqui, no {Nome_Supermercado}!"`).
-
-### 12.5. Requisitos de Notificação Push
-*   **RF-12.5.1:** O disparo da notificação deve ocorrer em tempo real (tolerância de até 1 minuto) após a entrada do usuário no raio configurado.
-*   **RF-12.5.2:** O conteúdo da notificação deve conter um "Deep Link" que, ao ser clicado, abra diretamente a tela do produto ou o encarte da oferta no app.
-*   **RF-12.5.3:** O sistema deve garantir resiliência no disparo utilizando mensageria (RabbitMQ) para enfileiramento dos Pushes.
-
-### 12.6. Requisitos de Analytics e Métricas (Crítico)
-*   **RF-12.6.1 - Engajamento:** O sistema deve rastrear e exibir no dashboard do supermercado o funil da campanha: Quantidade de Pushes Enviados ➔ Pushes Recebidos ➔ Pushes Abertos (CTR).
-*   **RF-12.6.2 - Comportamento Físico (Footfall Attribution):** O sistema deve registrar uma "Visita ao Supermercado" caso o usuário entre em um raio de altíssima proximidade (ex: 20 a 50 metros) em até 24 horas após receber a notificação.
-*   **RF-12.6.3 - Inteligência de Dados:** O sistema deve gerar relatórios agregados de: Categorias mais convertidas via Push, Mapas de Calor (Heatmaps) de onde os usuários abrem o app, e Correlação exata entre o investimento na campanha e o tráfego físico gerado.
-
-### 12.7. Requisitos de Privacidade e Consentimento (Obrigatório)
-*   **RF-12.7.1:** O sistema deve estar 100% aderente à **LGPD**, exibindo um modal claro solicitando o aceite aos Termos de Uso e Política de Privacidade na criação da conta.
-*   **RF-12.7.2:** O aplicativo deve solicitar permissão explícita (OS-level prompt) para acesso à localização, explicando claramente o benefício ("Para enviar ofertas exclusivas quando você estiver perto").
-*   **RF-12.7.3:** O usuário deve ter um painel de Preferências de Privacidade onde possa gerenciar facilmente o *Opt-in* e *Opt-out* de rastreamento de localização e notificações push, a qualquer momento.
-*   **RF-12.7.4:** Dados sensíveis de localização bruta devem ser retidos pelo tempo mínimo necessário ou anonimizados para fins estatísticos (Data Anonymization).
-
-### 🛠️ Diferenciais, Sugestões e Boas Práticas (Growth Features)
-Para elevar esta funcionalidade ao nível "World Class", recomendo a implementação das seguintes estratégias na esteira de evolução:
-
-1.  **Frequency Capping (Controle de Fadiga):** Implementar um limite rígido (ex: máximo de 1 push por loja por dia, ou 3 por semana) para evitar que o usuário considere o app como *Spam* e o desinstale.
-2.  **Testes A/B Nativos:** Permitir que o gestor do supermercado crie duas versões de texto (Copy) para a mesma campanha de proximidade, enviando para fatias da audiência e usando a vencedora automaticamente.
-3.  **Predição de Recompra (AI-Driven):** O `recommendation-service` pode calcular o ciclo de vida do produto (ex: pacote de fraldas acaba em média a cada 15 dias). O Push de proximidade se torna muito mais forte se ativado na janela exata da provável recompra.
-4.  **Fallback para SMS/WhatsApp:** Para usuários de alto valor (VIPs do supermercado) que optaram por desligar o Push, permitir o roteamento do alerta via WhatsApp corporativo da loja, desde que haja opt-in específico.
+### 10.3 Material de Apoio
+*   O SmartMarket deve fornecer ao supermercado um guia básico de identidade visual para criação do totem/cartaz (cores, logo, tipografia).
+*   Slogans sugeridos: *"Encarte Digital — Consciência Ambiental"*, *"Aponte, Economize e Ajude o Planeta"*.
 
 ---
 
-## 13. Diferencial Estratégico: Canal de Aquisição Físico-Digital (Totem QR Code)
+## 11. Diferencial: Acesso Público sem Fricção (PLG)
 
-### 🌱 Visão de Negócio e Posicionamento Sustentável
-Esta funcionalidade estabelece uma ponte estratégica entre o ambiente físico do supermercado e a plataforma digital SmartMarket. O objetivo é criar um canal de aquisição e engajamento de baixo atrito, posicionando o produto como uma solução moderna e ecologicamente consciente. Ao substituir o encarte de papel por um acesso digital imediato, reforçamos o valor de sustentabilidade e modernização para o supermercado parceiro.
+### 🎯 Visão de Negócio
 
-### 13.1. Funcionalidade: Totem de Acesso ao Encarte Digital
-Um totem físico, posicionado estrategicamente na entrada do supermercado, contendo um QR Code dinâmico. Ao escanear o código, o cliente é direcionado instantaneamente para o encarte digital daquela loja específica, sem a necessidade de login ou instalação de aplicativo.
+O SmartMarket adota a estratégia de *Product-Led Growth*: o usuário percebe valor nos primeiros 5 segundos, sem precisar criar conta. A conversão para usuário logado ocorre de forma orgânica.
 
-### 13.2. Requisitos Funcionais (RF-07)
-*   **RF-07.1 - Geração de QR Code por Loja:** O painel do Gestor do Supermercado deve fornecer uma área para gerar ou visualizar um QR Code único para sua loja. Este QR Code deve conter parâmetros de rastreamento (ex: `?utm_source=totem&utm_campaign=acesso_fisico`).
-*   **RF-07.2 - Vinculação Dinâmica:** O QR Code deve ser permanente. O sistema deve garantir que o link associado a ele sempre redirecione para o encarte digital que estiver ativo no momento do escaneamento.
-*   **RF-07.3 - Acesso Público e Imediato:** A página de destino do QR Code deve ser pública, de carregamento rápido e não exigir qualquer tipo de autenticação, em conformidade com o requisito **RF-01.5**.
+### 11.1 Vitrine Universal
+*   A página inicial (`/`) exibe imediatamente: Supermercados Próximos, Ofertas em Destaque e Encartes Ativos.
+*   Navegação completa sem login: abrir encartes, buscar produtos, usar filtros.
 
-### 13.3. Requisitos de Experiência do Usuário (UX)
-*   **UX-13.3.1 - Interação Instantânea:** A experiência do usuário deve ser fluida. Ao apontar a câmera, o acesso ao encarte deve ser percebido como instantâneo.
-*   **UX-13.3.2 - Navegação Mobile-First:** A visualização do encarte deve ser 100% otimizada para dispositivos móveis, com gestos intuitivos de zoom e navegação entre as páginas ou ofertas.
-*   **UX-13.3.3 - Incentivo à Exploração (CTA):** Durante a navegação no encarte, o sistema deve apresentar *Call-to-Actions* (CTAs) contextuais e não intrusivos para incentivar o engajamento mais profundo, como "Criar minha lista de compras" ou "Salvar oferta".
+### 11.2 Geolocalização Pública
+*   Solicitar permissão de GPS via prompt nativo.
+*   Se concedido: filtrar por raio de 3 km.
+*   Se negado: exibir campo para CEP/Bairro no header.
 
-### 13.4. Requisitos de Analytics e Métricas (RF-08)
-*   **RF-08.1 - Rastreamento de Origem:** O sistema de analytics deve ser capaz de identificar e segmentar todos os acessos provenientes do QR Code do totem.
-*   **RF-08.2 - Funil de Conversão Físico-Digital:** O dashboard do gestor deve exibir métricas chave para este canal:
-    *   Número de escaneamentos do QR Code.
-    *   Tempo médio de sessão por usuário vindo do totem.
-    *   Produtos e ofertas mais visualizados a partir deste canal.
-    *   Taxa de conversão (usuários que realizaram uma ação secundária, como salvar uma oferta ou iniciar um cadastro).
-*   **RF-08.3 - Análise Comparativa:** Permitir a comparação de desempenho entre o tráfego originado pelo totem físico e outros canais de aquisição digital.
+### 11.3 UX da Vitrine
+*   **Header para anônimos:** Botões claros de "Entrar" e "Criar Conta" no canto superior direito.
+*   **Skeleton Screens:** Usar loaders visuais durante carregamento para reter atenção.
+*   **Carregamento rápido:** Conteúdo público servido via cache Redis.
 
-### 13.5. Requisitos Não Funcionais (RNF-04)
-*   **RNF-04.1 - Performance de Carregamento:** A página do encarte acessada via QR Code deve ter um *Largest Contentful Paint (LCP)* inferior a 2 segundos em uma conexão 4G.
-*   **RNF-04.2 - Alta Disponibilidade:** O endpoint de redirecionamento do QR Code deve ter um SLA de 99.95% de disponibilidade.
-*   **RNF-04.3 - Compatibilidade Mobile:** Garantir funcionamento pleno nos navegadores padrão (Chrome, Safari) das duas últimas versões dos sistemas operacionais iOS e Android.
-
-### 13.6. Requisitos de Negócio e Material de Apoio
-*   **RN-13.6.1 - Guia de Design do Totem:** A plataforma SmartMarket deve fornecer aos supermercados um guia de identidade visual para a construção do totem, com especificações de cores, logo e tipografia, garantindo consistência da marca.
-*   **RN-13.6.2 - Slogans Recomendados:** Sugerir frases de impacto para o totem, como: "Encarte Digital — Consciência Ambiental", "Aponte, Economize e Ajude o Planeta" ou "Seu Encarte Agora é Digital. Rápido e Ecológico".
-
-### 🛠️ Diferenciais e Evolução (Growth Features)
-Para maximizar o impacto deste canal, as seguintes evoluções devem ser consideradas no roadmap:
-
-1.  **Testes A/B de Mensagens:** Permitir que o gestor teste diferentes chamadas (slogans) no totem e meça qual gera mais escaneamentos, otimizando a comunicação.
-2.  **Campanhas Específicas via QR Code:** Evoluir o sistema para que o QR Code possa apontar para campanhas específicas (ex: "Ofertas de Hortifruti da Terça") em vez de apenas o encarte principal, criando um senso de urgência e exclusividade.
-3.  **Bônus de Primeira Interação:** Oferecer um cupom de desconto exclusivo para o primeiro acesso via totem, como forma de incentivar a experimentação e criar um ciclo de retorno.
-4.  **Integração com Notificações:** Após o usuário navegar pelo encarte, exibir um prompt amigável sugerindo a ativação de notificações para ser avisado sobre novas promoções daquela loja.
+### 11.4 Privacidade (LGPD)
+*   Texto explicativo claro antes do prompt de localização do OS.
+*   Não rastrear nem armazenar localização bruta do usuário no MVP.
 
 ---
 
-## 14. Diferencial Estratégico: Acesso Público e Experiência sem Fricção (Product-Led Growth)
+## 12. 🧾 Backlog (Fase Pós-MVP)
 
-### 🎯 Visão de Negócio e Growth
-Para maximizar a adoção da plataforma e reduzir o Custo de Aquisição de Clientes (CAC), o SmartMarket adota a estratégia de *Product-Led Growth* através de um modelo "Try Before You Buy" (ou "Navegue Antes de Logar"). O usuário deve perceber o valor da plataforma (ofertas relevantes e próximas) nos primeiros 5 segundos de uso, removendo a barreira do cadastro obrigatório. A conversão para usuário logado ocorrerá de forma orgânica e por engajamento.
-
-### 14.1. Funcionalidade: Tela Inicial Universal e Acesso Desbloqueado
-Todos os usuários, autenticados ou anônimos, têm acesso a uma experiência rica. O conteúdo core da plataforma (encartes, produtos em destaque e vitrines) é totalmente consumível sem bloqueios de tela ou forçantes de login.
-
-### 14.2. Requisitos Funcionais (RF-09)
-*   **RF-09.1 - Vitrine Universal:** A página inicial (`/`) deve exibir de imediato: Produtos em Destaque, Supermercados Próximos e Encartes Ativos, independentemente do status de autenticação.
-*   **RF-09.2 - Navegação Completa Anônima:** O usuário anônimo pode abrir encartes (visualização de tablóide), buscar produtos por barra de pesquisa e usar todos os filtros de categoria e preço.
-*   **RF-09.3 - Conversão Contextual (Soft Gate):** Ações de personalização e retenção, como "Favoritar Produto" ou "Criar Lista de Compras", devem abrir um modal amigável (Soft Gate) convidando o usuário a criar uma conta ou fazer login, sem perder o contexto (após o login, a ação de favoritar é concluída automaticamente).
-
-### 14.3. Requisitos de Geolocalização Pública (Raio de 3KM)
-*   **RF-09.4 - Permissão Opcional de GPS:** Ao carregar a tela inicial pela primeira vez, o aplicativo deve solicitar, via prompt nativo do navegador/OS, acesso à geolocalização.
-*   **RF-09.5 - Raio Padrão (3 KM):** Se a permissão for concedida, o sistema (via Redis Geospatial) filtra automaticamente e exibe apenas os supermercados e ofertas em um raio de até 3 km do usuário.
-*   **RF-09.6 - Fallback para Busca Manual:** Se a permissão for negada (ou falhar), a interface deve exibir um campo visível no Header para que o usuário informe seu CEP ou Bairro, garantindo o funcionamento do filtro geográfico.
-
-### 14.4. Requisitos de Experiência do Usuário (UX)
-*   **UX-14.4.1 - Header de Conversão:** O Header para usuários não logados deve conter botões claros de "Entrar" (Secundário) e "Criar Conta" (Primário / Destaque), posicionados no canto superior direito.
-*   **UX-14.4.2 - Skeleton Screens:** Durante o carregamento da Home, utilizar *Skeleton Loaders* para mitigar a percepção de tempo de espera e reter a atenção do usuário.
-*   **UX-14.4.3 - Progressive Profiling:** Em vez de pedir todos os dados no cadastro, o SmartMarket deve adotar o *Login Social* (Google, Apple) em 1 clique para reduzir a fricção e pedir dados adicionais (como CPF ou interesses) apenas posteriormente.
-
-### 14.5. Requisitos de Analytics e Comportamento Anônimo (Crítico)
-*   **RF-09.7 - Tracking Anônimo:** O sistema de analytics deve gerar um UUID de sessão anônima (`Session ID`), armazenado localmente (cookie/local storage), para rastrear a jornada de usuários não logados.
-*   **RF-09.8 - Eventos a Monitorar:** Devemos rastrear: 1) Taxa de rejeição sem interação, 2) Tempo gasto no encarte anônimo, 3) Interação com o filtro de localização, 4) Cliques em produtos.
-*   **RF-09.9 - Funil de Conversão (Anonymous to Registered):** O dashboard de Growth do administrador deve exibir a métrica de "Taxa de Conversão de Sessões Anônimas para Usuários Logados", identificando qual "Soft Gate" (ex: "clicou em favoritar") mais gerou conversões.
-
-### 14.6. Requisitos de Privacidade (LGPD)
-*   **RF-09.10 - Banner de Cookies e Privacidade:** Exibir de forma sutil, na parte inferior da tela, o aviso sobre uso de cookies para melhoria de experiência anônima.
-*   **RF-09.11 - Transparência de Dados:** No prompt de localização (customizado antes do prompt do OS), deve haver um texto explicativo claro: "Usamos sua localização apenas para mostrar as melhores ofertas perto de você".
-
-### 14.7. Requisitos Não Funcionais (RNF-05)
-*   **RNF-05.1 - Performance com Tráfego Público:** Como a página inicial será pública, requisições do catálogo base devem ser servidas por Cache em Memória (Redis) e, se possível, os *assets* (imagens/banners) devem usar CDN Edge Caching. O *Time to First Byte* (TTFB) da vitrine anônima deve ser inferior a 150ms.
-*   **RNF-05.2 - Rate Limiting:** Implementar Rate Limiting rigoroso no `api-gateway` para rotas públicas, visando proteger a infraestrutura contra ataques de botnets ou *web scraping* automatizado extraindo ofertas.
-
-### 🛠️ Diferenciais, Sugestões e Boas Práticas (Growth & IA Features)
-Para enriquecer a experiência dos usuários mesmo sem possuirmos seus dados nominais:
-
-1.  **Personalização Baseada em Comportamento Anônimo:** Usar o `local storage` para salvar categorias recentemente clicadas na mesma sessão. Se o usuário clicou em 3 itens de "Churrasco", a vitrine passa a priorizar e reordenar a seção de Carnes no topo da Home.
-2.  **Trending "Na sua Região" (Recomendação Inteligente):** Em vez de exibir apenas produtos genéricos, criar um carrossel na Home: "Produtos mais buscados no seu bairro hoje". Isso cria um *Fear Of Missing Out* (FOMO) local.
-3.  **Persistência de Dados de Conversão:** Ao tentar salvar uma "Lista de Compras" sem estar logado, o sistema salva os itens em cache. Após o usuário completar a criação da conta, o SmartMarket migra a lista em cache para o banco de dados oficial dele, não frustrando o esforço inicial do usuário ("Seamless Handoff").
+As funcionalidades abaixo foram **documentadas e planejadas**, mas removidas do escopo do MVP para reduzir complexidade e acelerar a validação. Devem ser priorizadas após confirmação das hipóteses H1, H2 e H3.
 
 ---
 
-## 15. Estratégia de Cache em Múltiplas Camadas (Alta Performance)
+### 🤖 Recommendation Service (IA)
+*   Motor de recomendação que cruza geolocalização + perfil de interesses.
+*   Tagueamento automático de interesses do usuário baseado em engajamento.
+*   Personalização baseada em comportamento anônimo (reordenação de vitrine).
+*   Carrossel "Trending na sua Região" com FOMO local.
+*   Predição de recompra (AI-Driven) baseada em ciclo de vida do produto.
 
-Para suportar o alto volume de tráfego gerado pela vitrine pública (acessos anônimos) e garantir tempo de resposta na casa dos milissegundos, o SmartMarket adota uma estratégia de cache em 4 camadas.
+### 📍 Geofencing e Geolocalização Avançada
+*   Captura de localização em background com otimização de bateria.
+*   Cálculo de proximidade radial em tempo real (Redis Geospatial avançado).
+*   Triggers automáticos de Entry/Exit em zonas de geofencing.
+*   Cache por Geohash (agrupamento regional de cache hits).
+*   Footfall Attribution (registro de "visita ao supermercado" por proximidade de 20-50m).
 
-### 15.1. Camada 1: Cache no Frontend (Angular)
-*   **RF-15.1.1:** O frontend deve utilizar cache em memória via RxJS (`shareReplay`) para evitar requisições duplicadas de componentes que consomem os mesmos endpoints na mesma sessão de tela.
-*   **RF-15.1.2:** O sistema deve utilizar `localStorage` para reter o estado de preferências não-sensíveis do usuário anônimo (ex: o CEP da busca fallback) para evitar requisições desnecessárias na reabertura do site.
+### 🔔 Notificações Inteligentes
+*   Push Notifications em tempo real ao entrar no raio de um supermercado.
+*   Variáveis dinâmicas no texto do push (nome do usuário, nome do supermercado, produto).
+*   Deep Links (abrir tela específica do produto/encarte ao clicar no push).
+*   Enfileiramento resiliente via RabbitMQ.
+*   Frequency Capping (limite de pushes por loja/dia para evitar spam).
+*   Fallback para SMS/WhatsApp para usuários VIP com opt-in específico.
 
-### 15.2. Camada 2: Cache HTTP e Edge (CDN/Browser)
-*   **RF-15.2.1:** As respostas de endpoints públicos (catálogo, vitrine) devem obrigatoriamente utilizar a diretiva HTTP `Cache-Control: stale-while-revalidate`, fornecendo ao usuário um dado de forma instantânea enquanto o backend renova a informação em segundo plano.
-*   **RF-15.2.2:** O backend deve emitir cabeçalhos `ETag`. O frontend (ou browser) enviará `If-None-Match`, permitindo ao Gateway responder com HTTP `304 Not Modified` caso os dados não tenham sofrido alteração, reduzindo o consumo de banda.
+### 📊 Analytics Avançado
+*   Tracking anônimo com UUID de sessão (Session ID via cookie/localStorage).
+*   Funil de conversão: Anônimo → Registrado (identificar qual Soft Gate converte mais).
+*   Rastreamento de: taxa de rejeição, tempo no encarte, cliques em produtos, filtros usados.
+*   Tempo de permanência em telas e consumo visual de encartes.
+*   Mapas de calor (Heatmaps) de onde os usuários abrem o app.
+*   Análise comparativa entre canais de aquisição (QR Code vs. orgânico vs. outros).
+*   Dashboard de Growth com métricas de engajamento avançado.
 
-### 15.3. Camada 3: Cache no Backend (Spring Boot + Redis)
-*   **RF-15.3.1:** Consultas custosas do banco de dados devem ser mantidas no cache em memória usando o cluster do Redis.
-*   **RF-15.3.2 (Cache por Geohash):** O sistema NÃO deve cachear listas de ofertas utilizando a Latitude/Longitude granular do dispositivo. Em vez disso, o sistema de localização deve converter a coordenada para um **Geohash** (com tamanho fixo, ex: raio de 600m). O sistema agrupará os usuários geograficamente, garantindo que toda a sub-região receba um único "Cache Hit".
+### 📈 Campanhas Inteligentes
+*   Gestor cria campanhas com regras de segmentação (ex: "usuários que favoritaram carne e estão a 1km").
+*   Configuração: Produto/Encarte alvo, Mensagem Customizada, Preço Promocional, Raio de Alcance.
+*   Funil da campanha no dashboard: Pushes Enviados → Recebidos → Abertos (CTR).
+*   Testes A/B nativos: duas versões de Copy, audiência dividida, vencedor automático.
+*   Testes A/B de mensagens no totem QR Code.
 
-### 15.4. Camada 4: Invalidação de Cache Crítico (Event-Driven)
-*   **RF-15.4.1:** Para evitar que o usuário enxergue preços inconsistentes, a invalidação do Redis deve ser ativa e não apenas por expiração de tempo (TTL).
-*   **RF-15.4.2:** Após o banco de dados (PostgreSQL) registrar a alteração de uma oferta ou encarte, o serviço de origem deve publicar um evento (ex: `OfferPriceChangedEvent`) no RabbitMQ.
-*   **RF-15.4.3:** O listener deste evento cuidará do "Eviction" (despejo) exato no cache regional (`Geohash`) do produto/encarte recém-alterado.
+### 💳 Billing e Assinatura Automatizada
+*   Planos de assinatura dinâmicos (Mensal, Semestral, Anual) com limites configuráveis.
+*   Integração com gateway de pagamentos (PIX, Cartão de Crédito, Boleto).
+*   Assinatura recorrente com renovação automática.
+*   Controle de status: Ativa, Pendente, Cancelada, Expirada.
+*   Dashboard Financeiro: receita por período, ranking de planos, churn rate.
+*   Bloqueio automático de funcionalidades ao atingir limite do plano.
+*   Regras de negócio: downgrade mantém acesso até fim do ciclo pago.
+*   Upsell contextual in-app e módulo de add-ons (pacotes avulsos de push).
+*   Free Trial de 14 dias.
+*   Planos corporativos para redes multi-loja.
+*   Conformidade PCI-DSS para dados de cartão.
+
+### 🔗 Integrações Externas
+*   Integração com WhatsApp Business API para alertas.
+*   Integração com SMS para notificações de alto valor.
+*   Login Social (Google, Apple) em 1 clique.
+*   CDN Edge Caching para assets públicos.
+
+### ⚡ Infraestrutura Avançada
+*   Migração para Microserviços (database-per-service) se escala justificar.
+*   API Gateway dedicado (Spring Cloud Gateway).
+*   Event-Driven Architecture distribuída via RabbitMQ.
+*   Cache multi-layer sofisticado (Frontend → HTTP/CDN → Redis → Event-Driven Invalidation).
+*   Observabilidade completa: Prometheus + Grafana + Spring Boot Actuator + OpenTelemetry.
+*   Rate Limiting rigoroso em rotas públicas.
+*   SLA de 99.95% no endpoint de QR Code.
+*   Comunicação síncrona resiliente via OpenFeign + Resilience4j.
+
+### 👤 Funcionalidades de Usuário Final
+*   Perfil do consumidor (ROLE_CLIENTE com cadastro completo).
+*   Lista de compras (criar, salvar, compartilhar).
+*   Favoritar produtos e ofertas (Soft Gate para conversão).
+*   Progressive Profiling (dados adicionais solicitados gradualmente).
+*   Persistência de dados de conversão ("Seamless Handoff" de lista anônima → logado).
+*   Painel de Preferências de Privacidade (opt-in/opt-out de localização e push).
+
+### 🏷️ Funcionalidades de Negócio Adicionais
+*   Campanhas específicas via QR Code (ex: "Ofertas de Hortifruti da Terça").
+*   Bônus de primeira interação (cupom de desconto no primeiro acesso via totem).
+*   Integração com notificações após navegação no encarte (prompt de ativação).
+*   Segmentação de usuários por comportamento e perfil.
+*   Categorias de interesse (ex: "Churrasco", "Bebês", "Cervejas Artesanais").
+*   Relatórios agregados de categorias mais convertidas.
 
 ---
 
-## 16. Módulo de Assinatura e Billing (Planos para Supermercados)
-
-### 🚀 Visão de Negócio
-O SmartMarket passa a operar com monetização direta via plataforma através de planos de assinatura (Pacotes de Ofertas). O objetivo é transformar a plataforma em um SaaS escalável, garantindo flexibilidade para a criação de novos pacotes, permitindo cobrança recorrente automatizada e controlando o uso de recursos do sistema por parte dos supermercados.
-
-### 16.1. Requisitos Funcionais (RF-16)
-
-#### 📦 Gestão de Planos (Admin)
-*   **RF-16.1.1:** O sistema deve permitir que o administrador crie pacotes de forma dinâmica, definindo: Nome do plano, Descrição, Valor e Tipo de cobrança (Mensal, Semestral, Anual).
-*   **RF-16.1.2:** Cada plano deve permitir a configuração de limites:
-    *   Quantidade máxima de push notifications permitidas.
-    *   Quantidade máxima de ofertas que o supermercado pode publicar simultaneamente ou por período.
-    *   Acesso (Sim/Não) à funcionalidade de visualização de preferências dos clientes.
-*   **RF-16.1.3:** O Admin deve poder editar, desativar ou criar novos planos para o futuro. Planos desativados não afetarão assinantes atuais, mas não estarão disponíveis para novas assinaturas.
-
-#### 🛍️ Contratação e Experiência do Supermercado (Gestor)
-*   **RF-16.1.4:** A tela "Conheça nossos planos" deve ser acessível a partir da tela de login e também dentro do painel do gestor.
-*   **RF-16.1.5:** A tela de planos deve exibir os pacotes disponíveis de forma clara, com um quadro comparativo de funcionalidades e botão de contratação (Call to Action).
-*   **RF-16.1.6:** O supermercado (Gestor) deve poder visualizar o plano atual contratado, status da assinatura, limites de uso (consumidos vs. disponíveis) e histórico de pagamentos.
-
-#### 💳 Pagamentos e Billing
-*   **RF-16.1.7:** A plataforma deve integrar um gateway de pagamentos para processamento direto, suportando os métodos: PIX, Cartão de Crédito e Boleto.
-*   **RF-16.1.8:** O sistema deve processar assinatura recorrente e renovação automática para métodos que suportem (Cartão de Crédito).
-*   **RF-16.1.9:** O sistema deve controlar o status da assinatura de cada supermercado: *Ativa*, *Pendente* (aguardando pagamento), *Cancelada* ou *Expirada*.
-
-#### 📊 Dashboard Financeiro (Admin)
-*   **RF-16.1.10:** O administrador deve ter acesso a um Dashboard Financeiro contendo: Receita total e por período, ranking de planos mais vendidos, e métricas de supermercados ativos vs. inativos (Churn rate).
-*   **RF-16.1.11:** O administrador deve poder visualizar uma lista completa de supermercados com o respectivo plano atual, histórico financeiro e controle manual do status da assinatura (caso necessário).
-
-### 16.2. Requisitos Não Funcionais (RNF-16)
-*   **RNF-16.2.1:** **Segurança Financeira:** O sistema deve possuir integração segura com o Gateway de Pagamentos, não armazenando dados sensíveis de cartão de crédito no banco de dados próprio (conformidade com PCI-DSS).
-*   **RNF-16.2.2:** **Alta Disponibilidade e Resiliência:** O processamento de Webhooks (retorno de status de pagamento pelo Gateway) deve ser assíncrono (usando RabbitMQ) e idempotente, garantindo que o status da assinatura seja atualizado mesmo em cenários de falha temporária.
-
-### 16.3. Regras de Negócio (RN-16)
-*   **RN-16.3.1:** Supermercados sem um plano "Ativo" devem ter acesso restrito ao painel, permitindo apenas a gestão da conta e regularização financeira (contratação/renovação de plano).
-*   **RN-16.3.2:** Quando o supermercado atingir o limite do plano (ex: cota de disparos de Push Notification atingida ou cota de ofertas no ar), as funcionalidades excedentes deverão ser bloqueadas automaticamente na interface, sugerindo o "Upgrade" de plano.
-*   **RN-16.3.3:** Todo o consumo de recursos (ofertas publicadas, pushes enviados) deve ser registrado no sistema (Billing/Analytics) para auditoria e limitação das cotas.
-*   **RN-16.3.4:** O downgrade ou cancelamento de um plano manterá o acesso atual até o final do ciclo já pago.
-
-### 16.4. Fluxos Principais
-1.  **Fluxo de Contratação:** Gestor acessa tela de Planos ➔ Escolhe o pacote e ciclo de cobrança ➔ Insere dados de pagamento (ex: PIX) ➔ Sistema aguarda Webhook ➔ Pagamento confirmado ➔ Status da assinatura muda para "Ativa" ➔ Limites do plano são provisionados.
-2.  **Fluxo de Consumo e Bloqueio:** Gestor tenta criar nova oferta ➔ Sistema valida no backend se o limite do plano foi atingido ➔ Se "Sim", retorna erro de limite excedido e a UI exibe modal de Upsell ➔ Se "Não", a oferta é criada e o contador de uso incrementa.
-3.  **Fluxo de Renovação / Inadimplência:** Ciclo do plano vence ➔ Sistema tenta cobrança no Cartão ou emite novo boleto/PIX ➔ Se falhar ou não pago no vencimento, status muda para "Pendente" ➔ Após X dias (período de carência), muda para "Expirada/Inativa" e suspende o acesso operacional da loja.
-
-### 16.5. Casos de Uso (UC)
-*   **UC-01 - Configurar Planos:** Ator: Admin. Descrição: Criar novo plano "Premium" anual com acesso total a métricas.
-*   **UC-02 - Assinar Plano:** Ator: Gestor. Descrição: Selecionar o plano "Pro", escolher cartão de crédito e efetivar o pagamento.
-*   **UC-03 - Acompanhar Receita:** Ator: Admin. Descrição: Acessar o dashboard para verificar o faturamento recorrente (MRR) do mês.
-*   **UC-04 - Controlar Limites:** Ator: Sistema. Descrição: Bloquear o botão "Enviar Push" de um supermercado no plano "Básico" que já enviou suas 2 notificações do mês.
-
-### 💡 16.6. Sugestões de Melhorias (Growth & Diferenciais)
-*   **Período de Testes (Free Trial):** Implementar modelo "Trial de 14 dias" no plano mais completo para acelerar a adoção inicial por novos supermercados.
-*   **Upsell Contextual (In-App):** Quando o supermercado tentar ver a área de "Preferências de Clientes" (mas seu plano não permitir), mostrar um botão de "Faça Upgrade em 1 clique" direto na tela bloqueada.
-*   **Módulo de Cobrança Adicional (Add-ons):** Em vez de obrigar a mudança de plano, permitir que o supermercado compre "Pacotes Extras de Push" de forma avulsa.
-*   **Planos Corporativos (Redes Múltiplas Lojas):** Planejar arquitetura para no futuro permitir um "Plano Multi-Loja", gerando desconto na mensalidade para supermercados que cadastrarem filiais em um único CNPJ base.
+> **Nota:** As funcionalidades do backlog estão documentadas nas versões anteriores do REQUIREMENTS.md (v1.7.0) com detalhamento completo de requisitos funcionais, não funcionais e regras de negócio. Este documento deve ser consultado como referência ao iniciar cada fase pós-MVP.

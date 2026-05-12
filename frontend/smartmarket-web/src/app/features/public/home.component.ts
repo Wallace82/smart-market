@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PublicCatalogMockService, MockOffer, MockSupermarket, MockFlyer } from './public-catalog-mock.service';
+import { PublicCatalogService } from '@core/services/public-catalog.service';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -20,7 +20,7 @@ import { RouterModule } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit {
-  private catalogService = inject(PublicCatalogMockService);
+  private catalogService = inject(PublicCatalogService);
 
   // Sinais de Estado
   isLoading = signal<boolean>(true);
@@ -29,9 +29,9 @@ export class HomeComponent implements OnInit {
   userRadius = this.catalogService.userSelectedRadius;
 
   // Sinais de Dados
-  offers = signal<MockOffer[]>([]);
-  supermarkets = signal<MockSupermarket[]>([]);
-  flyers = signal<MockFlyer[]>([]);
+  offers = signal<any[]>([]);
+  supermarkets = signal<any[]>([]);
+  flyers = signal<any[]>([]);
 
   ngOnInit(): void {
     this.loadCatalog();
@@ -53,8 +53,8 @@ export class HomeComponent implements OnInit {
         this.userAddress.set(address);
       }
 
-      this.catalogService.getTrendingOffersNearby().subscribe(data => this.offers.set(data));
-      this.catalogService.getActiveFlyersNearby().subscribe(data => this.flyers.set(data));
+      this.catalogService.getTrendingOffersNearby(loc.lat, loc.lng).subscribe(data => this.offers.set(data));
+      this.catalogService.getActiveFlyersNearby(loc.lat, loc.lng).subscribe(data => this.flyers.set(data));
       this.catalogService.getNearbySupermarkets(loc.lat, loc.lng).subscribe(data => {
         this.supermarkets.set(data);
         this.isLoading.set(false);

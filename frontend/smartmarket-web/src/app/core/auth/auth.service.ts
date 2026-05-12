@@ -78,9 +78,16 @@ export class AuthService {
 
   private decodificarToken(token: string): void {
     try {
-      // Simulação simples de decodificação de JWT
-      // Em produção, usar uma lib como jwt-decode
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      // Decodificação robusta de JWT (Base64URL)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      const payload = JSON.parse(jsonPayload);
+      console.log('Payload decodificado:', payload);
+      
       this._user.set({
         id: payload.id || payload.userId || payload.sub,
         email: payload.sub || payload.email,

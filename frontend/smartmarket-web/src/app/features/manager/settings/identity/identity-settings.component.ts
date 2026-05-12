@@ -10,6 +10,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { SupermarketResponse } from '@core/models/supermarket.model';
 import { SupermarketService } from '@core/services/supermarket.service';
 import { AuthService } from '@core/auth/auth.service';
+import { WhitelabelThemeDirective } from '../../../../shared/directives/whitelabel-theme.directive';
 
 @Component({
   selector: 'app-identity-settings',
@@ -22,7 +23,8 @@ import { AuthService } from '@core/auth/auth.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    WhitelabelThemeDirective
   ],
   templateUrl: './identity-settings.component.html',
   styleUrl: './identity-settings.component.scss'
@@ -50,36 +52,51 @@ export class IdentitySettingsComponent implements OnInit {
       const market = this.supermarket();
       if (market) {
         this.form.patchValue({
-          corPrimariaHex: market.corPrimariaHex || '#000000',
-          corSecundariaHex: market.corSecundariaHex || '#ffffff'
+          corPrimariaHex: market.corPrimariaHex || '#16a34a',
+          corSecundariaHex: market.corSecundariaHex || '#0284c7'
         }, { emitEvent: false });
         if (market.urlLogomarca) {
           this.logoPreview.set(market.urlLogomarca);
         }
       }
     });
+
+    // NOVO: Efeito para carregar os dados iniciais assim que o usuário estiver disponível
+    effect(() => {
+      const user = this.authService.user();
+      if (user?.id) {
+        this.carregarDados(user.id);
+      }
+    });
+
+    // Sincronizar mudanças do form com o preview via sinal
+    this.form.valueChanges.subscribe(val => {
+      const current = this.supermarket();
+      if (current) {
+        this.supermarket.set({
+          ...current,
+          corPrimariaHex: val.corPrimariaHex,
+          corSecundariaHex: val.corSecundariaHex
+        });
+      }
+    });
   }
 
   ngOnInit(): void {
-    this.carregarDados();
+    // O carregamento inicial agora é tratado pelo effect reativo
   }
 
-  carregarDados(): void {
-    const user = this.authService.user();
-    if (user && user.id) {
-      this.supermarketService.buscarPorGestor(user.id).subscribe({
-        next: (markets: SupermarketResponse[]) => {
-          if (markets && markets.length > 0) {
-            this.supermarket.set(markets[0]);
-          } else {
-            this.exibirMensagem('Nenhum supermercado encontrado para este gestor.');
-          }
-        },
-        error: () => this.exibirMensagem('Erro ao carregar dados do supermercado')
-      });
-    } else {
-      this.exibirMensagem('Usuário não autenticado.');
-    }
+  carregarDados(userId: string): void {
+    this.supermarketService.buscarPorGestor(userId).subscribe({
+      next: (markets: SupermarketResponse[]) => {
+        if (markets && markets.length > 0) {
+          this.supermarket.set(markets[0]);
+        } else {
+          this.exibirMensagem('Nenhum supermercado encontrado para seu perfil.');
+        }
+      },
+      error: () => this.exibirMensagem('Erro ao conectar com o serviço de supermercados.')
+    });
   }
 
   onFileSelected(event: any): void {

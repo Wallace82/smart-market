@@ -12,6 +12,7 @@ import { SupermarketService } from '../../../core/services/supermarket.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { PublicApiService } from '../../../core/services/public-api.service';
 import { SupermarketResponse, SupermarketRequest } from '../../../core/models/supermarket.model';
+import { effect } from '@angular/core';
 
 @Component({
   selector: 'app-manager-settings',
@@ -21,8 +22,7 @@ import { SupermarketResponse, SupermarketRequest } from '../../../core/models/su
     FormsModule,
     MatIconModule, 
     MatButtonModule, 
-    MatSnackBarModule,
-    MatTooltipModule
+    MatSnackBarModule
   ],
   templateUrl: './manager-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,30 +77,46 @@ export class ManagerSettingsComponent implements OnInit {
     '#f43f5e', '#1f2937'
   ];
 
-  ngOnInit() {
-    this.loadSupermarket();
+  constructor() {
+    // Efeito reativo: carrega o supermercado assim que o ID do usuário estiver disponível
+    effect(() => {
+      const user = this.authService.user();
+      console.log('ManagerSettingsComponent: Usuário logado detectado:', user);
+      if (user?.id) {
+        this.loadSupermarket(user.id);
+      }
+    });
   }
 
-  loadSupermarket() {
-    const user = this.authService.user();
-    if (user?.id) {
-      this.isLoading.set(true);
-      this.supermarketService.buscarPorGestor(user.id).subscribe({
-        next: (supermarkets) => {
-          if (supermarkets.length > 0) {
-            const sm = supermarkets[0];
-            this.supermarketId.set(sm.id);
-            this.updateStoreDataFromResponse(sm);
-          }
-          this.isLoading.set(false);
-        },
-        error: (err) => {
-          console.error('Erro ao carregar supermercado', err);
-          this.isLoading.set(false);
-          this.snackBar.open('Erro ao carregar dados do supermercado.', 'Fechar', { duration: 3000 });
+  ngOnInit() {
+    // Opcional: Forçar carregamento se o usuário já estiver lá (o effect já cuida disso)
+  }
+
+  loadSupermarket(userId?: string) {
+    const id = userId || this.authService.user()?.id;
+    if (!id) return;
+
+    console.log('ManagerSettingsComponent: Buscando supermercados para o gestor:', id);
+    this.isLoading.set(true);
+    this.supermarketService.buscarPorGestor(id).subscribe({
+      next: (supermarkets) => {
+        console.log('ManagerSettingsComponent: Supermercados encontrados:', supermarkets);
+        if (supermarkets.length > 0) {
+          const sm = supermarkets[0];
+          this.supermarketId.set(sm.id);
+          this.updateStoreDataFromResponse(sm);
+        } else {
+          console.warn('ManagerSettingsComponent: Nenhum supermercado vinculado a este gestor.');
+          this.snackBar.open('Nenhum supermercado encontrado para sua conta.', 'Fechar', { duration: 5000 });
         }
-      });
-    }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('ManagerSettingsComponent: Erro ao carregar supermercado', err);
+        this.isLoading.set(false);
+        this.snackBar.open('Erro ao carregar dados do supermercado. Verifique a conexão com o backend.', 'Fechar', { duration: 5000 });
+      }
+    });
   }
 
   updateStoreDataFromResponse(sm: SupermarketResponse) {

@@ -1,4 +1,4 @@
-<div class="min-h-screen font-sans" [ngStyle]="viewerStyle">
+<div class="min-h-screen font-sans" [ngStyle]="viewerStyle" [appWhitelabelTheme]="supermarket()">
   
   <!-- Loading State -->
   <div *ngIf="loading()" class="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
@@ -18,8 +18,7 @@
   <div *ngIf="!loading() && !error()" class="max-w-7xl mx-auto min-h-screen flex flex-col shadow-2xl bg-white/10 backdrop-blur-sm relative overflow-hidden">
     
     <!-- Header Imersivo -->
-    <header class="relative z-10 p-10 pt-16 text-center overflow-hidden" 
-            [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+    <header class="relative z-10 p-10 pt-16 text-center overflow-hidden bg-[var(--color-primary)]">
       
       <!-- Overlay Decorativo -->
       <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -62,8 +61,7 @@
         
         <!-- Card de Oferta Estilo Varejo -->
         <div *ngFor="let oferta of ofertas()" 
-             class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-b-4 relative flex flex-col group overflow-hidden"
-             [style.border-bottom-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+             class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-b-4 relative flex flex-col group overflow-hidden border-b-[var(--color-primary)]">
           
           <!-- Selo de Preço "Splash" (Estilo Tradicional) -->
           <div class="absolute -right-1 -top-1 w-20 h-20 z-20 pointer-events-none transform group-hover:scale-110 transition-transform">

@@ -16,6 +16,7 @@ import { EncarteDigitalResponse, TemaEncarteResponse } from '@core/models/encart
 import { SupermarketResponse } from '@core/models/supermarket.model';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { WhitelabelThemeDirective } from '../../../shared/directives/whitelabel-theme.directive';
 
 @Component({
   selector: 'app-flyer-viewer',
@@ -26,7 +27,8 @@ import { catchError } from 'rxjs/operators';
     MatIconModule, 
     MatButtonModule, 
     MatTooltipModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    WhitelabelThemeDirective
   ],
   templateUrl: './flyer-viewer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -168,7 +170,6 @@ export class FlyerViewerComponent implements OnInit {
 
   get viewerStyle() {
     const t = this.tema();
-    const s = this.supermarket();
     const isDark = t?.id === 't4' || t?.nome?.toLowerCase().includes('black');
     
     return {
@@ -178,7 +179,6 @@ export class FlyerViewerComponent implements OnInit {
       'background-size': 'cover',
       'background-position': 'center',
       'background-color': t?.corFundoHex || '#f8fafc',
-      'border-top': `12px solid ${s?.corPrimariaHex || '#16a34a'}`,
       'color': isDark ? '#ffffff' : '#1f2937'
     };
   }

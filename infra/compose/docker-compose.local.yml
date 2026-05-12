@@ -115,6 +115,21 @@ services:
       minio:
         condition: service_healthy
 
+  api-gateway:
+    build:
+      context: ../../backend/api-gateway
+    container_name: smartmarket-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      AUTH_SERVICE_URL: http://smartmarket-auth-service:8081
+      SUPERMARKET_SERVICE_URL: http://smartmarket-supermarket-service:8082
+      PRODUCT_SERVICE_URL: http://smartmarket-product-service:8083
+    depends_on:
+      - auth-service
+      - supermarket-service
+      - product-service
+
 volumes:
   smartmarket_postgres_data:
   smartmarket_minio_data:

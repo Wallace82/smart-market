@@ -41,5 +41,14 @@ export class SupermarketService {
   alterarStatus(id: string, status: 'PENDENTE' | 'ATIVO' | 'INATIVO'): Observable<SupermarketResponse> {
     return this.http.patch<SupermarketResponse>(`${this.apiUrl}/${id}/status`, { status });
   }
+
+  // Métodos Públicos (Vitrine)
+  listarProximos(lat: number, lng: number, raio: number = 3000): Observable<SupermarketResponse[]> {
+    const params = new HttpParams()
+      .set('latitude', lat.toString())
+      .set('longitude', lng.toString())
+      .set('radiusMeters', raio.toString());
+    return this.http.get<SupermarketResponse[]>(`${this.apiUrl}/public/nearby`, { params });
+  }
 }
 

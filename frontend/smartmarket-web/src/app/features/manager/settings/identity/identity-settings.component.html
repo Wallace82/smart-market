@@ -1,59 +1,144 @@
-<mat-card class="p-6 max-w-4xl mx-auto mt-8 shadow-lg rounded-lg">
-  <mat-card-title class="text-2xl font-bold mb-6 text-gray-800">Configurações de Identidade Visual</mat-card-title>
-  <mat-card-content>
-    <form [formGroup]="form" (ngSubmit)="salvar()" class="space-y-6">
-      <!-- Upload de Logomarca -->
-      <div class="flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50">
-        <input type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden" #fileInput>
-        <button mat-flat-button color="primary" type="button" (click)="fileInput.click()" class="mb-3">
-          <mat-icon>cloud_upload</mat-icon> Upload Logomarca
-        </button>
-        <div *ngIf="logoPreview()" class="mt-4">
-          <img [src]="logoPreview()" alt="Prévia da Logomarca" class="max-w-xs max-h-32 object-contain border rounded-md shadow-sm">
+<div class="max-w-6xl mx-auto p-4 sm:p-8 animate-in fade-in duration-700">
+  <!-- Header Minimalista -->
+  <header class="mb-10">
+    <h1 class="text-3xl font-black tracking-tighter text-gray-900 uppercase">Personalização de Marca</h1>
+    <p class="text-gray-500 font-medium">Defina a identidade visual que será aplicada automaticamente aos seus encartes digitais.</p>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Painel de Configuração (Esquerda) -->
+    <div class="lg:col-span-7 space-y-8">
+      
+      <!-- Card: Logomarca -->
+      <section class="bg-white/70 backdrop-blur-md rounded-3xl p-8 border border-white shadow-xl shadow-gray-200/50">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+            <mat-icon class="text-green-600">photo_library</mat-icon>
+          </div>
+          <h2 class="text-xl font-bold text-gray-900">Logomarca Oficial</h2>
         </div>
-        <p *ngIf="!logoPreview()" class="text-sm text-gray-500 mt-2">Nenhuma logomarca selecionada</p>
-      </div>
 
-      <!-- Seleção de Cores -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Cor Primária (Hex)</mat-label>
-          <input matInput type="color" formControlName="corPrimariaHex" class="h-10 p-1">
-          <input matInput type="text" formControlName="corPrimariaHex" class="ml-2">
-          <mat-error *ngIf="form.get('corPrimariaHex')?.invalid && form.get('corPrimariaHex')?.touched">
-            Cor primária inválida. Use formato HEX (#RRGGBB).
-          </mat-error>
-        </mat-form-field>
+        <div class="relative group">
+          <div class="w-full aspect-[3/1] bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-green-400 group-hover:bg-green-50/30">
+            <img *ngIf="logoPreview()" [src]="logoPreview()" class="h-full w-full object-contain p-6 animate-in zoom-in-95 duration-500">
+            
+            <div *ngIf="!logoPreview()" class="text-center">
+              <mat-icon class="text-gray-300 text-5xl mb-2">cloud_upload</mat-icon>
+              <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Arraste ou clique para upload</p>
+            </div>
 
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Cor Secundária (Hex)</mat-label>
-          <input matInput type="color" formControlName="corSecundariaHex" class="h-10 p-1">
-          <input matInput type="text" formControlName="corSecundariaHex" class="ml-2">
-          <mat-error *ngIf="form.get('corSecundariaHex')?.invalid && form.get('corSecundariaHex')?.touched">
-            Cor secundária inválida. Use formato HEX (#RRGGBB).
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Prévia da Aplicação (Simples) -->
-      <div class="p-4 border rounded-md bg-white shadow-sm">
-        <h3 class="text-lg font-semibold mb-3 text-gray-700">Prévia da Aplicação</h3>
-        <div class="w-full h-32 flex items-center justify-center rounded-md"
-             [style.background-color]="form.get('corPrimariaHex')?.value || '#000000'"
-             [style.color]="form.get('corSecundariaHex')?.value || '#ffffff'">
-          <img *ngIf="logoPreview()" [src]="logoPreview()" alt="Logo" class="max-h-24 object-contain"
-               [style.filter]="(form.get('corPrimariaHex')?.value === '#000000' || form.get('corPrimariaHex')?.value === '#000') ? 'invert(1)' : 'none'">
-          <span *ngIf="!logoPreview()" class="text-xl font-medium">Seu Supermercado</span>
+            <!-- Overlay de Upload -->
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <button mat-fab extended color="primary" (click)="fileInput.click()">
+                <mat-icon>upload</mat-icon>
+                {{ logoPreview() ? 'Trocar Logomarca' : 'Selecionar Arquivo' }}
+              </button>
+            </div>
+          </div>
+          <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
         </div>
-        <p class="text-sm text-gray-600 mt-2">Esta é uma prévia de como sua marca aparecerá.</p>
-      </div>
+        <p class="mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest">Formatos suportados: PNG, JPG ou SVG (Máx 2MB)</p>
+      </section>
 
-      <div class="flex justify-end">
-        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()" class="px-6 py-3">
-          <mat-icon *ngIf="loading()">loop</mat-icon>
-          {{ loading() ? 'Salvando...' : 'Salvar Configurações' }}
+      <!-- Card: Cores da Marca -->
+      <section class="bg-white/70 backdrop-blur-md rounded-3xl p-8 border border-white shadow-xl shadow-gray-200/50">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+            <mat-icon class="text-purple-600">palette</mat-icon>
+          </div>
+          <h2 class="text-xl font-bold text-gray-900">Cores Institucionais</h2>
+        </div>
+
+        <form [formGroup]="form" class="space-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Cor Primária -->
+            <div class="space-y-4">
+              <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Cor Primária</label>
+              <div class="flex items-center gap-4">
+                <div class="relative w-16 h-16 rounded-2xl border-4 border-white shadow-lg overflow-hidden shrink-0">
+                  <input type="color" formControlName="corPrimariaHex" class="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer">
+                </div>
+                <div class="flex-1">
+                  <input type="text" formControlName="corPrimariaHex" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 font-mono text-sm uppercase tracking-widest focus:ring-2 focus:ring-green-500/20">
+                </div>
+              </div>
+            </div>
+
+            <!-- Cor Secundária -->
+            <div class="space-y-4">
+              <label class="block text-xs font-black text-gray-500 uppercase tracking-widest">Cor Secundária</label>
+              <div class="flex items-center gap-4">
+                <div class="relative w-16 h-16 rounded-2xl border-4 border-white shadow-lg overflow-hidden shrink-0">
+                  <input type="color" formControlName="corSecundariaHex" class="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer">
+                </div>
+                <div class="flex-1">
+                  <input type="text" formControlName="corSecundariaHex" class="w-full bg-gray-50 border-none rounded-xl px-4 py-3 font-mono text-sm uppercase tracking-widest focus:ring-2 focus:ring-green-500/20">
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Botão de Ação -->
+      <div class="flex justify-end pt-4">
+        <button (click)="salvar()" [disabled]="form.invalid || loading()" 
+                class="relative group px-10 py-4 bg-gray-900 text-white rounded-2xl font-black uppercase tracking-widest text-xs overflow-hidden transition-all hover:bg-black disabled:opacity-50">
+          <span class="relative z-10 flex items-center gap-2">
+            <mat-icon *ngIf="loading()" class="animate-spin text-sm">loop</mat-icon>
+            {{ loading() ? 'Salvando...' : 'Confirmar Identidade Visual' }}
+          </span>
+          <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-blue-500 opacity-0 group-hover:opacity-20 transition-opacity"></div>
         </button>
       </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+    </div>
+
+    <!-- Preview Imersivo (Direita) -->
+    <div class="lg:col-span-5">
+      <div class="sticky top-8">
+        <div class="relative mx-auto w-full max-w-[320px] aspect-[9/19.5] bg-gray-900 rounded-[3rem] p-3 shadow-2xl border-4 border-gray-800">
+          <!-- Mockup de Smartphone -->
+          <div class="w-full h-full bg-white rounded-[2.5rem] overflow-hidden flex flex-col relative" [appWhitelabelTheme]="supermarket()">
+            
+            <!-- App Header Preview -->
+            <div class="h-48 relative overflow-hidden" [style.background-color]="form.get('corPrimariaHex')?.value">
+              <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+              <div class="relative z-10 flex flex-col items-center justify-center h-full p-6 text-center">
+                <div class="w-16 h-16 bg-white rounded-2xl p-2 mb-3 shadow-lg transform -rotate-3 border-2 border-white">
+                  <img *ngIf="logoPreview()" [src]="logoPreview()" class="w-full h-full object-contain">
+                  <mat-icon *ngIf="!logoPreview()" class="text-gray-300 w-full h-full flex items-center justify-center">store</mat-icon>
+                </div>
+                <h3 class="text-white text-lg font-black uppercase leading-tight">{{ supermarket()?.nomeFantasia || 'Sua Loja' }}</h3>
+              </div>
+            </div>
+
+            <!-- Content Area Preview -->
+            <div class="flex-1 p-4 space-y-4 bg-gray-50">
+              <div class="h-4 w-3/4 bg-gray-200 rounded-full"></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="aspect-square bg-white rounded-xl border border-gray-100 shadow-sm p-2">
+                  <div class="h-2/3 bg-gray-100 rounded-lg mb-2"></div>
+                  <div class="h-2 w-full bg-gray-200 rounded-full mb-1"></div>
+                  <div class="h-3 w-1/2 rounded-full" [style.background-color]="form.get('corSecundariaHex')?.value"></div>
+                </div>
+                <div class="aspect-square bg-white rounded-xl border border-gray-100 shadow-sm p-2">
+                  <div class="h-2/3 bg-gray-100 rounded-lg mb-2"></div>
+                  <div class="h-2 w-full bg-gray-200 rounded-full mb-1"></div>
+                  <div class="h-3 w-1/2 rounded-full" [style.background-color]="form.get('corSecundariaHex')?.value"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notch do Celular -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-b-2xl z-50"></div>
+          </div>
+          
+          <!-- Legenda do Preview -->
+          <div class="absolute -bottom-12 left-0 right-0 text-center">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Preview Mobile em Tempo Real</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,37 +1,260 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 // Angular Material
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { SupermarketService } from '../../../core/services/supermarket.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { PublicApiService } from '../../../core/services/public-api.service';
+import { SupermarketResponse, SupermarketRequest } from '../../../core/models/supermarket.model';
 
 @Component({
   selector: 'app-manager-settings',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    MatIconModule, 
+    MatButtonModule, 
+    MatSnackBarModule,
+    MatTooltipModule
+  ],
   templateUrl: './manager-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ManagerSettingsComponent {
-  // Sinal com os dados fictícios do Supermercado Logado
+export class ManagerSettingsComponent implements OnInit {
+  private supermarketService = inject(SupermarketService);
+  private authService = inject(AuthService);
+  private publicApiService = inject(PublicApiService);
+  private snackBar = inject(MatSnackBar);
+
+  public isLoading = signal(false);
+  public isSearchingCep = signal(false);
+  public isSearchingCnpj = signal(false);
+  public supermarketId = signal<string | null>(null);
+
+  // Sinal com os dados do Supermercado
   public storeData = signal({
-    name: 'Supermercado Nova Era',
-    cnpj: '12.345.678/0001-90',
-    email: 'contato@novaera.com.br',
-    phone: '(11) 98765-4321',
-    cep: '01234-567',
-    address: 'Av. Paulista, 1000',
-    city: 'São Paulo',
+    name: '',
+    cnpj: '',
+    email: '',
+    phone: '',
+    cep: '',
+    address: '',
+    city: '',
     state: 'SP',
-    logoUrl: 'https://ui-avatars.com/api/?name=Nova+Era&background=16a34a&color=fff&bold=true&size=128',
-    latitude: '-23.561414',
-    longitude: '-46.655881',
+    logoUrl: '',
+    latitude: 0,
+    longitude: 0,
+    raioAtuacao: 3000,
     primaryColor: '#16a34a',
     secondaryColor: '#ea580c',
-    branches: [
-      { id: '1', name: 'Matriz - Paulista', address: 'Av. Paulista, 1000, São Paulo - SP' },
-      { id: '2', name: 'Filial - Pinheiros', address: 'Rua Teodoro Sampaio, 2500, São Paulo - SP' },
-      { id: '3', name: 'Filial - Centro', address: 'Rua Direita, 150, São Paulo - SP' }
-    ]
+    branches: [] as any[]
   });
-}
+
+  // Estados do Brasil
+  public brazilianStates = [
+    { uf: 'AC', name: 'Acre' }, { uf: 'AL', name: 'Alagoas' }, { uf: 'AP', name: 'Amapá' },
+    { uf: 'AM', name: 'Amazonas' }, { uf: 'BA', name: 'Bahia' }, { uf: 'CE', name: 'Ceará' },
+    { uf: 'DF', name: 'Distrito Federal' }, { uf: 'ES', name: 'Espírito Santo' }, { uf: 'GO', name: 'Goiás' },
+    { uf: 'MA', name: 'Maranhão' }, { uf: 'MT', name: 'Mato Grosso' }, { uf: 'MS', name: 'Mato Grosso do Sul' },
+    { uf: 'MG', name: 'Minas Gerais' }, { uf: 'PA', name: 'Pará' }, { uf: 'PB', name: 'Paraíba' },
+    { uf: 'PR', name: 'Paraná' }, { uf: 'PE', name: 'Pernambuco' }, { uf: 'PI', name: 'Piauí' },
+    { uf: 'RJ', name: 'Rio de Janeiro' }, { uf: 'RN', name: 'Rio Grande do Norte' }, { uf: 'RS', name: 'Rio Grande do Sul' },
+    { uf: 'RO', name: 'Rondônia' }, { uf: 'RR', name: 'Roraima' }, { uf: 'SC', name: 'Santa Catarina' },
+    { uf: 'SP', name: 'São Paulo' }, { uf: 'SE', name: 'Sergipe' }, { uf: 'TO', name: 'Tocantins' }
+  ];
+
+  // Cores predefinidas para a paleta rápida
+  public presetColors = [
+    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#14b8a6',
+    '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
+    '#f43f5e', '#1f2937'
+  ];
+
+  ngOnInit() {
+    this.loadSupermarket();
+  }
+
+  loadSupermarket() {
+    const user = this.authService.user();
+    if (user?.id) {
+      this.isLoading.set(true);
+      this.supermarketService.buscarPorGestor(user.id).subscribe({
+        next: (supermarkets) => {
+          if (supermarkets.length > 0) {
+            const sm = supermarkets[0];
+            this.supermarketId.set(sm.id);
+            this.updateStoreDataFromResponse(sm);
+          }
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Erro ao carregar supermercado', err);
+          this.isLoading.set(false);
+          this.snackBar.open('Erro ao carregar dados do supermercado.', 'Fechar', { duration: 3000 });
+        }
+      });
+    }
+  }
+
+  updateStoreDataFromResponse(sm: SupermarketResponse) {
+    this.storeData.set({
+      name: sm.nomeFantasia,
+      cnpj: sm.cnpj,
+      email: 'contato@' + sm.nomeFantasia.toLowerCase().replace(/\s/g, '') + '.com.br',
+      phone: '(11) 99999-9999',
+      cep: '00000-000',
+      address: sm.endereco,
+      city: 'São Paulo',
+      state: 'SP',
+      logoUrl: sm.urlLogomarca || `https://ui-avatars.com/api/?name=${sm.nomeFantasia}&background=16a34a&color=fff&bold=true&size=128`,
+      latitude: sm.latitude,
+      longitude: sm.longitude,
+      raioAtuacao: sm.raioAtuacao,
+      primaryColor: sm.corPrimariaHex || '#16a34a',
+      secondaryColor: sm.corSecundariaHex || '#ea580c',
+      branches: []
+    });
+  }
+
+  saveChanges() {
+    const id = this.supermarketId();
+    if (!id) {
+      this.snackBar.open('Supermercado não identificado.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    const data = this.storeData();
+    const request: SupermarketRequest = {
+      nomeFantasia: data.name,
+      cnpj: data.cnpj,
+      endereco: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      raioAtuacao: data.raioAtuacao,
+      gestorId: this.authService.user()?.id!,
+      corPrimariaHex: data.primaryColor,
+      corSecundariaHex: data.secondaryColor,
+      urlLogomarca: data.logoUrl
+    };
+
+    this.isLoading.set(true);
+    this.supermarketService.atualizar(id, request).subscribe({
+      next: (res) => {
+        this.snackBar.open('Configurações salvas com sucesso!', 'Fechar', { duration: 3000 });
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao salvar', err);
+        this.snackBar.open('Erro ao salvar configurações.', 'Fechar', { duration: 3000 });
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onLogoChange(event: any) {
+    const file = event.target.files[0];
+    const id = this.supermarketId();
+    if (file && id) {
+      this.isLoading.set(true);
+      this.supermarketService.uploadLogomarca(id, file).subscribe({
+        next: (res) => {
+          this.storeData.update(d => ({ ...d, logoUrl: res.urlLogomarca! }));
+          this.snackBar.open('Logo atualizada com sucesso!', 'Fechar', { duration: 3000 });
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.snackBar.open('Erro ao enviar logo.', 'Fechar', { duration: 3000 });
+          this.isLoading.set(false);
+        }
+      });
+    }
+  }
+
+  updateField(field: string, event: any) {
+    let value = event.target.value;
+    
+    // Converte para número se o campo for numérico
+    if (['latitude', 'longitude', 'raioAtuacao'].includes(field)) {
+      value = value !== '' ? Number(value) : 0;
+    }
+    
+    this.storeData.update(data => ({ ...data, [field]: value }));
+  }
+
+
+  buscarCep() {
+    const cep = this.storeData().cep;
+    if (!cep || cep.replace(/\D/g, '').length !== 8) {
+      this.snackBar.open('Informe um CEP válido com 8 dígitos.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    this.isSearchingCep.set(true);
+    this.publicApiService.buscarCep(cep).subscribe({
+      next: (res) => {
+        if (res.erro) {
+          this.snackBar.open('CEP não encontrado.', 'Fechar', { duration: 3000 });
+        } else {
+          this.storeData.update(data => ({
+            ...data,
+            address: `${res.logradouro}${res.bairro ? ', ' + res.bairro : ''}`,
+            city: res.localidade,
+            state: res.uf
+          }));
+          this.snackBar.open('Endereço atualizado via CEP!', 'Fechar', { duration: 2000 });
+        }
+        this.isSearchingCep.set(false);
+      },
+      error: () => {
+        this.snackBar.open('Erro ao buscar CEP.', 'Fechar', { duration: 3000 });
+        this.isSearchingCep.set(false);
+      }
+    });
+  }
+
+  buscarCnpj() {
+    const cnpj = this.storeData().cnpj;
+    if (!cnpj || cnpj.replace(/\D/g, '').length !== 14) {
+      this.snackBar.open('Informe um CNPJ válido com 14 dígitos.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    this.isSearchingCnpj.set(true);
+    this.publicApiService.buscarCnpj(cnpj).subscribe({
+      next: (res) => {
+        this.storeData.update(data => ({
+          ...data,
+          name: res.nome_fantasia || res.razao_social,
+          address: `${res.logradouro}, ${res.numero}${res.complemento ? ' - ' + res.complemento : ''}`,
+          city: res.municipio,
+          state: res.uf,
+          cep: res.cep,
+          phone: res.ddd_telefone_1 || data.phone,
+          email: res.email || data.email
+        }));
+        this.snackBar.open('Dados da empresa atualizados via CNPJ!', 'Fechar', { duration: 2000 });
+        this.isSearchingCnpj.set(false);
+      },
+      error: () => {
+        this.snackBar.open('Erro ao buscar CNPJ ou CNPJ não encontrado.', 'Fechar', { duration: 3000 });
+        this.isSearchingCnpj.set(false);
+      }
+    });
+  }
+
+  updatePrimaryColor(color: string) {
+
+    this.storeData.update(data => ({ ...data, primaryColor: color }));
+  }
+
+  updateSecondaryColor(color: string) {
+    this.storeData.update(data => ({ ...data, secondaryColor: color }));
+  }
+}

@@ -12,11 +12,19 @@
     </div>
     
     <div class="flex gap-3">
-      <button class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all">
+      <button 
+        (click)="loadSupermarket()" 
+        [disabled]="isLoading()"
+        class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all disabled:opacity-50">
         Descartar
       </button>
-      <button class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all">
-        <mat-icon class="!text-[20px] !w-5 !h-5 mr-2">save</mat-icon> Salvar Alterações
+      <button 
+        (click)="saveChanges()" 
+        [disabled]="isLoading()"
+        class="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 transition-all disabled:opacity-50">
+        <mat-icon *ngIf="!isLoading()" class="!text-[20px] !w-5 !h-5 mr-2">save</mat-icon>
+        <span *ngIf="isLoading()" class="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+        {{ isLoading() ? 'Salvando...' : 'Salvar Alterações' }}
       </button>
     </div>
   </header>
@@ -28,7 +36,7 @@
     <div class="xl:col-span-1 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col items-center text-center h-max">
       
       <!-- Upload de Logo Moderno -->
-      <div class="relative group cursor-pointer mb-5">
+      <div class="relative group cursor-pointer mb-5" (click)="logoInput.click()">
         <div class="w-32 h-32 rounded-full border-4 border-white shadow-md overflow-hidden bg-gray-50">
           <img [src]="storeData().logoUrl" alt="Logo da Loja" class="w-full h-full object-cover">
         </div>
@@ -36,6 +44,7 @@
           <mat-icon class="text-white !text-[32px] !w-8 !h-8 mb-1">photo_camera</mat-icon>
           <span class="text-[10px] text-white font-bold uppercase tracking-widest">Alterar</span>
         </div>
+        <input #logoInput type="file" class="hidden" accept="image/*" (change)="onLogoChange($event)">
       </div>
 
       <h3 class="text-lg font-bold text-gray-900">{{ storeData().name }}</h3>
@@ -63,19 +72,29 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div class="flex flex-col">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Nome do Supermercado</label>
-            <input type="text" [value]="storeData().name" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+            <input type="text" [value]="storeData().name" (input)="updateField('name', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
           </div>
           <div class="flex flex-col">
-            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide flex items-center justify-between">CNPJ <mat-icon class="!text-[14px] !w-3.5 !h-3.5 text-gray-400" matTooltip="Não pode ser alterado">lock</mat-icon></label>
-            <input type="text" [value]="storeData().cnpj" class="px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed" disabled>
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide flex items-center justify-between">
+              CNPJ 
+              <button 
+                (click)="buscarCnpj()" 
+                [disabled]="isSearchingCnpj() || !storeData().cnpj"
+                class="text-[10px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 disabled:opacity-50">
+                <mat-icon *ngIf="!isSearchingCnpj()" class="!text-[14px] !w-3.5 !h-3.5">search</mat-icon>
+                <span *ngIf="isSearchingCnpj()" class="animate-spin h-3 w-3 border border-blue-600 border-t-transparent rounded-full"></span>
+                BUSCAR DADOS
+              </button>
+            </label>
+            <input type="text" [value]="storeData().cnpj" (input)="updateField('cnpj', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           </div>
           <div class="flex flex-col">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">E-mail Comercial</label>
-            <input type="email" [value]="storeData().email" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+            <input type="email" [value]="storeData().email" (input)="updateField('email', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
           </div>
           <div class="flex flex-col">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">WhatsApp / Telefone</label>
-            <input type="text" [value]="storeData().phone" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
+            <input type="text" [value]="storeData().phone" (input)="updateField('phone', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
           </div>
         </div>
       </div>
@@ -84,36 +103,53 @@
       <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <h2 class="text-base font-bold text-gray-900 mb-5 border-b border-gray-100 pb-3 flex items-center justify-between">
           Endereço Principal
-          <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Buscar CEP</button>
+          <button 
+            (click)="buscarCep()" 
+            [disabled]="isSearchingCep() || !storeData().cep"
+            class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 disabled:opacity-50">
+            <mat-icon *ngIf="!isSearchingCep()" class="!text-[16px] !w-4 !h-4">map</mat-icon>
+            <span *ngIf="isSearchingCep()" class="animate-spin h-3 w-3 border border-blue-600 border-t-transparent rounded-full"></span>
+            {{ isSearchingCep() ? 'Buscando...' : 'Buscar CEP' }}
+          </button>
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-6 gap-5">
           <div class="flex flex-col sm:col-span-2">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">CEP</label>
-            <input type="text" [value]="storeData().cep" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+            <input type="text" [value]="storeData().cep" (input)="updateField('cep', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           </div>
           <div class="flex flex-col sm:col-span-4">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Endereço (Rua/Avenida)</label>
-            <input type="text" [value]="storeData().address" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+            <input type="text" [value]="storeData().address" (input)="updateField('address', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           </div>
           <div class="flex flex-col sm:col-span-4">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Cidade</label>
-            <input type="text" [value]="storeData().city" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+            <input type="text" [value]="storeData().city" (input)="updateField('city', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           </div>
           <div class="flex flex-col sm:col-span-2">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Estado (UF)</label>
-            <select class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
-              <option value="SP" selected>São Paulo (SP)</option>
-              <option value="RJ">Rio de Janeiro (RJ)</option>
-              <option value="MG">Minas Gerais (MG)</option>
+            <select [value]="storeData().state" (change)="updateField('state', $event)" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+              <option *ngFor="let state of brazilianStates" [value]="state.uf">
+                {{ state.name }} ({{ state.uf }})
+              </option>
             </select>
           </div>
           <div class="flex flex-col sm:col-span-3 mt-2 border-t border-gray-100 pt-4">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Latitude (GPS)</label>
-            <input type="text" [value]="storeData().latitude" placeholder="Ex: -23.550520" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+            <input type="number" [value]="storeData().latitude" (input)="updateField('latitude', $event)" placeholder="Ex: -23.550520" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
           </div>
           <div class="flex flex-col sm:col-span-3 mt-2 border-t border-gray-100 pt-4">
             <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Longitude (GPS)</label>
-            <input type="text" [value]="storeData().longitude" placeholder="Ex: -46.633308" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+            <input type="number" [value]="storeData().longitude" (input)="updateField('longitude', $event)" placeholder="Ex: -46.633308" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors">
+          </div>
+          <div class="flex flex-col sm:col-span-6 mt-2 border-t border-gray-100 pt-4">
+            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide flex items-center justify-between">
+              Raio de Atuação (Metros)
+              <span class="text-[10px] text-gray-400 font-normal normal-case italic">Define a distância máxima para visibilidade na vitrine</span>
+            </label>
+            <div class="flex items-center gap-3">
+              <input type="range" min="500" max="20000" step="500" [value]="storeData().raioAtuacao" (input)="updateField('raioAtuacao', $event)" class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
+              <span class="text-sm font-bold text-gray-900 w-20 text-right">{{ storeData().raioAtuacao / 1000 }} km</span>
+            </div>
           </div>
         </div>
       </div>
@@ -123,26 +159,65 @@
         <h2 class="text-base font-bold text-gray-900 mb-2 border-b border-gray-100 pb-3 flex items-center gap-2">
           <mat-icon class="text-purple-500">palette</mat-icon> Personalização de Marca
         </h2>
-        <p class="text-sm text-gray-500 mb-5">Escolha as cores que serão usadas como padrão na geração dos seus encartes e promoções.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <p class="text-sm text-gray-500 mb-5">Escolha as cores que serão usadas como padrão na geração dos seus encartes. Você pode usar a paleta, o seletor ou digitar o código hexadecimal.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          
+          <!-- Cor Primária -->
           <div class="flex flex-col">
-            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Cor Primária</label>
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm overflow-hidden shrink-0">
-                <input type="color" [value]="storeData().primaryColor" class="w-16 h-16 -m-2 cursor-pointer">
+            <label class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Cor Primária</label>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm overflow-hidden shrink-0" title="Clique para abrir o seletor">
+                  <input type="color" [value]="storeData().primaryColor" (input)="updatePrimaryColor($any($event.target).value)" class="w-16 h-16 -m-2 cursor-pointer">
+                </div>
+                <input type="text" [value]="storeData().primaryColor" (input)="updatePrimaryColor($any($event.target).value)" placeholder="#000000" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors uppercase">
               </div>
-              <input type="text" [value]="storeData().primaryColor" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors uppercase">
+              
+              <div class="mt-1">
+                <p class="text-[10px] text-gray-500 font-medium uppercase mb-2">Paleta Rápida</p>
+                <div class="flex flex-wrap gap-2">
+                  <button *ngFor="let color of presetColors" 
+                          (click)="updatePrimaryColor(color)"
+                          [class.ring-2]="storeData().primaryColor === color"
+                          [class.ring-offset-2]="storeData().primaryColor === color"
+                          [class.ring-gray-400]="storeData().primaryColor === color"
+                          class="w-6 h-6 rounded-full border border-gray-200 hover:scale-110 transition-transform cursor-pointer"
+                          [style.backgroundColor]="color"
+                          [title]="color">
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Cor Secundária -->
           <div class="flex flex-col">
-            <label class="text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">Cor Secundária</label>
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm overflow-hidden shrink-0">
-                <input type="color" [value]="storeData().secondaryColor" class="w-16 h-16 -m-2 cursor-pointer">
+            <label class="text-xs font-bold text-gray-700 mb-2 uppercase tracking-wide">Cor Secundária</label>
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm overflow-hidden shrink-0" title="Clique para abrir o seletor">
+                  <input type="color" [value]="storeData().secondaryColor" (input)="updateSecondaryColor($any($event.target).value)" class="w-16 h-16 -m-2 cursor-pointer">
+                </div>
+                <input type="text" [value]="storeData().secondaryColor" (input)="updateSecondaryColor($any($event.target).value)" placeholder="#000000" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors uppercase">
               </div>
-              <input type="text" [value]="storeData().secondaryColor" class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors uppercase">
+
+              <div class="mt-1">
+                <p class="text-[10px] text-gray-500 font-medium uppercase mb-2">Paleta Rápida</p>
+                <div class="flex flex-wrap gap-2">
+                  <button *ngFor="let color of presetColors" 
+                          (click)="updateSecondaryColor(color)"
+                          [class.ring-2]="storeData().secondaryColor === color"
+                          [class.ring-offset-2]="storeData().secondaryColor === color"
+                          [class.ring-gray-400]="storeData().secondaryColor === color"
+                          class="w-6 h-6 rounded-full border border-gray-200 hover:scale-110 transition-transform cursor-pointer"
+                          [style.backgroundColor]="color"
+                          [title]="color">
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
 

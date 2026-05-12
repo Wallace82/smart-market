@@ -27,5 +27,19 @@ public class ListarSupermercadoUseCase {
     public List<Supermercado> buscarPorGestorId(UUID gestorId) {
         return repository.findByGestorId(gestorId);
     }
+
+    /**
+     * RF-06.2: Supermercados próximos por GPS — raio padrão 3 km.
+     */
+    public List<Supermercado> buscarProximos(Double latitude, Double longitude, Integer radiusMeters) {
+        return repository.findNearby(latitude, longitude, radiusMeters);
+    }
+
+    /**
+     * RF-06.3: Supermercados por CEP ou bairro — fallback quando GPS negado.
+     */
+    public List<Supermercado> buscarPorLocalizacao(String cep, String bairro, int page, int size) {
+        return repository.findByLocation(cep, bairro, page, size);
+    }
 }
 

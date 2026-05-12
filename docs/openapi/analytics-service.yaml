@@ -1,50 +1,81 @@
 openapi: 3.0.3
 info:
-  title: SmartMarket - Analytics & Recommendation Service
-  description: Ingestão de eventos de telemetria e predição de interesses.
-  version: 1.0.0
+  title: SmartMarket Analytics Service API
+  version: 2.0.0
+  description: |
+    Contrato do módulo `analytics` para o MVP do SmartMarket (v2.0).
+    
+    Responsável por métricas essenciais (RF-08):
+    - RF-08.1: Visualizações por encarte
+    - RF-08.2: Escaneamentos de QR Code (via parâmetro UTM)
+    - RF-08.3: Dashboard do Gestor (encartes publicados, total de visualizações, acessos QR)
+    
+    > **Fora do escopo MVP:** Heatmaps, funis de conversão, tracking de sessão anônima,
+    > footfall attribution, analytics comportamental. Ver backlog pós-MVP.
 servers:
-  - url: http://localhost:8085
+  - url: /api/v1
+tags:
+  - name: Events
+    description: Ingestão de eventos de telemetria (público)
+  - name: Dashboard
+    description: Métricas consolidadas para o Gestor
 
 paths:
-  /api/v1/public/analytics/events:
+
+  /public/analytics/events:
     post:
-      summary: Registra um evento de telemetria
-      description: Captura cliques, visualizações de encarte, acessos via Totem QR Code e interesses orgânicos.
-      tags:
-        - Tracking
-      parameters:
-        - name: X-Anonymous-Id
-          in: header
-          required: false
-          description: ID para trackear a sessão de visitantes não autenticados (Product-Led Growth).
-          schema:
-            type: string
+      tags: [Events]
+      summary: Registrar evento de telemetria (público)
+      description: |
+        Endpoint público para captura de eventos MVP. Não requer autenticação (RF-01.4).
+        Processado de forma assíncrona.
+      operationId: registerEvent
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelemetryEvent'
+              $ref: '#/components/schemas/TelemetryEventRequest'
       responses:
         '202':
-          description: Evento computado (assíncrono).
+          description: Evento recebido e enfileirado para processamento
 
-  /api/v1/manager/analytics/dashboard:
+  /manager/analytics/dashboard:
     get:
-      summary: Retorna métricas consolidadas para o Gestor
-      description: Traz os dados de visitas físicas, CTR de push e encartes mais lidos.
-      tags:
-        - Métricas
+      tags: [Dashboard]
+      summary: Métricas do Dashboard do Gestor (RF-08.3)
+      description: |
+        Retorna métricas básicas do supermercado autenticado:
+        encartes publicados, total de visualizações e acessos via QR Code.
+      operationId: getManagerDashboard
       security:
         - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: startDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
-          description: JSON com dados agregados para os gráficos do Frontend.
+          description: Métricas do gestor
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManagerDashboardMetrics'
+                $ref: '#/components/schemas/ManagerDashboardResponse'
 
 components:
   securitySchemes:
@@ -54,60 +85,76 @@ components:
       bearerFormat: JWT
 
   schemas:
-    TelemetryEvent:
+
+    TelemetryEventRequest:
       type: object
-      required:
-        - eventType
-        - resourceId
+      required: [eventType, resourceId]
       properties:
         eventType:
           type: string
-          enum: 
-            - PRODUCT_VIEW
-            - FLYER_PAGE_VIEW
-            - OFFER_CLICK
+          description: |
+            Tipos de evento suportados no MVP:
+            - FLYER_VIEW: Visualização de encarte (RF-08.1)
+            - QR_CODE_SCANNED: Acesso via QR Code (RF-08.2)
+          enum:
+            - FLYER_VIEW
             - QR_CODE_SCANNED
-            - PUSH_OPENED
-            - SOFT_GATE_CONVERTED
         resourceId:
           type: string
-          description: ID do produto, encarte ou campanha alvo.
-        contextData:
-          type: object
-          additionalProperties: true
-          description: Metadados extras (ex. tempo de tela em segundos, categoria do produto p/ motor de interesse).
-          example:
-            category: "Bebidas"
-            timeSpentSeconds: 12
-        source:
+          format: uuid
+          description: ID do encarte (FLYER_VIEW) ou do supermercado (QR_CODE_SCANNED)
+        supermarketId:
           type: string
-          enum: [WEB, MOBILE_APP, TOTEM_QR]
+          format: uuid
+        utmSource:
+          type: string
+          description: Parâmetro UTM para identificar origem do acesso (RF-07.4)
+          example: totem
 
-    ManagerDashboardMetrics:
+    ManagerDashboardResponse:
       type: object
+      description: Métricas básicas do MVP para o Dashboard do Gestor (RF-08.3)
       properties:
-        totalActiveFlyers:
+        supermarketId:
+          type: string
+          format: uuid
+        totalPublishedFlyers:
           type: integer
-        totalPushesSent:
+          description: Total de encartes com status ATIVO no período
+        totalFlyerViews:
           type: integer
-        pushOpenRatePercentage:
-          type: number
-          format: double
-        physicalVisitsAttributed:
+          description: Total de visualizações de encartes (RF-08.1)
+        totalQrCodeScans:
           type: integer
-        conversionChartData:
+          description: Total de escaneamentos via QR Code (RF-08.2)
+        flyerViewsTimeline:
           type: array
+          description: Série temporal de visualizações por dia
           items:
             type: object
             properties:
               date:
                 type: string
                 format: date
-              pushes:
+              views:
                 type: integer
-              visits:
+              qrScans:
                 type: integer
-        topCategories:
+
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
           type: array
           items:
             type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

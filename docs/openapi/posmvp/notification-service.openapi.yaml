@@ -1,8 +1,21 @@
 openapi: 3.0.3
 info:
   title: SmartMarket Notification Service API
-  version: 1.0.0
-  description: Contrato inicial do notification-service para o MVP do SmartMarket.
+  version: 2.0.0
+  description: |
+    # ⚠️ BACKLOG PÓS-MVP
+
+    Este contrato define o módulo de **Notificações Inteligentes**, planejado para
+    após a validação das hipóteses do MVP.
+
+    Funcionalidades cobertas:
+    - Campanhas de Push Notification por geofencing
+    - Frequency Capping (limite de pushes por loja/dia)
+    - Histórico de entregas e status
+    - Fallback SMS/WhatsApp
+
+    > Tracking em background, geofencing e notificações push por proximidade estão
+    > **explicitamente fora do escopo MVP** (ver RF-06 e RF-08 em REQUIREMENTS.md).
 servers:
   - url: /api/v1
 tags:

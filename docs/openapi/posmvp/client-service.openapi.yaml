@@ -1,8 +1,22 @@
 openapi: 3.0.3
 info:
   title: SmartMarket Client Service API
-  version: 1.0.0
-  description: Contrato inicial do client-service para o MVP do SmartMarket.
+  version: 2.0.0
+  description: |
+    # ⚠️ BACKLOG PÓS-MVP
+
+    Este contrato define funcionalidades planejadas para **após a validação do MVP**.
+    Nenhum endpoint deste arquivo deve ser implementado na Fase 1–4 do Roadmap.
+
+    Funcionalidades cobertas:
+    - Perfil do consumidor (ROLE_CLIENTE com cadastro completo)
+    - Lista de compras (criar, salvar, compartilhar)
+    - Favoritar produtos e ofertas (Soft Gate para conversão)
+    - Registro de visualizações de produto
+
+    > A busca de supermercados próximos (geolocalização pública) foi movida para
+    > `supermarket-service.openapi.yaml` (`/public/supermarkets/nearby`), que é o
+    > contrato MVP correto para essa funcionalidade (RF-06).
 servers:
   - url: /api/v1
 tags:

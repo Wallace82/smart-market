@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,25 +50,31 @@ public class AuthController {
         return ResponseEntity.ok(new AuthTokenResponseDTO("mocked-new-jwt", request.getRefreshToken(), 3600L));
     }
 
-    @PostMapping("/register")
-    @Operation(summary = "Registrar Usuário", description = "Cria uma nova conta de usuário no sistema")
+    /**
+     * Cria um usuário (ADMIN ou GESTOR). Somente ADMIN pode executar esta operação (RF-01.1, MVP).
+     * Auto-cadastro público não está no escopo do MVP — ver REQUIREMENTS.md seção 12 (ROLE_CLIENTE pós-MVP).
+     */
+    @PostMapping("/users")
+    @Operation(summary = "Criar Usuário (Admin)", description = "Cria uma conta com papel ADMIN ou GESTOR. Requer autenticação ADMIN.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de registro inválidos")
+            @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso"),
+            @ApiResponse(responseCode = "409", description = "E-mail já cadastrado"),
+            @ApiResponse(responseCode = "400", description = "Papel inválido ou dados incorretos")
     })
-    public ResponseEntity<?> registerUser(@RequestBody RegistroUsuarioRequestDTO signUpRequest) {
-        log.info("Iniciando registro para novo usuário: {}", signUpRequest.getEmail());
+    public ResponseEntity<?> criarUsuario(@RequestBody RegistroUsuarioRequestDTO request) {
+        log.info("Admin criando novo usuário: {} com papel: {}", request.getEmail(), request.getPapel());
         try {
-            registrarUsuarioUseCase.execute(signUpRequest);
-            log.info("Usuário registrado com sucesso: {}", signUpRequest.getEmail());
-            return ResponseEntity.ok().body("Usuário registrado com sucesso!");
+            registrarUsuarioUseCase.execute(request);
+            log.info("Usuário criado com sucesso: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.CREATED).body("Usuário criado com sucesso.");
         } catch (IllegalArgumentException e) {
-            log.warn("Erro de validação ao registrar usuário {}: {}", signUpRequest.getEmail(), e.getMessage());
+            log.warn("Erro de validação ao criar usuário {}: {}", request.getEmail(), e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
-            log.error("Erro interno ao registrar usuário {}: {}", signUpRequest.getEmail(), e.getMessage(), e);
+            log.error("Erro interno ao criar usuário {}: {}", request.getEmail(), e.getMessage(), e);
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
 }
+
 

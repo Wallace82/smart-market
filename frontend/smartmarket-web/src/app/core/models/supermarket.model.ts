@@ -1,19 +1,29 @@
 export interface SupermarketResponse {
   id: string;
-  nome: string;
-  nomeFantasia?: string;
+  nomeFantasia: string;
   cnpj: string;
   status: 'ATIVO' | 'INATIVO' | 'PENDENTE';
+  endereco: string;
+  latitude: number;
+  longitude: number;
+  raioAtuacao: number;
+  gestorId: string;
   urlLogomarca?: string;
   corPrimariaHex?: string;
   corSecundariaHex?: string;
-  // Adicione outros campos conforme necessário
+  criadoEm?: string;
+  atualizadoEm?: string;
 }
 
 export interface SupermarketRequest {
-  nome: string;
-  nomeFantasia?: string;
+  nomeFantasia: string;
   cnpj: string;
+  endereco: string;
+  latitude: number;
+  longitude: number;
+  raioAtuacao: number;
+  gestorId: string;
+  urlLogomarca?: string;
   corPrimariaHex?: string;
   corSecundariaHex?: string;
-}
+}

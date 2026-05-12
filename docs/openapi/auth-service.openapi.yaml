@@ -1,18 +1,27 @@
 openapi: 3.0.3
 info:
   title: SmartMarket Auth Service API
-  version: 1.0.0
-  description: Contrato inicial do auth-service para o MVP do SmartMarket.
+  version: 2.0.0
+  description: |
+    Contrato do módulo `auth` para o MVP do SmartMarket (v2.0).
+    
+    **Perfis suportados no MVP:** ADMIN e GESTOR.
+    Acesso público não requer autenticação (vitrine, encartes, QR Code — RF-01.4).
 servers:
   - url: /api/v1
 tags:
   - name: Auth
+    description: Autenticação e gestão de tokens JWT
   - name: Users
+    description: Gestão de usuários (Admin e Gestor)
+
 paths:
+
   /auth/login:
     post:
       tags: [Auth]
-      summary: Autenticar usuario com email e senha
+      summary: Autenticar usuário com e-mail e senha
+      description: Retorna um par de tokens JWT (access + refresh). Usado por Admin e Gestor.
       operationId: login
       requestBody:
         required: true
@@ -28,15 +37,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthTokenResponse'
         '401':
-          description: Credenciais invalidas
+          description: Credenciais inválidas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /auth/refresh:
     post:
       tags: [Auth]
       summary: Renovar access token
+      description: Emite um novo access token a partir de um refresh token válido.
       operationId: refreshToken
       requestBody:
         required: true
@@ -52,15 +63,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthTokenResponse'
         '401':
-          description: Refresh token invalido ou expirado
+          description: Refresh token inválido ou expirado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /auth/forgot-password:
     post:
       tags: [Auth]
-      summary: Iniciar recuperacao de senha
+      summary: Iniciar recuperação de senha
+      description: |
+        Envia um e-mail com link/token temporário para redefinição de senha.
+        Responde com 202 independente de o e-mail existir (segurança contra enumeração).
       operationId: forgotPassword
       requestBody:
         required: true
@@ -70,15 +85,16 @@ paths:
               $ref: '#/components/schemas/ForgotPasswordRequest'
       responses:
         '202':
-          description: Solicitacao recebida e processada de forma assincrona
+          description: Solicitação recebida
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
+
   /auth/reset-password:
     post:
       tags: [Auth]
-      summary: Redefinir senha com token temporario
+      summary: Redefinir senha com token temporário
       operationId: resetPassword
       requestBody:
         required: true
@@ -90,15 +106,19 @@ paths:
         '204':
           description: Senha redefinida com sucesso
         '400':
-          description: Token invalido ou senha fora da politica
+          description: Token inválido, expirado ou senha fora da política
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /users:
     post:
       tags: [Users]
-      summary: Criar usuario (Admin)
+      summary: Criar usuário (somente Admin)
+      description: |
+        Cria um usuário com role ADMIN ou GESTOR. Apenas ADMIN pode executar esta operação.
+        No MVP não há auto-cadastro de clientes (ROLE_CLIENTE é pós-MVP).
       operationId: createUser
       security:
         - bearerAuth: []
@@ -110,21 +130,22 @@ paths:
               $ref: '#/components/schemas/CreateUserRequest'
       responses:
         '201':
-          description: Usuario criado
+          description: Usuário criado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '409':
-          description: Email ja cadastrado
+          description: E-mail já cadastrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /users/{id}:
     get:
       tags: [Users]
-      summary: Consultar usuario por ID
+      summary: Consultar usuário por ID
       operationId: getUserById
       security:
         - bearerAuth: []
@@ -132,21 +153,22 @@ paths:
         - $ref: '#/components/parameters/UserIdPath'
       responses:
         '200':
-          description: Usuario encontrado
+          description: Usuário encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '404':
-          description: Usuario nao encontrado
+          description: Usuário não encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
   /users/{id}/status:
     patch:
       tags: [Users]
-      summary: Atualizar status do usuario
+      summary: Ativar ou desativar usuário (somente Admin)
       operationId: updateUserStatus
       security:
         - bearerAuth: []
@@ -165,34 +187,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-  /users/{id}/roles:
-    put:
-      tags: [Users]
-      summary: Substituir papeis do usuario
-      operationId: replaceUserRoles
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/UserIdPath'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ReplaceUserRolesRequest'
-      responses:
-        '200':
-          description: Papeis atualizados
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResponse'
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   parameters:
     UserIdPath:
       name: id
@@ -201,13 +203,22 @@ components:
       schema:
         type: string
         format: uuid
+
   schemas:
+
     Role:
       type: string
-      enum: [ADMIN, GESTOR, CLIENTE]
+      description: |
+        Perfis de acesso do MVP.
+        - ADMIN: Gestor total da plataforma (catálogo global, temas, supermercados).
+        - GESTOR: Responsável por um supermercado (ofertas, encartes, whitelabel).
+        > CLIENTE (pós-MVP): Perfil com cadastro completo, favoritos e lista de compras.
+      enum: [ADMIN, GESTOR]
+
     UserStatus:
       type: string
       enum: [ATIVO, INATIVO, BLOQUEADO]
+
     LoginRequest:
       type: object
       required: [email, password]
@@ -218,12 +229,14 @@ components:
         password:
           type: string
           minLength: 8
+
     RefreshTokenRequest:
       type: object
       required: [refreshToken]
       properties:
         refreshToken:
           type: string
+
     ForgotPasswordRequest:
       type: object
       required: [email]
@@ -231,6 +244,7 @@ components:
         email:
           type: string
           format: email
+
     ResetPasswordRequest:
       type: object
       required: [token, newPassword]
@@ -240,6 +254,7 @@ components:
         newPassword:
           type: string
           minLength: 8
+
     CreateUserRequest:
       type: object
       required: [name, email, role]
@@ -253,6 +268,7 @@ components:
           format: email
         role:
           $ref: '#/components/schemas/Role'
+
     UpdateUserStatusRequest:
       type: object
       required: [status]
@@ -262,15 +278,7 @@ components:
         reason:
           type: string
           maxLength: 255
-    ReplaceUserRolesRequest:
-      type: object
-      required: [roles]
-      properties:
-        roles:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/Role'
+
     AuthTokenResponse:
       type: object
       required: [accessToken, refreshToken, tokenType, expiresIn]
@@ -285,10 +293,11 @@ components:
         expiresIn:
           type: integer
           format: int64
-          description: Duracao em segundos
+          description: Duração do access token em segundos
+
     UserResponse:
       type: object
-      required: [id, name, email, status, roles]
+      required: [id, name, email, role, status]
       properties:
         id:
           type: string
@@ -298,21 +307,21 @@ components:
         email:
           type: string
           format: email
+        role:
+          $ref: '#/components/schemas/Role'
         status:
           $ref: '#/components/schemas/UserStatus'
-        roles:
-          type: array
-          items:
-            $ref: '#/components/schemas/Role'
         createdAt:
           type: string
           format: date-time
+
     MessageResponse:
       type: object
       properties:
         message:
           type: string
           example: Request accepted
+
     ErrorResponse:
       type: object
       required: [code, message, traceId, timestamp]

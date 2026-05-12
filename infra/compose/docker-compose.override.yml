@@ -1,14 +1,4 @@
 services:
-  api-gateway:
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      AUTH_SERVICE_URL: http://auth-service:8081
-      SUPERMARKET_SERVICE_URL: http://supermarket-service:8082
-      PRODUCT_SERVICE_URL: http://product-service:8083
-      CLIENT_SERVICE_URL: http://client-service:8084
-      NOTIFICATION_SERVICE_URL: http://notification-service:8085
-      RECOMMENDATION_SERVICE_URL: http://recommendation-service:8086
-
   auth-service:
     environment:
       SPRING_PROFILES_ACTIVE: local
@@ -16,7 +6,6 @@ services:
       DB_USERNAME: smartmarket
       DB_PASSWORD: smartmarket
       SPRING_REDIS_HOST: redis
-      SPRING_RABBITMQ_HOST: rabbitmq
 
   supermarket-service:
     environment:
@@ -25,7 +14,6 @@ services:
       DB_USERNAME: smartmarket
       DB_PASSWORD: smartmarket
       SPRING_REDIS_HOST: redis
-      SPRING_RABBITMQ_HOST: rabbitmq
 
   product-service:
     environment:
@@ -34,31 +22,3 @@ services:
       DB_USERNAME: smartmarket
       DB_PASSWORD: smartmarket
       SPRING_REDIS_HOST: redis
-      SPRING_RABBITMQ_HOST: rabbitmq
-
-  client-service:
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      DB_URL: jdbc:postgresql://postgres:5432/smartmarket
-      DB_USERNAME: smartmarket
-      DB_PASSWORD: smartmarket
-      SPRING_REDIS_HOST: redis
-      SPRING_RABBITMQ_HOST: rabbitmq
-
-  notification-service:
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      DB_URL: jdbc:postgresql://postgres:5432/smartmarket
-      DB_USERNAME: smartmarket
-      DB_PASSWORD: smartmarket
-      SPRING_REDIS_HOST: redis
-      SPRING_RABBITMQ_HOST: rabbitmq
-
-  recommendation-service:
-    environment:
-      SPRING_PROFILES_ACTIVE: local
-      DB_URL: jdbc:postgresql://postgres:5432/smartmarket
-      DB_USERNAME: smartmarket
-      DB_PASSWORD: smartmarket
-      SPRING_REDIS_HOST: redis
-      SPRING_RABBITMQ_HOST: rabbitmq

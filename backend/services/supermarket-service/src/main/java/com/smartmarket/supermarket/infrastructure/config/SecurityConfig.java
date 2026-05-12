@@ -18,10 +18,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // No MVP inicial, deixamos aberto para facilitar os testes.
-                // A segurança principal está no api-gateway e auth-service.
+                // No microserviço, permitimos todas as requisições pois a segurança 
+                // é gerenciada pelo API Gateway. Em produção, poderíamos restringir 
+                // para aceitar apenas requisições vindas do IP do Gateway.
                 .anyRequest().permitAll()
             );
+
 
         return http.build();
     }

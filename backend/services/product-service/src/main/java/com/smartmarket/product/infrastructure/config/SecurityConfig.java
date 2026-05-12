@@ -18,9 +18,12 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // No MVP inicial, deixamos aberto para facilitar os testes. 
-                // A segurança principal está no api-gateway e auth-service.
-                .anyRequest().permitAll()
+                // Vitrine pública: ofertas, encartes e eventos de analytics (RF-01.4)
+                .requestMatchers("/api/v1/public/**").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // Gestão de catálogo, ofertas e encartes requerem JWT (ADMIN/GESTOR)
+                .anyRequest().authenticated()
             );
 
         return http.build();

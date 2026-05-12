@@ -42,12 +42,15 @@ public class RegistrarUsuarioUseCase {
         try {
             papelNome = PapelNome.valueOf(registroRequest.getPapel());
         } catch (IllegalArgumentException | NullPointerException e) {
-            // Default para CLIENTE se não enviado ou inválido
-            papelNome = PapelNome.ROLE_CLIENTE;
+            // No MVP apenas ROLE_ADMIN e ROLE_GESTOR são válidos. ROLE_CLIENTE é pós-MVP.
+            throw new IllegalArgumentException(
+                "Papel inválido: '" + registroRequest.getPapel() + "'. Valores aceitos: ROLE_ADMIN, ROLE_GESTOR."
+            );
         }
 
         Papel papel = papelRepository.findByNome(papelNome)
                 .orElseThrow(() -> new RuntimeException("Erro: Papel " + registroRequest.getPapel() + " não encontrado."));
+
 
         usuario.adicionarPapel(papel);
 

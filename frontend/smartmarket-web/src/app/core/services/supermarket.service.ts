@@ -39,8 +39,7 @@ export class SupermarketService {
   }
 
   alterarStatus(id: string, status: 'PENDENTE' | 'ATIVO' | 'INATIVO'): Observable<SupermarketResponse> {
-    return this.http.patch<SupermarketResponse>(`${this.apiUrl}/${id}/status`, null, {
-      params: { novoStatus: status }
-    });
+    return this.http.patch<SupermarketResponse>(`${this.apiUrl}/${id}/status`, { status });
   }
 }
+

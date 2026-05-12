@@ -5,13 +5,9 @@ param(
 $ErrorActionPreference = "Stop"
 
 $services = @(
-    @{ Name = "api-gateway"; Url = "http://localhost:8080/health" },
     @{ Name = "auth-service"; Url = "http://localhost:8081/health" },
     @{ Name = "supermarket-service"; Url = "http://localhost:8082/health" },
-    @{ Name = "product-service"; Url = "http://localhost:8083/health" },
-    @{ Name = "client-service"; Url = "http://localhost:8084/health" },
-    @{ Name = "notification-service"; Url = "http://localhost:8085/health" },
-    @{ Name = "recommendation-service"; Url = "http://localhost:8086/health" }
+    @{ Name = "product-service"; Url = "http://localhost:8083/health" }
 )
 
 $allHealthy = $true

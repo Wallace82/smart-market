@@ -1,30 +1,53 @@
 openapi: 3.0.3
 info:
   title: SmartMarket Product Service API
-  version: 1.0.0
-  description: Contrato inicial do product-service para o MVP do SmartMarket.
+  version: 2.0.0
+  description: |
+    Contrato dos módulos `catalog`, `offer`, `flyer` e `storage` para o MVP (v2.0).
+    
+    Responsável por:
+    - Catálogo Global de Produtos mantido pelo Admin (RF-03)
+    - Gestão de Ofertas por Supermercado (RF-04)
+    - Temas Sazonais geridos pelo Admin (RF-05.1)
+    - Encartes Digitais criados pelo Gestor (RF-05)
+    - Upload de imagens para MinIO (RF-03.3)
+    - Vitrine pública de ofertas e encartes (RF-04.3, RF-05.4)
 servers:
   - url: /api/v1
 tags:
   - name: Categories
+    description: Categorias do catálogo global (Admin)
   - name: Products
-  - name: Promotions
+    description: Catálogo global de produtos (Admin)
+  - name: Offers
+    description: Ofertas por supermercado — seleciona produto do catálogo e define preço (Gestor)
+  - name: Themes
+    description: Temas sazonais para encartes (Admin)
   - name: Flyers
+    description: Encartes digitais — associam tema + ofertas (Gestor)
+  - name: Public
+    description: Endpoints públicos da vitrine — sem autenticação (RF-01.4)
+
 paths:
+
+  # ── CATÁLOGO GLOBAL (Admin) ────────────────────────────────────────────────
+
   /categories:
     get:
       tags: [Categories]
-      summary: Listar categorias
+      summary: Listar categorias do catálogo global
       operationId: listCategories
       security:
         - bearerAuth: []
       parameters:
-        - name: supermarketId
+        - name: q
           in: query
-          required: true
+          required: false
           schema:
             type: string
-            format: uuid
+            maxLength: 80
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
       responses:
         '200':
           description: Lista de categorias
@@ -34,7 +57,7 @@ paths:
                 $ref: '#/components/schemas/PagedCategoryResponse'
     post:
       tags: [Categories]
-      summary: Criar categoria
+      summary: Criar categoria (Admin)
       operationId: createCategory
       security:
         - bearerAuth: []
@@ -51,20 +74,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryResponse'
+
+  /categories/{id}:
+    put:
+      tags: [Categories]
+      summary: Atualizar categoria (Admin)
+      operationId: updateCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CategoryIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '200':
+          description: Categoria atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /products:
     get:
       tags: [Products]
-      summary: Buscar produtos
+      summary: Buscar produtos do catálogo global
       operationId: listProducts
       security:
         - bearerAuth: []
       parameters:
-        - name: supermarketId
-          in: query
-          required: false
-          schema:
-            type: string
-            format: uuid
         - name: categoryId
           in: query
           required: false
@@ -88,7 +131,7 @@ paths:
                 $ref: '#/components/schemas/PagedProductResponse'
     post:
       tags: [Products]
-      summary: Criar produto
+      summary: Criar produto no catálogo global (Admin)
       operationId: createProduct
       security:
         - bearerAuth: []
@@ -105,10 +148,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductResponse'
+
   /products/{id}:
     put:
       tags: [Products]
-      summary: Atualizar produto
+      summary: Atualizar produto (Admin)
       operationId: updateProduct
       security:
         - bearerAuth: []
@@ -119,7 +163,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateProductRequest'
+              $ref: '#/components/schemas/CreateProductRequest'
       responses:
         '200':
           description: Produto atualizado
@@ -128,16 +172,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductResponse'
         '404':
-          description: Produto nao encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /products/{id}/status:
-    patch:
+          $ref: '#/components/responses/NotFound'
+
+  /products/{id}/image:
+    post:
       tags: [Products]
-      summary: Atualizar status do produto
-      operationId: updateProductStatus
+      summary: Upload de imagem do produto (Admin)
+      description: Envia imagem para MinIO (bucket `smartmarket-products`). RF-03.3.
+      operationId: uploadProductImage
       security:
         - bearerAuth: []
       parameters:
@@ -145,21 +187,51 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/UpdateProductStatusRequest'
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
       responses:
         '200':
-          description: Status atualizado
+          description: Imagem enviada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponse'
-  /promotions:
+                $ref: '#/components/schemas/ImageUploadResponse'
+
+  # ── TEMAS SAZONAIS (Admin) — RF-05.1 ──────────────────────────────────────
+
+  /themes:
+    get:
+      tags: [Themes]
+      summary: Listar temas sazonais
+      operationId: listThemes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: active
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista de temas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedThemeResponse'
     post:
-      tags: [Promotions]
-      summary: Criar promocao
-      operationId: createPromotion
+      tags: [Themes]
+      summary: Criar tema sazonal (Admin)
+      description: Cria um tema com background decorativo e cor de fundo. RF-05.1.
+      operationId: createTheme
       security:
         - bearerAuth: []
       requestBody:
@@ -167,25 +239,144 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePromotionRequest'
+              $ref: '#/components/schemas/CreateThemeRequest'
       responses:
         '201':
-          description: Promocao criada
+          description: Tema criado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PromotionResponse'
+                $ref: '#/components/schemas/ThemeResponse'
+
+  /themes/{id}/image:
+    post:
+      tags: [Themes]
+      summary: Upload do background decorativo do tema (Admin)
+      description: Envia asset para MinIO (bucket `smartmarket-themes`). RF-05.1.
+      operationId: uploadThemeImage
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ThemeIdPath'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Imagem do tema enviada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageUploadResponse'
+
+  /themes/{id}/status:
+    patch:
+      tags: [Themes]
+      summary: Ativar ou desativar tema (Admin)
+      operationId: updateThemeStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ThemeIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [active]
+              properties:
+                active:
+                  type: boolean
+      responses:
+        '200':
+          description: Status do tema atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeResponse'
+
+  # ── OFERTAS (Gestor) — RF-04 ───────────────────────────────────────────────
+
+  /offers:
+    post:
+      tags: [Offers]
+      summary: Criar oferta (Gestor)
+      description: |
+        O Gestor seleciona um produto do Catálogo Global e define preço promocional + período de validade (RF-04.1, RF-04.2).
+      operationId: createOffer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOfferRequest'
+      responses:
+        '201':
+          description: Oferta criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferResponse'
         '422':
-          description: Regra de negocio violada
+          description: Regra de negócio violada (ex. dataFim < dataInicio)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /promotions/active:
+
+  /offers/{id}:
+    put:
+      tags: [Offers]
+      summary: Atualizar oferta (Gestor)
+      operationId: updateOffer
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOfferRequest'
+      responses:
+        '200':
+          description: Oferta atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Offers]
+      summary: Remover oferta (Gestor)
+      operationId: deleteOffer
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/OfferIdPath'
+      responses:
+        '204':
+          description: Oferta removida
+
+  /offers/active:
     get:
-      tags: [Promotions]
-      summary: Listar promocoes ativas
-      operationId: listActivePromotions
+      tags: [Offers]
+      summary: Listar ofertas ativas de um supermercado (Gestor)
+      operationId: listActiveOffers
       security:
         - bearerAuth: []
       parameters:
@@ -195,17 +386,31 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
       responses:
         '200':
-          description: Lista de promocoes ativas
+          description: Lista de ofertas ativas
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedPromotionResponse'
+                $ref: '#/components/schemas/PagedOfferResponse'
+
+  # ── ENCARTES DIGITAIS (Gestor) — RF-05 ───────────────────────────────────
+
   /flyers:
     post:
       tags: [Flyers]
-      summary: Criar encarte digital
+      summary: Criar encarte digital (Gestor)
+      description: |
+        Cria encarte associando: um Tema Sazonal, título, datas de vigência e lista de Ofertas.
+        Status inicial: RASCUNHO (RF-05.2, RF-05.5).
       operationId: createFlyer
       security:
         - bearerAuth: []
@@ -217,15 +422,92 @@ paths:
               $ref: '#/components/schemas/CreateFlyerRequest'
       responses:
         '201':
-          description: Encarte criado
+          description: Encarte criado com status RASCUNHO
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlyerResponse'
+
+    get:
+      tags: [Flyers]
+      summary: Listar encartes do supermercado (Gestor)
+      operationId: listFlyers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermarketId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/FlyerStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Lista de encartes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedFlyerResponse'
+
+  /flyers/{id}:
+    get:
+      tags: [Flyers]
+      summary: Consultar encarte por ID (Gestor)
+      operationId: getFlyerById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FlyerIdPath'
+      responses:
+        '200':
+          description: Encarte encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlyerResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Flyers]
+      summary: Atualizar encarte em RASCUNHO (Gestor)
+      operationId: updateFlyer
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/FlyerIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFlyerRequest'
+      responses:
+        '200':
+          description: Encarte atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlyerResponse'
+        '422':
+          description: Encarte não está em RASCUNHO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /flyers/{id}/publish:
     post:
       tags: [Flyers]
-      summary: Publicar encarte
+      summary: Publicar encarte — RASCUNHO → ATIVO (Gestor)
+      description: Valida que o encarte possui ao menos uma oferta válida antes de publicar. RF-05.5.
       operationId: publishFlyer
       security:
         - bearerAuth: []
@@ -233,41 +515,155 @@ paths:
         - $ref: '#/components/parameters/FlyerIdPath'
       responses:
         '200':
-          description: Encarte publicado
+          description: Encarte publicado (status ATIVO)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlyerResponse'
         '422':
-          description: Encarte sem promocoes validas
+          description: Encarte sem ofertas válidas ou fora do período de vigência
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /flyers/{id}/duplicate:
+
+  /flyers/{id}/close:
     post:
       tags: [Flyers]
-      summary: Duplicar encarte
-      operationId: duplicateFlyer
+      summary: Encerrar encarte — ATIVO → ENCERRADO (Gestor)
+      operationId: closeFlyer
       security:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/FlyerIdPath'
       responses:
-        '201':
-          description: Encarte duplicado
+        '200':
+          description: Encarte encerrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FlyerResponse'
+
+  # ── VITRINE PÚBLICA — RF-04.3, RF-04.4, RF-05.4 ──────────────────────────
+
+  /public/supermarkets/{supermarketId}/offers:
+    get:
+      tags: [Public]
+      summary: Listar ofertas ativas de um supermercado (público)
+      description: |
+        Acesso anônimo ou autenticado. Suporta filtros por categoria e faixa de preço (RF-04.3, RF-04.4).
+      operationId: listPublicOffers
+      parameters:
+        - name: supermarketId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: minPrice
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: maxPrice
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Ofertas ativas encontradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedOfferResponse'
+
+  /public/supermarkets/{supermarketId}/flyers/active:
+    get:
+      tags: [Public]
+      summary: Obter encarte ativo do supermercado (público)
+      description: |
+        Retorna o encarte ATIVO mais recente para visualização imersiva. RF-05.4, RF-07.2.
+        Inclui dados do Tema Sazonal e identidade visual da loja para renderização whitelabel.
+      operationId: getActiveFlyer
+      parameters:
+        - name: supermarketId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: utm_source
+          in: query
+          required: false
+          description: Parâmetro UTM para identificar acessos via QR Code (RF-07.4)
+          schema:
+            type: string
+            example: totem
+      responses:
+        '200':
+          description: Encarte ativo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFlyerResponse'
+        '404':
+          description: Nenhum encarte ativo para este supermercado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  responses:
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
   parameters:
+    CategoryIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     ProductIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ThemeIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OfferIdPath:
       name: id
       in: path
       required: true
@@ -296,23 +692,22 @@ components:
         minimum: 1
         maximum: 100
         default: 20
+
   schemas:
-    ProductStatus:
-      type: string
-      enum: [ATIVO, INATIVO, ESGOTADO]
-    PromotionStatus:
-      type: string
-      enum: [RASCUNHO, AGENDADA, ATIVA, EXPIRADA, CANCELADA]
+
     FlyerStatus:
       type: string
-      enum: [RASCUNHO, PUBLICADO, EXPIRADO, ARQUIVADO]
+      description: |
+        Ciclo de vida do Encarte Digital (RF-05.5):
+        - RASCUNHO: Em edição pelo Gestor
+        - ATIVO: Publicado e visível na vitrine pública
+        - ENCERRADO: Expirado manualmente ou por data de fim
+      enum: [RASCUNHO, ATIVO, ENCERRADO]
+
     CreateCategoryRequest:
       type: object
-      required: [supermarketId, name]
+      required: [name]
       properties:
-        supermarketId:
-          type: string
-          format: uuid
         name:
           type: string
           minLength: 2
@@ -320,14 +715,12 @@ components:
         description:
           type: string
           maxLength: 255
+
     CategoryResponse:
       type: object
-      required: [id, supermarketId, name]
+      required: [id, name]
       properties:
         id:
-          type: string
-          format: uuid
-        supermarketId:
           type: string
           format: uuid
         name:
@@ -336,13 +729,11 @@ components:
           type: string
         active:
           type: boolean
+
     CreateProductRequest:
       type: object
-      required: [supermarketId, categoryId, name, unitMeasure, basePrice]
+      required: [categoryId, name]
       properties:
-        supermarketId:
-          type: string
-          format: uuid
         categoryId:
           type: string
           format: uuid
@@ -359,27 +750,12 @@ components:
         unitMeasure:
           type: string
           example: UN
-        basePrice:
-          type: number
-          format: double
-          minimum: 0.01
-    UpdateProductRequest:
-      allOf:
-        - $ref: '#/components/schemas/CreateProductRequest'
-    UpdateProductStatusRequest:
-      type: object
-      required: [status]
-      properties:
-        status:
-          $ref: '#/components/schemas/ProductStatus'
+
     ProductResponse:
       type: object
-      required: [id, supermarketId, categoryId, name, unitMeasure, basePrice, status]
+      required: [id, categoryId, name]
       properties:
         id:
-          type: string
-          format: uuid
-        supermarketId:
           type: string
           format: uuid
         categoryId:
@@ -393,41 +769,85 @@ components:
           type: string
         unitMeasure:
           type: string
-        basePrice:
-          type: number
-          format: double
-        status:
-          $ref: '#/components/schemas/ProductStatus'
-    CreatePromotionRequest:
-      type: object
-      required: [productId, promotionalPrice, startAt, endAt]
-      properties:
-        productId:
+        imageUrl:
           type: string
-          format: uuid
-        promotionalPrice:
-          type: number
-          format: double
-          minimum: 0.01
-        startAt:
-          type: string
-          format: date-time
-        endAt:
-          type: string
-          format: date-time
-        highlight:
+          format: uri
+          description: URL pública da imagem no MinIO (bucket smartmarket-products)
+        active:
           type: boolean
-          default: false
-    PromotionResponse:
+
+    CreateThemeRequest:
       type: object
-      required: [id, productId, promotionalPrice, startAt, endAt, status]
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 80
+          example: Natal 2026
+        backgroundColorHex:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: '#1a472a'
+
+    ThemeResponse:
+      type: object
+      required: [id, name, active]
       properties:
         id:
           type: string
           format: uuid
+        name:
+          type: string
+        backgroundImageUrl:
+          type: string
+          format: uri
+          description: URL do asset decorativo no MinIO (bucket smartmarket-themes)
+        backgroundColorHex:
+          type: string
+        active:
+          type: boolean
+
+    CreateOfferRequest:
+      type: object
+      required: [supermarketId, productId, promotionalPrice, startAt, endAt]
+      properties:
+        supermarketId:
+          type: string
+          format: uuid
         productId:
           type: string
           format: uuid
+          description: ID do produto do Catálogo Global (RF-04.1)
+        promotionalPrice:
+          type: number
+          format: double
+          minimum: 0.01
+          description: Preço promocional definido pelo Gestor
+        startAt:
+          type: string
+          format: date-time
+          description: Início da validade da oferta (RF-04.2)
+        endAt:
+          type: string
+          format: date-time
+          description: Fim da validade da oferta (RF-04.2)
+
+    OfferResponse:
+      type: object
+      required: [id, supermarketId, productId, promotionalPrice, startAt, endAt, active]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        product:
+          $ref: '#/components/schemas/ProductResponse'
         promotionalPrice:
           type: number
           format: double
@@ -437,31 +857,97 @@ components:
         endAt:
           type: string
           format: date-time
-        status:
-          $ref: '#/components/schemas/PromotionStatus'
-        highlight:
+        active:
           type: boolean
+
     CreateFlyerRequest:
       type: object
-      required: [supermarketId, title, promotionIds]
+      required: [supermarketId, temaId, title, startAt, endAt, offerIds]
       properties:
         supermarketId:
+          type: string
+          format: uuid
+        temaId:
+          type: string
+          format: uuid
+          description: Tema Sazonal escolhido (RF-05.2)
+        title:
+          type: string
+          minLength: 3
+          maxLength: 120
+        startAt:
+          type: string
+          format: date-time
+          description: Início da vigência do encarte (RF-05.2)
+        endAt:
+          type: string
+          format: date-time
+          description: Fim da vigência do encarte (RF-05.2)
+        offerIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+          description: Lista de Ofertas do supermercado a exibir no encarte
+
+    UpdateFlyerRequest:
+      type: object
+      properties:
+        temaId:
           type: string
           format: uuid
         title:
           type: string
           minLength: 3
           maxLength: 120
-        description:
+        startAt:
           type: string
-          maxLength: 500
-        promotionIds:
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        offerIds:
           type: array
           minItems: 1
           items:
             type: string
             format: uuid
+
     FlyerResponse:
+      type: object
+      required: [id, supermarketId, temaId, title, status, startAt, endAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermarketId:
+          type: string
+          format: uuid
+        temaId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/FlyerStatus'
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        offerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    PublicFlyerResponse:
+      description: Encarte enriquecido para renderização imersiva na vitrine (RF-05.3, RF-05.4)
       type: object
       required: [id, supermarketId, title, status]
       properties:
@@ -473,15 +959,29 @@ components:
           format: uuid
         title:
           type: string
-        description:
-          type: string
         status:
           $ref: '#/components/schemas/FlyerStatus'
-        promotionIds:
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        tema:
+          $ref: '#/components/schemas/ThemeResponse'
+        offers:
           type: array
           items:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/OfferResponse'
+
+    ImageUploadResponse:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+
     PageMetadata:
       type: object
       properties:
@@ -494,6 +994,7 @@ components:
           format: int64
         totalPages:
           type: integer
+
     PagedCategoryResponse:
       type: object
       properties:
@@ -503,6 +1004,7 @@ components:
             $ref: '#/components/schemas/CategoryResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
+
     PagedProductResponse:
       type: object
       properties:
@@ -512,15 +1014,37 @@ components:
             $ref: '#/components/schemas/ProductResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
-    PagedPromotionResponse:
+
+    PagedThemeResponse:
       type: object
       properties:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/PromotionResponse'
+            $ref: '#/components/schemas/ThemeResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
+
+    PagedOfferResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OfferResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+
+    PagedFlyerResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlyerResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+
     ErrorResponse:
       type: object
       required: [code, message, traceId, timestamp]

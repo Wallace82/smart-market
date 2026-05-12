@@ -1,232 +1,322 @@
-# 🏛️ Arquitetura Técnica — SmartMarket
+# 🏛️ Arquitetura Técnica — SmartMarket MVP
 
-Este documento detalha a arquitetura técnica da plataforma SmartMarket, abordando os padrões adotados, o fluxo de comunicação entre os microserviços, a stack tecnológica e as decisões de design.
+> **Versão:** 2.0.0
+> **Data:** 2026-05-04
+> **Status:** MVP — Escopo Validável
+> **Alinhado com:** REQUIREMENTS.md v2.0
 
 ---
 
 ## 1. Visão Geral da Arquitetura
 
-O SmartMarket utiliza uma **Arquitetura de Microserviços** baseada em contêineres, com um modelo **API-First**. O sistema é dividido em serviços independentes por domínio de negócio (Bounded Contexts), garantindo alta escalabilidade, resiliência e independência de deploy.
+O SmartMarket MVP adota uma **Arquitetura de Monólito Modular**. Para uma equipe de 3 desenvolvedores validando hipóteses de mercado, microserviços introduzem complexidade operacional desnecessária (múltiplos deploys, databases separados, service discovery, comunicação inter-serviço).
 
-A arquitetura geral segue o padrão **API Gateway**, onde todas as requisições de clientes externos (Web/Mobile) passam por um ponto único de entrada antes de serem roteadas para os serviços internos.
+O monólito modular oferece:
+- **Desenvolvimento ágil** com um único ciclo de build e deploy.
+- **Separação lógica clara** entre domínios via módulos internos Java.
+- **Facilidade de extração futura** para microserviços, se o MVP validar escala.
 
----
-
-## 2. Stack Tecnológica Detalhada
-
-### 2.1 Backend (Microserviços)
-* **Linguagem:** Java 21 LTS
-* **Framework Principal:** Spring Boot 3.x
-* **Segurança:** Spring Security + JWT (JSON Web Tokens)
-* **Persistência:** Spring Data JPA + Hibernate
-* **Migração de Banco de Dados:** Flyway
-* **Comunicação Síncrona:** Spring Cloud OpenFeign / WebClient
-* **Comunicação Assíncrona:** RabbitMQ (Message Broker para eventos de domínio)
-* **Documentação de API:** OpenAPI 3.0 (Swagger UI)
-
-### 2.2 Frontend
-* **Framework Web:** Angular 18+
-* **Framework Mobile:** Ionic / Capacitor (Necessário para empacotamento nativo, Pushes e Background Geolocation)
-* **Linguagem:** TypeScript
-* **UI/UX:** Angular Material + Tailwind CSS
-* **Gerenciamento de Estado:** Signals / RxJS
-
-### 2.3 Banco de Dados e Armazenamento
-* **Banco de Dados Relacional:** PostgreSQL 16 (Padrão Database-per-Service)
-* **Object Storage (Arquivos/Imagens):** MinIO (Compatível com AWS S3 API)
-* **In-Memory Datastore / Cache:** Redis (Fundamental para cálculos de **Redis Geospatial** e cache de ofertas)
-
-### 2.4 Infraestrutura, DevOps e Observabilidade
-* **Containerização:** Docker
-* **Orquestração Local:** Docker Compose
-* **Orquestração de Produção (Futuro):** Kubernetes (K8s)
-* **CI/CD:** GitHub Actions
-* **Métricas e Monitoramento:** Prometheus + Grafana (via Spring Boot Actuator)
-* **Tracing Distribuído:** OpenTelemetry + Jaeger/Zipkin
-* **Centralização de Logs:** ELK Stack (Elasticsearch, Logstash, Kibana) ou Loki
+> ⚠️ **API Gateway dedicado, RabbitMQ, database-per-service e Kubernetes são pós-MVP.**
+> Ver seção de Backlog em `REQUIREMENTS.md`.
 
 ---
 
-## 3. Padrões Arquiteturais Adotados
+## 2. Stack Tecnológica
 
-1. **Database per Service:** Cada microserviço possui seu próprio schema/banco de dados isolado. Nenhum serviço acessa o banco de outro diretamente.
-2. **API Gateway:** Centraliza autenticação inicial, rate limiting, CORS e roteamento.
-3. **Clean Architecture / Hexagonal:** O código dos serviços é estruturado para isolar a regra de negócio (Domínio) da infraestrutura (Bancos, APIs externas).
-4. **Event-Driven Architecture (EDA):** Uso de eventos assíncronos para manter a consistência eventual e disparar ações cruzadas (ex: enviar notificação quando uma promoção é ativada).
-5. **Stateless Authentication:** Uso de JWT para autenticação. O estado do usuário não é guardado no servidor; o token contém as *claims* necessárias.
-6. **Correlation ID:** Um ID único gerado no API Gateway que trafega por todos os serviços e logs para facilitar o rastreamento de requisições (*Distributed Tracing*).
+| Camada | Tecnologia |
+|---|---|
+| **Backend** | Java 21 LTS + Spring Boot 3.4.x |
+| **Frontend** | Angular 18+ + Tailwind CSS + Angular Material + Signals |
+| **Segurança** | Spring Security + JWT (stateless) |
+| **Banco de Dados** | PostgreSQL 16 — **banco único** |
+| **Migração de BD** | Flyway |
+| **Object Storage** | MinIO (compatível com S3) |
+| **Cache** | Redis (cache de catálogo, ofertas e dados geoespaciais simples) |
+| **Containerização** | Docker + Docker Compose |
+| **Documentação de API** | OpenAPI 3.0 (Swagger UI via SpringDoc) |
 
----
-
-## 4. Estrutura Interna dos Microserviços (Clean Architecture)
-
-Cada microserviço backend é estruturado nas seguintes camadas:
-
-* **`domain` (Domínio):** O coração do software. Contém Entidades, Enums, Value Objects e as Interfaces de Repositório. **Não possui dependências de frameworks externos** (nem Spring, nem JPA).
-* **`application` (Aplicação/Casos de Uso):** Contém as regras de negócio orquestradas (UseCases) e DTOs. Coordena o fluxo de dados entre o domínio e as portas.
-* **`infrastructure` (Infraestrutura):** Implementa as interfaces do domínio. Contém:
-    * `persistence`: Entidades JPA, Repositórios do Spring Data, Mapeadores (Mapper) e Adaptadores.
-    * `web`: Controllers REST (Endpoints), Tratamento de Exceções Globais.
-    * `security`: Filtros de segurança locais (JWT).
-    * `messaging`: Producers e Consumers de mensageria (RabbitMQ).
-    * `clients`: Clientes HTTP (Feign) para falar com outros microserviços.
+> **Removido do MVP:** Ionic/Capacitor, API Gateway Spring Cloud, RabbitMQ, Prometheus/Grafana, OpenTelemetry/Jaeger, ELK Stack, Kubernetes.
 
 ---
 
-## 4.1 Estrutura do Frontend (Angular)
+## 3. Estrutura de Módulos do Backend (`smartmarket-api`)
 
-O projeto frontend em Angular é organizado de forma modular e escalável, seguindo as melhores práticas para aplicações de grande porte. A estrutura de diretórios principal (`src/app`) é:
+O backend é uma **aplicação Spring Boot única** dividida em módulos internos por domínio. Cada módulo possui seus próprios pacotes de `domain`, `application` e `infrastructure`, sem dependências cruzadas de banco de dados.
 
-*   **`core`**: Contém a lógica central e singletons da aplicação, que são carregados apenas uma vez.
-    *   `guards`: Guardas de rota (ex: `auth.guard.ts`).
-    *   `interceptors`: Interceptadores HTTP (ex: para adicionar o token JWT).
-    *   `services`: Serviços globais (ex: `AuthService`, `NotificationService`).
-    *   `models`: Interfaces e tipos globais.
+```
+smartmarket-api/
+├── auth/          → Autenticação, JWT, controle de roles (ADMIN, GESTOR)
+├── supermarket/   → Cadastro, aprovação, Whitelabel, coordenadas, QR Code
+├── catalog/       → Catálogo global de produtos e categorias (Admin)
+├── offer/         → Ofertas por supermercado (Gestor)
+├── flyer/         → Encartes digitais e temas sazonais
+├── geo/           → Filtro de proximidade por raio simples (RF-06)
+├── analytics/     → Métricas básicas: views de encarte e scans de QR Code (RF-08)
+└── storage/       → Integração com MinIO (upload de imagens)
+```
 
-*   **`features`**: Cada pasta aqui representa uma "Feature" ou módulo de negócio da aplicação, com seus próprios componentes, serviços e rotas (lazy-loaded).
-    *   `admin`: Painel do administrador da plataforma.
-        *   `billing/`: Criação de planos, dashboard financeiro e gestão de assinaturas (RF-16).
-    *   `manager`: Painel do gestor do supermercado. Subdividido por domínios:
-        *   `billing/`: Contratação de planos, faturas e controle de limites (RF-16).
-        *   `campaigns/`: Gestão de campanhas inteligentes de proximidade (RF-12).
-        *   `dashboard/`: Visão geral e métricas de desempenho.
-        *   `flyers/`: Criação e listagem de encartes digitais temáticos (RF-04).
-        *   `marketing/`: Funcionalidades de Growth e gestão de QR Code (RF-13).
-        *   `offers/`: Catálogo e definição de preços promocionais da loja (RF-03).
-        *   `settings/`: Configurações, como Identidade Visual/Whitelabel (RF-02).
-    *   `client`: A aplicação do cliente final.
-    *   `auth`: Telas de login, registro e recuperação de senha.
-    *   `template`: Componentes de layout principal (Header, Sidebar, Footer).
+### 3.1 Banco de Dados
 
-*   **`shared`**: Contém componentes, diretivas e pipes reutilizáveis que não possuem estado e podem ser usados em múltiplos `features`.
-    *   `components`: Componentes genéricos (ex: `LoadingSpinnerComponent`, `EmptyStateComponent`).
-    *   `pipes`: Pipes de formatação (ex: `real-currency.pipe.ts`).
-    *   `directives`: Diretivas customizadas.
+- **Um único banco PostgreSQL** com schemas organizados por módulo quando conveniente.
+- Isolamento lógico garantido por convenção de nomenclatura de tabelas (prefixo por módulo).
+- Migrações versionadas via **Flyway**.
 
-*   **`assets`**: Arquivos estáticos como imagens, ícones e fontes.
-
-Essa estrutura promove o baixo acoplamento, facilita o carregamento sob demanda (*Lazy Loading*) das funcionalidades e melhora a manutenibilidade e a organização do código-fonte.
-
----
-
-## 5. Padrões de Comunicação entre Microserviços
-
-A comunicação entre os serviços ocorre de duas formas principais, dependendo do caso de uso:
-
-### 5.1 Comunicação Síncrona (REST / Feign)
-Utilizada para consultas (**Leituras**) que requerem resposta imediata para a interface do usuário ou quando uma validação imediata é imprescindível.
-* **Exemplo:** O `api-gateway` valida o token JWT sincronicamente delegando (ou repassando) as validações iniciais, ou quando o `client-service` precisa buscar detalhes em tempo real do catálogo no `product-service`.
-* **Resiliência:** Implementada com *Circuit Breakers* (Resilience4j) e *Retries* para evitar falhas em cascata caso o serviço de destino esteja fora do ar.
-
-### 5.2 Comunicação Assíncrona (Mensageria / Eventos)
-Utilizada para comandos de **Escrita** ou processos que não exigem resposta em tempo real, garantindo baixo acoplamento e consistência eventual. Utilizaremos o **RabbitMQ** como *Message Broker*.
-* **Exemplo 1 (Geofencing e Notificações):** O App mobile envia pings de localização. Quando o usuário entra no raio da loja, o `notification-service` (usando Redis Geospatial) detecta e publica um `GeofenceEntryEvent`. O mesmo serviço consome isso enfileirando o envio do Push em tempo real.
-* **Exemplo 2 (QR Code e Analytics):** Quando o usuário escaneia o Totem na loja, o Gateway/Frontend publica um `QRCodeScannedEvent`. O `recommendation-service` consome para gerar métricas de conversão físico-digital e Heatmaps.
-
----
-
-## 6. Diagrama de Comunicação (Macro)
-
-```mermaid
-graph TD
-    Client(Cliente - App Mobile/Web) -->|HTTPS/REST| Gateway(API Gateway)
-    Webhook(Gateway de Pagamentos) -->|Webhooks| Gateway
-    
-    Gateway -->|Roteamento Seguro| Auth(Auth Service)
-    Gateway -->|Roteamento Seguro| Supermarket(Supermarket Service)
-    Gateway -->|Roteamento Seguro| Product(Product Service)
-    Gateway -->|Roteamento Seguro| Customer(Client Service)
-    Gateway -->|Ping Localização / QR Code| Notification(Notification Service)
-    Gateway -->|Pagamentos e Planos| Billing(Billing Service)
-    
-    Auth -.->|Validação Síncrona JWT| Gateway
-    
-    Product -->|Publica: OfertaAtivada| RabbitMQ((RabbitMQ Event Bus))
-    Supermarket -->|Publica: LojaAtualizada| RabbitMQ
-    Customer -->|Publica: ProdutoVisualizado| RabbitMQ
-    Notification -->|Publica: GeofenceEntry / QRScanned| RabbitMQ
-    Billing -->|Publica: AssinaturaAtiva / LimiteAtingido| RabbitMQ
-    
-    RabbitMQ -->|Consome Evento| Notification(Notification Service)
-    RabbitMQ -->|Consome Evento| Recommendation(Recommendation Service)
-    RabbitMQ -->|Consome Evento| Supermarket
-    
-    Product -->|Upload/Leitura de Imagens| MinIO[(MinIO Object Storage)]
-    Supermarket -->|Upload/Leitura de Logos| MinIO
-    
-    Auth --- DB_Auth[(PostgreSQL Auth)]
-    Supermarket --- DB_Sup[(PostgreSQL Supermarket)]
-    Product --- DB_Prod[(PostgreSQL Product)]
-    Customer --- DB_Cust[(PostgreSQL Client)]
-    Notification --- DB_Notif[(PostgreSQL Notif)]
-    Recommendation --- DB_Rec[(PostgreSQL Recom)]
-    Billing --- DB_Bill[(PostgreSQL Billing)]
-    
-    Notification --- Redis[(Redis Geospatial)]
-    Product --- Redis
+```
+PostgreSQL (único banco)
+├── schema: auth       → users
+├── schema: supermarket → supermarkets
+├── schema: catalog     → categories, products
+├── schema: offer       → offers
+├── schema: flyer       → flyers, flyer_offers, themes
+└── schema: analytics   → events
 ```
 
 ---
 
-## 7. Gestão de Arquivos e Imagens (MinIO)
+## 4. Padrões Arquiteturais do Backend
 
-A plataforma utiliza o MinIO para armazenar assets binários, organizados em buckets específicos para garantir isolamento e performance.
+### 4.1 Clean Architecture (por módulo)
 
-### 7.1 Organização de Buckets
-*   `smartmarket-products`: Imagens do catálogo global de produtos (gerido pelo Admin).
-*   `smartmarket-brands`: Logomarcas dos supermercados (Whitelabel).
-*   `smartmarket-themes`: Assets visuais de temas sazonais (Natal, Páscoa, etc).
+Cada módulo interno segue a separação em camadas:
 
-### 7.2 Fluxo de Upload e Leitura
-* **Upload:** O microserviço responsável (ex: `supermarket-service` para logos) recebe o arquivo via `MultipartFile`, gera um UUID único e o armazena no bucket correspondente.
-* **Leitura:** O microserviço retorna a URL pública do asset. O Frontend Angular consome essa URL diretamente para renderização, reduzindo o tráfego nos microserviços.
+```
+[módulo]/
+├── domain/
+│   ├── model/         → Entidades de domínio puras (sem JPA, sem Spring)
+│   ├── repository/    → Interfaces de repositório (ports)
+│   └── exception/     → Exceções de domínio
+├── application/
+│   ├── usecase/       → Casos de uso (regras de negócio)
+│   └── dto/           → DTOs de entrada e saída
+└── infrastructure/
+    ├── persistence/   → Entidades JPA, Spring Data Repos, Mappers (MapStruct)
+    ├── web/           → Controllers REST, GlobalExceptionHandler
+    └── storage/       → Adaptador MinIO (apenas no módulo storage)
+```
 
----
+**Regra:** O `domain` é 100% livre de dependências de infraestrutura. MapStruct converte `Domain ↔ DTO ↔ JPA Entity`.
 
-## 8. Customização Visual (Whitelabel e Temas)
+### 4.2 Stateless Authentication (JWT)
 
-O sistema foi desenhado para permitir que cada supermercado mantenha sua identidade visual enquanto aproveita campanhas globais.
+- O `auth` module valida credenciais e emite tokens JWT com `userId`, `email` e `role`.
+- Roles suportados no MVP: `ROLE_ADMIN`, `ROLE_GESTOR`.
+- Rotas públicas (`/api/v1/public/**`) são liberadas sem autenticação (RF-01.4).
+- Um `JwtAuthFilter` no `SecurityFilterChain` valida o token a cada requisição.
 
-1.  **Identidade da Loja:** O `supermarket-service` armazena a `urlLogomarca`, `corPrimariaHex` e `corSecundariaHex`.
-2.  **Temas Sazonais:** O `product-service` gerencia a entidade `TemaEncarte`. Um tema define backgrounds e cores decorativas.
-3.  **Composição do Encarte:** Ao criar um `EncarteDigital`, o gestor associa a sua loja, escolhe um tema e seleciona as ofertas. O Frontend mescla as cores da loja com os elementos visuais do tema.
+### 4.3 Injeção de Dependências
 
----
-
-## 9. Fluxo de Segurança (Autenticação e Autorização)
-
-1. O Cliente faz o Login (`POST /api/v1/auth/login`) enviando credenciais pelo API Gateway.
-2. O API Gateway roteia para o `auth-service`.
-3. O `auth-service` valida o hash da senha no banco e gera um token JWT contendo `userId`, `email` e `roles` (Ex: `ROLE_ADMIN`, `ROLE_GESTOR`, `ROLE_CLIENTE`).
-4. O Cliente recebe o JWT e o armazena no frontend.
-5. Nas próximas requisições, o Cliente envia o cabeçalho `Authorization: Bearer <token>`.
-6. O API Gateway valida a assinatura do JWT localmente. Se for válido, a requisição é processada com as permissões do *Role* associado.
-
----
-
-## 10. Observabilidade e Monitoramento
-
-* **Logs Centralizados:** Exportação de logs estruturados para o ELK Stack ou Grafana Loki.
-* **Métricas de Saúde:** Endpoints do Actuator (`/actuator/prometheus`) para consumo pelo Prometheus/Grafana.
-* **Distributed Tracing:** OpenTelemetry para rastreio de requisições entre microserviços.
+- Construtor injection via Lombok `@RequiredArgsConstructor` em todos os componentes.
+- Sem field injection (`@Autowired`).
 
 ---
 
-## 11. Estratégia de Cache (Multi-Layer Caching)
+## 5. Diagrama de Alto Nível
 
-Para garantir respostas em milissegundos e suportar picos de tráfego de usuários anônimos na vitrine pública, a arquitetura implementa cache em quatro níveis complementares:
+```
+┌──────────────────────────────────────────────────────┐
+│              Frontend Angular 18+                     │
+│         (Mobile-First / SPA / Signals)                │
+│  ┌──────────────┐  ┌────────────┐  ┌──────────────┐  │
+│  │ Dashboard    │  │  Vitrine   │  │  Encarte     │  │
+│  │ Admin/Gestor │  │  Pública   │  │  Digital     │  │
+│  └──────────────┘  └────────────┘  └──────────────┘  │
+└─────────────────────────┬────────────────────────────┘
+                          │ HTTP REST (JSON)
+┌─────────────────────────▼────────────────────────────┐
+│                   smartmarket-api                      │
+│  ┌──────────┬──────────┬─────────┬──────────────┐    │
+│  │   auth   │supermarkt│ catalog │    offer     │    │
+│  ├──────────┼──────────┼─────────┼──────────────┤    │
+│  │  flyer   │   geo    │analytic │   storage    │    │
+│  │ (themes) │          │    s    │   (MinIO)    │    │
+│  └──────────┴──────────┴─────────┴──────────────┘    │
+└──────────────┬──────────────┬──────────────┬─────────┘
+               │              │              │
+          PostgreSQL        MinIO          Redis
+          (único BD)       (imgs)         (cache)
+```
 
-### 11.1 Nível 1: Client-Side (Angular)
-*   **State Management com RxJS:** Utiliza-se intensamente o operador `shareReplay({ bufferSize: 1, refCount: true })` nas chamadas `HttpClient` para garantir que apenas uma requisição saia do browser, mesmo que dezenas de componentes a assinem simultaneamente.
-*   **Local Storage:** Cache de contexto offline local do usuário (última localização buscada e UUID da sessão anônima).
+---
 
-### 11.2 Nível 2: Edge / HTTP Cache (API Gateway)
-*   **Stale-While-Revalidate:** Rotas públicas (`/api/v1/public/**`) embutem headers como `Cache-Control: public, max-age=60, stale-while-revalidate=1200`. Isso permite entrega massiva e paralela em background sem gargalo no servidor principal.
-*   **ETag (Entity Tag):** Adoção do filtro nativo `ShallowEtagHeaderFilter` no Spring Boot para prevenir *over-fetching*. O Gateway valida a *hash* do conteúdo respondendo com HTTP `304` e corpo vazio quando não há novidades.
+## 6. Gestão de Arquivos e Imagens (MinIO)
 
-### 11.3 Nível 3: Application Cache (Redis)
-*   **Spring Cache Abstraction:** Usa-se o Redis como provedor primário. 
-*   **Chaveamento Geográfico Inteligente:** Em vez de chaves exclusivas por usuário logado (o que gera "Cache Miss" constante), a chave do cache unifica os clientes usando um agrupamento físico (**Geohash**) via algoritmo do Redis Geospatial, o que centraliza a leitura e maximiza os acessos bem sucedidos à memória.
+Buckets organizados por tipo de asset (RNF-02):
 
-### 11.4 Nível 4: Invalidação Reativa via Broker
-O cache não depende unicamente do tempo de expiração (TTL). Ao ser salvo um ajuste de oferta (Write DB) via API, o PostgreSQL é garantido via transação. Logo após, a persistência despacha no RabbitMQ um evento como `OfferPriceChangedEvent`. O *Cache Invalidation Service* capta a mensagem e remove (evict) seletivamente as chaves em memória para a localidade afetada, resultando em leitura sempre consolidada nos próximos segundos após atualizações.
+| Bucket | Conteúdo | Módulo responsável |
+|---|---|---|
+| `smartmarket-products` | Imagens do catálogo global de produtos | `catalog` / `storage` |
+| `smartmarket-brands` | Logomarcas dos supermercados (Whitelabel) | `supermarket` / `storage` |
+| `smartmarket-themes` | Assets decorativos dos Temas Sazonais | `flyer` / `storage` |
+
+**Fluxo de upload:** Controller recebe `MultipartFile` → `storage` module persiste no MinIO → retorna URL pública → URL é salva na entidade correspondente no PostgreSQL.
+
+**Leitura:** O Frontend consome a URL pública diretamente do MinIO, sem tráfego adicional na API.
+
+---
+
+## 7. Customização Visual — Whitelabel e Temas Sazonais
+
+O encarte digital mescla dois layers de identidade visual (RF-05.3):
+
+1. **Whitelabel da Loja** (`supermarket` module):
+   - `logoUrl` → MinIO bucket `smartmarket-brands`
+   - `primaryColorHex` e `secondaryColorHex` → definidos pelo Gestor
+
+2. **Tema Sazonal** (`flyer` module):
+   - `backgroundImageUrl` → MinIO bucket `smartmarket-themes`
+   - `backgroundColorHex` → definido pelo Admin
+
+3. **Composição no Frontend:**
+   O Angular aplica as cores da loja como variáveis CSS customizadas (`--color-primary`, `--color-secondary`) e renderiza o background do tema como layer decorativo. A composição é feita inteiramente no client-side, sem processamento de imagem no servidor.
+
+---
+
+## 8. Geolocalização Simplificada (RF-06)
+
+No MVP, a geolocalização é implementada com **cálculo de distância euclidiana simples** no PostgreSQL, sem Redis Geospatial avançado.
+
+**Estratégia:**
+
+```sql
+-- Filtro por raio usando fórmula de Haversine simplificada via PostgreSQL
+SELECT *, 
+  (6371000 * acos(cos(radians(:lat)) * cos(radians(latitude))
+   * cos(radians(longitude) - radians(:lng))
+   + sin(radians(:lat)) * sin(radians(latitude)))) AS distance_meters
+FROM supermarkets
+WHERE status = 'ATIVO'
+HAVING distance_meters <= :radiusMeters
+ORDER BY distance_meters ASC;
+```
+
+**Fluxos:**
+- **GPS disponível (RF-06.1/06.2):** Frontend solicita coordenadas via `navigator.geolocation` → envia `lat/lng` para `GET /api/v1/public/supermarkets/nearby`.
+- **GPS negado (RF-06.3):** Usuário informa CEP ou bairro → `GET /api/v1/public/supermarkets/by-location` → API consulta endereço no banco.
+
+> ⚠️ **Fora do escopo MVP:** Redis Geospatial avançado, Geohash, geofencing, tracking em background.
+
+---
+
+## 9. QR Code por Loja (RF-07)
+
+O QR Code é gerado **dinamicamente** pelo backend via biblioteca Java (ex: `zxing`) e entregue como PNG.
+
+**Fluxo:**
+1. `GET /api/v1/supermarkets/{id}/qrcode` (autenticado, Gestor)
+2. Backend monta a `targetUrl`: `https://smartmarket.app/loja/{id}?utm_source=totem`
+3. Gera PNG do QR Code em memória e retorna a URL MinIO ou `image/png` diretamente.
+4. Ao escanear, o usuário acessa o encarte ativo publicamente (RF-07.3).
+5. O parâmetro `utm_source=totem` é capturado pelo módulo `analytics` como evento `QR_CODE_SCANNED` (RF-07.4, RF-08.2).
+
+---
+
+## 10. Analytics Essencial (RF-08)
+
+O módulo `analytics` persiste eventos simples no PostgreSQL. **Não há sistema de streaming ou fila no MVP.**
+
+| Evento | Trigger | RF |
+|---|---|---|
+| `FLYER_VIEW` | Frontend chama `POST /public/analytics/events` ao renderizar encarte | RF-08.1 |
+| `QR_CODE_SCANNED` | Frontend chama `POST /public/analytics/events` ao detectar `utm_source=totem` | RF-08.2 |
+
+O **Dashboard do Gestor** (RF-08.3) é servido por queries agregadas simples no PostgreSQL com filtro de período.
+
+> ⚠️ **Fora do escopo MVP:** Heatmaps, funis de conversão, tracking de sessão anônima, footfall attribution, analytics comportamental avançado.
+
+---
+
+## 11. Estratégia de Cache (Redis — Simplificada)
+
+No MVP, o Redis é utilizado apenas para **cache de leitura das rotas públicas mais acessadas**, sem complexidade de invalidação reativa.
+
+| Dado em cache | TTL | Chave |
+|---|---|---|
+| Lista de supermercados próximos | 60s | `nearby:{geohash_nivel5}` |
+| Encarte ativo de uma loja | 120s | `flyer:active:{supermarketId}` |
+| Catálogo de categorias | 300s | `categories:all` |
+
+**Invalidação:** Por TTL simples. Ao publicar ou encerrar um encarte, o módulo `flyer` invalida explicitamente a chave `flyer:active:{supermarketId}` via `@CacheEvict`.
+
+> ⚠️ **Fora do escopo MVP:** Invalidação reativa via RabbitMQ, cache multi-layer com ETag no Gateway, Geohash avançado.
+
+---
+
+## 12. Estrutura do Frontend Angular
+
+O projeto Angular é organizado de forma modular com **Lazy Loading** por feature:
+
+```
+src/app/
+├── core/
+│   ├── guards/        → AuthGuard, RoleGuard
+│   ├── interceptors/  → JwtInterceptor (adiciona Bearer token)
+│   └── services/      → AuthService, GeoService
+│
+├── features/
+│   ├── auth/          → Login, recuperação de senha
+│   ├── admin/
+│   │   ├── supermarkets/  → Cadastro e aprovação de lojas
+│   │   ├── catalog/       → Catálogo global de produtos e categorias
+│   │   └── themes/        → Gestão de Temas Sazonais
+│   ├── manager/
+│   │   ├── dashboard/     → Métricas básicas (RF-08.3)
+│   │   ├── whitelabel/    → Logo, cores, endereço (RF-02)
+│   │   ├── offers/        → Ofertas da loja (RF-04)
+│   │   ├── flyers/        → Encartes digitais (RF-05)
+│   │   └── qrcode/        → Visualização e download do QR Code (RF-07)
+│   └── storefront/        → Vitrine pública (anônima ou autenticada)
+│       ├── home/          → Supermercados e ofertas por localização
+│       └── flyer-view/    → Visualização imersiva do encarte (RF-05.4)
+│
+├── shared/
+│   ├── components/    → Skeleton screens, empty-state, cards
+│   ├── pipes/         → CurrencyBRL, DatePT
+│   └── directives/    → WhitelabelTheme (aplica CSS vars da loja)
+│
+└── assets/
+```
+
+**Regras de UX:**
+- **Skeleton Screens** em todos os carregamentos de dados remotos.
+- Variáveis CSS customizadas (`--primary`, `--secondary`) injetadas via `WhitelabelTheme` directive para renderização do encarte.
+- **Mobile-First**: breakpoints `sm` → `md` → `lg`.
+- Conteúdo público servido via cache Redis → carregamento < 300ms (RNF-01).
+
+---
+
+## 13. Fluxo de Segurança
+
+```
+[Usuário]
+   │
+   ├─ POST /api/v1/auth/login  {email, password}
+   │         │
+   │    [auth module]
+   │    valida senha (BCrypt) → gera JWT {userId, email, role}
+   │         │
+   │    retorna {accessToken, refreshToken}
+   │
+   └─ Próximas requisições: Authorization: Bearer <token>
+             │
+        [JwtAuthFilter]
+        valida assinatura → extrai role → SecurityContext
+             │
+        [Controller] → verifica @PreAuthorize("hasRole('ADMIN')")
+```
+
+**Rotas públicas** (`/api/v1/public/**`) são excluídas do filtro JWT no `SecurityFilterChain`.
+
+---
+
+## 14. Roadmap Arquitetural (Pós-MVP)
+
+Após validação das hipóteses H1, H2 e H3:
+
+| Fase | Evolução |
+|---|---|
+| **Extração de Serviços** | Separar módulos em microserviços independentes (database-per-service) |
+| **API Gateway** | Introduzir Spring Cloud Gateway para roteamento, rate limiting e CORS central |
+| **Mensageria** | Introduzir RabbitMQ para EDA: invalidação de cache reativa, notificações push |
+| **Observabilidade** | Prometheus + Grafana, OpenTelemetry + Jaeger, ELK Stack |
+| **Mobile Nativo** | Ionic/Capacitor para push notifications e background geolocation |
+| **Billing** | Módulo de assinaturas com gateway de pagamentos (PIX, Cartão) |

@@ -34,23 +34,6 @@ services:
       timeout: 20s
       retries: 3
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: smartmarket-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    volumes:
-      - smartmarket_rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   redis:
     image: redis:7-alpine
     container_name: smartmarket-redis
@@ -64,7 +47,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Cria os buckets no MinIO automaticamente ao iniciar
   create-bucket:
     image: minio/mc:latest
     container_name: smartmarket-mc
@@ -82,20 +64,6 @@ services:
       /usr/bin/mc anonymous set public myminio/smartmarket-themes;
       exit 0;
       "
-
-  api-gateway:
-    build:
-      context: ../../backend/api-gateway
-    container_name: smartmarket-api-gateway
-    ports:
-      - "8080:8080"
-    depends_on:
-      - auth-service
-      - supermarket-service
-      - product-service
-      - client-service
-      - notification-service
-      - recommendation-service
 
   auth-service:
     build:
@@ -147,56 +115,7 @@ services:
       minio:
         condition: service_healthy
 
-  client-service:
-    build:
-      context: ../../backend/services/client-service
-    container_name: smartmarket-client-service
-    ports:
-      - "8084:8084"
-    environment:
-      DB_HOST: smartmarket-postgres
-      DB_PORT: 5432
-      DB_NAME: smartmarket
-      DB_USER: smartmarket
-      DB_PASSWORD: smartmarket
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  notification-service:
-    build:
-      context: ../../backend/services/notification-service
-    container_name: smartmarket-notification-service
-    ports:
-      - "8085:8085"
-    environment:
-      DB_HOST: smartmarket-postgres
-      DB_PORT: 5432
-      DB_NAME: smartmarket
-      DB_USER: smartmarket
-      DB_PASSWORD: smartmarket
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  recommendation-service:
-    build:
-      context: ../../backend/services/recommendation-service
-    container_name: smartmarket-recommendation-service
-    ports:
-      - "8086:8086"
-    environment:
-      DB_HOST: smartmarket-postgres
-      DB_PORT: 5432
-      DB_NAME: smartmarket
-      DB_USER: smartmarket
-      DB_PASSWORD: smartmarket
-    depends_on:
-      postgres:
-        condition: service_healthy
-
 volumes:
   smartmarket_postgres_data:
   smartmarket_minio_data:
   smartmarket_redis_data:
-  smartmarket_rabbitmq_data:

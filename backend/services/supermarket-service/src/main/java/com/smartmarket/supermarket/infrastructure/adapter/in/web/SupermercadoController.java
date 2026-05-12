@@ -12,8 +12,6 @@ import com.smartmarket.supermarket.application.dto.SupermercadoResponse;
 import com.smartmarket.supermarket.application.dto.PageMetadata;
 import com.smartmarket.supermarket.application.dto.PagedSupermarketResponse;
 import com.smartmarket.supermarket.application.dto.UpdateSupermarketStatusRequest;
-import com.smartmarket.supermarket.application.dto.CreateSubscriptionRequest;
-import com.smartmarket.supermarket.application.dto.SubscriptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -122,8 +120,10 @@ public class SupermercadoController {
             String newLogoUrl = brandImageStorageService.upload(
                     file.getOriginalFilename(),
                     file.getInputStream(),
-                    file.getContentType()
+                    file.getContentType(),
+                    file.getSize()
             );
+
 
             // Atualiza a URL da logomarca no supermercado
             supermercadoExistente.setUrlLogomarca(newLogoUrl);
@@ -184,21 +184,62 @@ public class SupermercadoController {
         }
     }
 
-    @PostMapping("/{id}/subscriptions")
-    public ResponseEntity<SubscriptionResponse> criarAssinatura(@PathVariable("id") UUID id, @RequestBody CreateSubscriptionRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            new SubscriptionResponse(UUID.randomUUID(), id, request.getPlanId(), "ATIVA", 
-                                     request.getStartAt(), request.getEndAt(), request.getAutoRenew())
-        );
+    // ── ENDPOINTS PÚBLICOS — vitrine e geolocalização (RF-06) ─────────────────────────────
+
+    /**
+     * RF-06.1 / RF-06.2: Retorna supermercados ATIVOS dentro do raio em metros a partir das
+     * coordenadas GPS fornecidas. Não requer autenticação.
+     * O cálculo usa fórmula de Haversine via query no banco (ver ARCHITECTURE.md seção 8).
+     */
+    @GetMapping("/public/nearby")
+    public ResponseEntity<List<SupermercadoResponse>> buscarProximos(
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude,
+            @RequestParam(value = "radiusMeters", defaultValue = "3000") Integer radiusMeters) {
+        List<Supermercado> proximos = listarSupermercadoUseCase.buscarProximos(latitude, longitude, radiusMeters);
+        List<SupermercadoResponse> responses = proximos.stream()
+                .map(this::fromDomain)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/{id}/subscriptions/current")
-    public ResponseEntity<SubscriptionResponse> obterAssinaturaVigente(@PathVariable("id") UUID id) {
-        return ResponseEntity.ok(
-            new SubscriptionResponse(UUID.randomUUID(), id, UUID.randomUUID(), "ATIVA", 
-                                     java.time.LocalDateTime.now().minusDays(10), 
-                                     java.time.LocalDateTime.now().plusDays(20), true)
-        );
+    /**
+     * RF-06.3: Fallback para quando o usuário nega permissão de GPS.
+     * Aceita CEP (8 dígitos) ou nome de bairro. Não requer autenticação.
+     */
+    @GetMapping("/public/by-location")
+    public ResponseEntity<?> buscarPorLocalizacao(
+            @RequestParam(value = "cep", required = false) String cep,
+            @RequestParam(value = "bairro", required = false) String bairro,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+        if ((cep == null || cep.isBlank()) && (bairro == null || bairro.isBlank())) {
+            return ResponseEntity.badRequest().body("Informe ao menos um parâmetro: cep ou bairro.");
+        }
+        List<Supermercado> supermercados = listarSupermercadoUseCase.buscarPorLocalizacao(cep, bairro, page, size);
+        List<SupermercadoResponse> responses = supermercados.stream()
+                .map(this::fromDomain)
+                .collect(Collectors.toList());
+        PageMetadata pageMetadata = new PageMetadata(page, size, responses.size(), 1);
+        return ResponseEntity.ok(new PagedSupermarketResponse(responses, pageMetadata));
+    }
+
+    /**
+     * Perfil público do supermercado — inclui whitelabel para renderização da vitrine (RF-05.3).
+     * Não requer autenticação (RF-01.4).
+     */
+    @GetMapping("/public/{id}")
+    public ResponseEntity<?> buscarPublicoPorId(@PathVariable("id") UUID id) {
+        try {
+            Supermercado supermercado = listarSupermercadoUseCase.buscarPorId(id);
+            if (supermercado.getStatus() != SupermercadoStatus.ATIVO) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(fromDomain(supermercado));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
+
 

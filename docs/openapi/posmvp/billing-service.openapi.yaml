@@ -1,8 +1,22 @@
 openapi: 3.0.3
 info:
   title: SmartMarket Billing Service API
-  description: API responsável pelo gerenciamento de planos SaaS, limites de uso, pagamentos e assinaturas dos supermercados na plataforma SmartMarket.
-  version: 1.0.0
+  version: 2.0.0
+  description: |
+    # ⚠️ BACKLOG PÓS-MVP
+
+    Este contrato define o módulo de **Billing e Assinatura**, planejado para após
+    a validação das hipóteses H1, H2 e H3 do MVP.
+
+    Funcionalidades cobertas:
+    - Planos de assinatura dinâmicos (Mensal, Semestral, Anual)
+    - Free Trial de 14 dias
+    - Integração com gateway de pagamentos (PIX, Cartão, Boleto)
+    - Controle de limites por plano (ofertas, pushes)
+    - Bloqueio automático ao atingir limites
+
+    > No MVP, todos os supermercados têm acesso irrestrito às funcionalidades
+    > do escopo MVP sem necessidade de assinatura.
 servers:
   - url: http://localhost:8080
     description: Servidor de Desenvolvimento Local

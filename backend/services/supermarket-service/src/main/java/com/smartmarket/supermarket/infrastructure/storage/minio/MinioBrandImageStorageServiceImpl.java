@@ -30,8 +30,18 @@ public class MinioBrandImageStorageServiceImpl implements BrandImageStorageServi
     }
 
     @Override
-    public String upload(String originalFileName, InputStream inputStream, String contentType) {
+    public String upload(String originalFileName, InputStream inputStream, String contentType, long size) {
         try {
+            // Verifica se o bucket existe, senão cria
+            boolean found = minioClient.bucketExists(io.minio.BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!found) {
+                minioClient.makeBucket(io.minio.MakeBucketArgs.builder().bucket(bucketName).build());
+                
+                // Opcional: Definir política de acesso público para leitura se necessário
+                String policy = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::" + bucketName + "/*\"]}]}";
+                minioClient.setBucketPolicy(io.minio.SetBucketPolicyArgs.builder().bucket(bucketName).config(policy).build());
+            }
+
             String fileExtension = "";
             int dotIndex = originalFileName.lastIndexOf('.');
             if (dotIndex > 0 && dotIndex < originalFileName.length() - 1) {
@@ -43,18 +53,19 @@ public class MinioBrandImageStorageServiceImpl implements BrandImageStorageServi
                     PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(fileName)
-                            .stream(inputStream, inputStream.available(), -1)
+                            .stream(inputStream, size, -1)
                             .contentType(contentType)
                             .build()
             );
 
             logger.info("Logomarca {} enviada com sucesso para o MinIO no bucket {}", fileName, bucketName);
-            return publicUrlPrefix + fileName; // Retorna a URL pública completa
+            return publicUrlPrefix + fileName;
         } catch (Exception e) {
             logger.error("Erro ao fazer upload da logomarca para o MinIO", e);
             throw new RuntimeException("Falha ao salvar a logomarca", e);
         }
     }
+
 
     @Override
     public void delete(String fileName) {

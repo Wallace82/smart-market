@@ -12,5 +12,15 @@ public interface SupermercadoDomainRepository {
     List<Supermercado> findByGestorId(UUID gestorId);
     boolean existsByCnpj(String cnpj);
     Supermercado save(Supermercado supermercado);
+
+    /**
+     * RF-06.2: Busca supermercados ATIVOS dentro do raio em metros via fórmula de Haversine.
+     */
+    List<Supermercado> findNearby(Double latitude, Double longitude, Integer radiusMeters);
+
+    /**
+     * RF-06.3: Busca supermercados ATIVOS por CEP ou nome de bairro (busca parcial no endereço).
+     */
+    List<Supermercado> findByLocation(String cep, String bairro, int page, int size);
 }
 

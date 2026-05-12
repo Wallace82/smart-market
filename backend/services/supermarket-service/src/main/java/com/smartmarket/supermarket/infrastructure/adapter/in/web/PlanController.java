@@ -9,9 +9,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * ⚠️ CONTROLLER PÓS-MVP — NÃO EVOLUIR DURANTE O MVP.
+ *
+ * Planos e assinaturas são funcionalidades do backlog pós-MVP.
+ * Ver REQUIREMENTS.md seção 12 (Billing e Assinatura Automatizada) e
+ * docs/openapi/posmvp/billing-service.openapi.yaml.
+ *
+ * Este controller retorna dados mockados apenas para não quebrar builds existentes.
+ * Será removido/substituído pelo billing-service na fase pós-MVP.
+ *
+ * @deprecated Pós-MVP. Ver billing-service.openapi.yaml em docs/openapi/posmvp/
+ */
+@Deprecated
 @RestController
 @RequestMapping("/api/v1/plans")
 public class PlanController {
+
 
     @GetMapping
     public ResponseEntity<List<PlanResponse>> listarPlanos() {

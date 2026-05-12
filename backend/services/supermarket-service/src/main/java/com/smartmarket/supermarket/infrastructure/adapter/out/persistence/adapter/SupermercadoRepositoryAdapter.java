@@ -54,5 +54,21 @@ public class SupermercadoRepositoryAdapter implements SupermercadoDomainReposito
         SupermercadoEntity savedEntity = jpaRepository.save(entity);
         return mapper.toDomain(savedEntity);
     }
+
+    @Override
+    public List<Supermercado> findNearby(Double latitude, Double longitude, Integer radiusMeters) {
+        return jpaRepository.findNearbyByHaversine(latitude, longitude, radiusMeters).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Supermercado> findByLocation(String cep, String bairro, int page, int size) {
+        String cepParam = (cep != null && !cep.isBlank()) ? cep : null;
+        String bairroParam = (bairro != null && !bairro.isBlank()) ? bairro : null;
+        return jpaRepository.findByAddressContaining(cepParam, bairroParam, PageRequest.of(page, size)).stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }
 

@@ -11,6 +11,11 @@ export interface SupermarketResponse {
   urlLogomarca?: string;
   corPrimariaHex?: string;
   corSecundariaHex?: string;
+  email?: string;
+  telefone?: string;
+  cep?: string;
+  cidade?: string;
+  estado?: string;
   criadoEm?: string;
   atualizadoEm?: string;
 }
@@ -26,4 +31,40 @@ export interface SupermarketRequest {
   urlLogomarca?: string;
   corPrimariaHex?: string;
   corSecundariaHex?: string;
-}
+  email?: string;
+  telefone?: string;
+  cep?: string;
+  cidade?: string;
+  estado?: string;
+}
+
+export interface FilialResponse {
+  id: string;
+  supermercadoId: string;
+  nome: string;
+  endereco: string;
+  cep?: string;
+  cidade?: string;
+  estado?: string;
+  latitude?: number;
+  longitude?: number;
+  telefone?: string;
+  email?: string;
+  ativo: boolean;
+  criadoEm?: string;
+  atualizadoEm?: string;
+}
+
+export interface FilialRequest {
+  supermercadoId: string;
+  nome: string;
+  endereco: string;
+  cep?: string;
+  cidade?: string;
+  estado?: string;
+  latitude?: number;
+  longitude?: number;
+  telefone?: string;
+  email?: string;
+  ativo: boolean;
+}

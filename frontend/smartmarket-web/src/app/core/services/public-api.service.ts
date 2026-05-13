@@ -10,12 +10,11 @@ export class PublicApiService {
 
   buscarCep(cep: string): Observable<any> {
     const cleanCep = cep.replace(/\D/g, '');
-    return this.http.get(`https://viacep.com.br/ws/${cleanCep}/json/`);
+    return this.http.get(`/external/cep/${cleanCep}/json/`);
   }
 
   buscarCnpj(cnpj: string): Observable<any> {
     const cleanCnpj = cnpj.replace(/\D/g, '');
-    // Usando BrasilAPI que é gratuita e não requer chave
-    return this.http.get(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+    return this.http.get(`/external/cnpj/${cleanCnpj}`);
   }
 }

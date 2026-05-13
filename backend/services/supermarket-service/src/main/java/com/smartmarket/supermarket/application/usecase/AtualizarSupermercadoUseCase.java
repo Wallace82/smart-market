@@ -30,6 +30,11 @@ public class AtualizarSupermercadoUseCase {
         supermercadoExistente.setUrlLogomarca(supermercadoAtualizado.getUrlLogomarca());
         supermercadoExistente.setCorPrimariaHex(supermercadoAtualizado.getCorPrimariaHex());
         supermercadoExistente.setCorSecundariaHex(supermercadoAtualizado.getCorSecundariaHex());
+        supermercadoExistente.setEmail(supermercadoAtualizado.getEmail());
+        supermercadoExistente.setTelefone(supermercadoAtualizado.getTelefone());
+        supermercadoExistente.setCep(supermercadoAtualizado.getCep());
+        supermercadoExistente.setCidade(supermercadoAtualizado.getCidade());
+        supermercadoExistente.setEstado(supermercadoAtualizado.getEstado());
         supermercadoExistente.setAtualizadoEm(LocalDateTime.now());
 
         return repository.save(supermercadoExistente);

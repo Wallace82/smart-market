@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { SupermarketRequest, SupermarketResponse } from '../models/supermarket.model';
+import { SupermarketRequest, SupermarketResponse, FilialRequest, FilialResponse } from '../models/supermarket.model';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +49,23 @@ export class SupermarketService {
       .set('longitude', lng.toString())
       .set('radiusMeters', raio.toString());
     return this.http.get<SupermarketResponse[]>(`${this.apiUrl}/public/nearby`, { params });
+  }
+
+  // Métodos de Filiais
+  listarFiliais(supermercadoId: string): Observable<FilialResponse[]> {
+    return this.http.get<FilialResponse[]>(`/api/v1/filiais/supermercado/${supermercadoId}`);
+  }
+
+  cadastrarFilial(request: FilialRequest): Observable<FilialResponse> {
+    return this.http.post<FilialResponse>(`/api/v1/filiais`, request);
+  }
+
+  atualizarFilial(id: string, request: FilialRequest): Observable<FilialResponse> {
+    return this.http.put<FilialResponse>(`/api/v1/filiais/${id}`, request);
+  }
+
+  deletarFilial(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/filiais/${id}`);
   }
 }
 

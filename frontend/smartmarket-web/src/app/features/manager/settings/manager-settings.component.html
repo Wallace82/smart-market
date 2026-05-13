@@ -225,7 +225,12 @@
       <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <h2 class="text-base font-bold text-gray-900 mb-2 border-b border-gray-100 pb-3 flex items-center justify-between">
           <span class="flex items-center gap-2"><mat-icon class="text-blue-500">store</mat-icon> Lojas e Filiais</span>
-          <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center"><mat-icon class="!text-[16px] !w-4 !h-4 mr-1">add</mat-icon> Adicionar Filial</button>
+          <button 
+            (click)="addBranch()"
+            class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center">
+            <mat-icon class="!text-[16px] !w-4 !h-4 mr-1">add</mat-icon> 
+            Adicionar Filial
+          </button>
         </h2>
         <p class="text-sm text-gray-500 mb-5">Gerencie as filiais da sua rede para direcionar campanhas e ofertas por localidade.</p>
         
@@ -236,13 +241,20 @@
                 <mat-icon>location_on</mat-icon>
               </div>
               <div>
-                <p class="text-sm font-bold text-gray-900">{{ branch.name }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ branch.address }}</p>
+                <p class="text-sm font-bold text-gray-900">{{ branch.nome }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">{{ branch.endereco }}</p>
               </div>
             </div>
             <div class="flex gap-1">
-              <button mat-icon-button class="!text-gray-400 hover:!text-blue-600 transition-colors"><mat-icon class="!text-[20px]">edit</mat-icon></button>
-              <button mat-icon-button class="!text-gray-400 hover:!text-red-600 transition-colors"><mat-icon class="!text-[20px]">delete</mat-icon></button>
+              <button mat-icon-button class="!text-gray-400 hover:!text-blue-600 transition-colors">
+                <mat-icon class="!text-[20px]">edit</mat-icon>
+              </button>
+              <button 
+                (click)="deleteBranch(branch.id)"
+                mat-icon-button 
+                class="!text-gray-400 hover:!text-red-600 transition-colors">
+                <mat-icon class="!text-[20px]">delete</mat-icon>
+              </button>
             </div>
           </div>
         </div>

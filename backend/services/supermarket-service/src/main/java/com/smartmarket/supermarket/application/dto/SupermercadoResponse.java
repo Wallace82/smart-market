@@ -18,11 +18,16 @@ public class SupermercadoResponse {
     private String urlLogomarca;
     private String corPrimariaHex;
     private String corSecundariaHex;
+    private String email;
+    private String telefone;
+    private String cep;
+    private String cidade;
+    private String estado;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
 
     // Construtor para mapear de Supermercado (domain model) para SupermercadoResponse
-    public SupermercadoResponse(UUID id, String nomeFantasia, String cnpj, SupermercadoStatus status, String endereco, Double latitude, Double longitude, Integer raioAtuacao, UUID gestorId, String urlLogomarca, String corPrimariaHex, String corSecundariaHex, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+    public SupermercadoResponse(UUID id, String nomeFantasia, String cnpj, SupermercadoStatus status, String endereco, Double latitude, Double longitude, Integer raioAtuacao, UUID gestorId, String urlLogomarca, String corPrimariaHex, String corSecundariaHex, String email, String telefone, String cep, String cidade, String estado, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.id = id;
         this.nomeFantasia = nomeFantasia;
         this.cnpj = cnpj;
@@ -35,6 +40,11 @@ public class SupermercadoResponse {
         this.urlLogomarca = urlLogomarca;
         this.corPrimariaHex = corPrimariaHex;
         this.corSecundariaHex = corSecundariaHex;
+        this.email = email;
+        this.telefone = telefone;
+        this.cep = cep;
+        this.cidade = cidade;
+        this.estado = estado;
         this.criadoEm = criadoEm;
         this.atualizadoEm = atualizadoEm;
     }
@@ -52,6 +62,11 @@ public class SupermercadoResponse {
     public String getUrlLogomarca() { return urlLogomarca; }
     public String getCorPrimariaHex() { return corPrimariaHex; }
     public String getCorSecundariaHex() { return corSecundariaHex; }
+    public String getEmail() { return email; }
+    public String getTelefone() { return telefone; }
+    public String getCep() { return cep; }
+    public String getCidade() { return cidade; }
+    public String getEstado() { return estado; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
 
@@ -68,6 +83,11 @@ public class SupermercadoResponse {
     public void setUrlLogomarca(String urlLogomarca) { this.urlLogomarca = urlLogomarca; }
     public void setCorPrimariaHex(String corPrimariaHex) { this.corPrimariaHex = corPrimariaHex; }
     public void setCorSecundariaHex(String corSecundariaHex) { this.corSecundariaHex = corSecundariaHex; }
+    public void setEmail(String email) { this.email = email; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public void setCep(String cep) { this.cep = cep; }
+    public void setCidade(String cidade) { this.cidade = cidade; }
+    public void setEstado(String estado) { this.estado = estado; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
 }

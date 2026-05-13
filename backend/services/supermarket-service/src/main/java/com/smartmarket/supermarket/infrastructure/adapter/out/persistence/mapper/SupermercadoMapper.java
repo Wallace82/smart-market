@@ -26,6 +26,12 @@ public class SupermercadoMapper {
         domain.setCorPrimariaHex(entity.getCorPrimariaHex());
         domain.setCorSecundariaHex(entity.getCorSecundariaHex());
         
+        domain.setEmail(entity.getEmail());
+        domain.setTelefone(entity.getTelefone());
+        domain.setCep(entity.getCep());
+        domain.setCidade(entity.getCidade());
+        domain.setEstado(entity.getEstado());
+        
         domain.setCriadoEm(entity.getCriadoEm());
         domain.setAtualizadoEm(entity.getAtualizadoEm());
         return domain;
@@ -49,6 +55,12 @@ public class SupermercadoMapper {
         entity.setUrlLogomarca(domain.getUrlLogomarca());
         entity.setCorPrimariaHex(domain.getCorPrimariaHex());
         entity.setCorSecundariaHex(domain.getCorSecundariaHex());
+
+        entity.setEmail(domain.getEmail());
+        entity.setTelefone(domain.getTelefone());
+        entity.setCep(domain.getCep());
+        entity.setCidade(domain.getCidade());
+        entity.setEstado(domain.getEstado());
 
         entity.setCriadoEm(domain.getCriadoEm());
         entity.setAtualizadoEm(domain.getAtualizadoEm());

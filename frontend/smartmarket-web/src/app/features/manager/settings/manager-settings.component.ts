@@ -11,7 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SupermarketService } from '../../../core/services/supermarket.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { PublicApiService } from '../../../core/services/public-api.service';
-import { SupermarketResponse, SupermarketRequest } from '../../../core/models/supermarket.model';
+import { SupermarketResponse, SupermarketRequest, FilialResponse, FilialRequest } from '../../../core/models/supermarket.model';
 import { effect } from '@angular/core';
 
 @Component({
@@ -54,7 +54,7 @@ export class ManagerSettingsComponent implements OnInit {
     raioAtuacao: 3000,
     primaryColor: '#16a34a',
     secondaryColor: '#ea580c',
-    branches: [] as any[]
+    branches: [] as FilialResponse[]
   });
 
   // Estados do Brasil
@@ -105,6 +105,7 @@ export class ManagerSettingsComponent implements OnInit {
           const sm = supermarkets[0];
           this.supermarketId.set(sm.id);
           this.updateStoreDataFromResponse(sm);
+          this.loadBranches(sm.id);
         } else {
           console.warn('ManagerSettingsComponent: Nenhum supermercado vinculado a este gestor.');
           this.snackBar.open('Nenhum supermercado encontrado para sua conta.', 'Fechar', { duration: 5000 });
@@ -123,20 +124,74 @@ export class ManagerSettingsComponent implements OnInit {
     this.storeData.set({
       name: sm.nomeFantasia,
       cnpj: sm.cnpj,
-      email: 'contato@' + sm.nomeFantasia.toLowerCase().replace(/\s/g, '') + '.com.br',
-      phone: '(11) 99999-9999',
-      cep: '00000-000',
+      email: sm.email || '',
+      phone: sm.telefone || '',
+      cep: sm.cep || '',
       address: sm.endereco,
-      city: 'São Paulo',
-      state: 'SP',
+      city: sm.cidade || '',
+      state: sm.estado || 'SP',
       logoUrl: sm.urlLogomarca || `https://ui-avatars.com/api/?name=${sm.nomeFantasia}&background=16a34a&color=fff&bold=true&size=128`,
       latitude: sm.latitude,
       longitude: sm.longitude,
       raioAtuacao: sm.raioAtuacao,
       primaryColor: sm.corPrimariaHex || '#16a34a',
       secondaryColor: sm.corSecundariaHex || '#ea580c',
-      branches: []
+      branches: this.storeData().branches
     });
+  }
+
+  loadBranches(supermarketId: string) {
+    this.supermarketService.listarFiliais(supermarketId).subscribe({
+      next: (branches) => {
+        this.storeData.update(d => ({ ...d, branches }));
+      },
+      error: (err) => console.error('Erro ao carregar filiais', err)
+    });
+  }
+
+  addBranch() {
+    const id = this.supermarketId();
+    if (!id) return;
+
+    // Simulação simples: abre um prompt ou apenas adiciona um rascunho.
+    // Para um sistema real, abriríamos um modal.
+    const name = prompt('Nome da Filial:');
+    const address = prompt('Endereço:');
+
+    if (name && address) {
+      const request: FilialRequest = {
+        supermercadoId: id,
+        nome: name,
+        endereco: address,
+        ativo: true
+      };
+
+      this.supermarketService.cadastrarFilial(request).subscribe({
+        next: (newBranch) => {
+          this.storeData.update(d => ({
+            ...d,
+            branches: [...d.branches, newBranch]
+          }));
+          this.snackBar.open('Filial adicionada!', 'Fechar', { duration: 3000 });
+        },
+        error: (err) => this.snackBar.open('Erro ao adicionar filial.', 'Fechar', { duration: 3000 })
+      });
+    }
+  }
+
+  deleteBranch(branchId: string) {
+    if (confirm('Tem certeza que deseja excluir esta filial?')) {
+      this.supermarketService.deletarFilial(branchId).subscribe({
+        next: () => {
+          this.storeData.update(d => ({
+            ...d,
+            branches: d.branches.filter(b => b.id !== branchId)
+          }));
+          this.snackBar.open('Filial excluída!', 'Fechar', { duration: 3000 });
+        },
+        error: (err) => this.snackBar.open('Erro ao excluir filial.', 'Fechar', { duration: 3000 })
+      });
+    }
   }
 
   saveChanges() {
@@ -157,7 +212,12 @@ export class ManagerSettingsComponent implements OnInit {
       gestorId: this.authService.user()?.id!,
       corPrimariaHex: data.primaryColor,
       corSecundariaHex: data.secondaryColor,
-      urlLogomarca: data.logoUrl
+      urlLogomarca: data.logoUrl,
+      email: data.email,
+      telefone: data.phone,
+      cep: data.cep,
+      cidade: data.city,
+      estado: data.state
     };
 
     this.isLoading.set(true);
@@ -245,6 +305,7 @@ export class ManagerSettingsComponent implements OnInit {
     this.isSearchingCnpj.set(true);
     this.publicApiService.buscarCnpj(cnpj).subscribe({
       next: (res) => {
+        console.log('Dados do CNPJ recebidos:', res);
         this.storeData.update(data => ({
           ...data,
           name: res.nome_fantasia || res.razao_social,
@@ -258,7 +319,8 @@ export class ManagerSettingsComponent implements OnInit {
         this.snackBar.open('Dados da empresa atualizados via CNPJ!', 'Fechar', { duration: 2000 });
         this.isSearchingCnpj.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Erro detalhado na busca de CNPJ:', err);
         this.snackBar.open('Erro ao buscar CNPJ ou CNPJ não encontrado.', 'Fechar', { duration: 3000 });
         this.isSearchingCnpj.set(false);
       }

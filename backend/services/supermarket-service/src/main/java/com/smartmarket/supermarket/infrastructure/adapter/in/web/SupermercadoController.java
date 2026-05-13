@@ -57,6 +57,11 @@ public class SupermercadoController {
         supermercado.setUrlLogomarca(request.getUrlLogomarca());
         supermercado.setCorPrimariaHex(request.getCorPrimariaHex());
         supermercado.setCorSecundariaHex(request.getCorSecundariaHex());
+        supermercado.setEmail(request.getEmail());
+        supermercado.setTelefone(request.getTelefone());
+        supermercado.setCep(request.getCep());
+        supermercado.setCidade(request.getCidade());
+        supermercado.setEstado(request.getEstado());
         return supermercado;
     }
 
@@ -75,6 +80,11 @@ public class SupermercadoController {
                 supermercado.getUrlLogomarca(),
                 supermercado.getCorPrimariaHex(),
                 supermercado.getCorSecundariaHex(),
+                supermercado.getEmail(),
+                supermercado.getTelefone(),
+                supermercado.getCep(),
+                supermercado.getCidade(),
+                supermercado.getEstado(),
                 supermercado.getCriadoEm(),
                 supermercado.getAtualizadoEm()
         );

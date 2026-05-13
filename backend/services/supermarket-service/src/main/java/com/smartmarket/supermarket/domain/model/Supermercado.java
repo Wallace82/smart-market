@@ -19,6 +19,12 @@ public class Supermercado {
     private String urlLogomarca;
     private String corPrimariaHex;
     private String corSecundariaHex;
+    
+    private String email;
+    private String telefone;
+    private String cep;
+    private String cidade;
+    private String estado;
 
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
@@ -64,6 +70,17 @@ public class Supermercado {
     public void setCorPrimariaHex(String corPrimariaHex) { this.corPrimariaHex = corPrimariaHex; }
     public String getCorSecundariaHex() { return corSecundariaHex; }
     public void setCorSecundariaHex(String corSecundariaHex) { this.corSecundariaHex = corSecundariaHex; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
+    public String getCidade() { return cidade; }
+    public void setCidade(String cidade) { this.cidade = cidade; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }

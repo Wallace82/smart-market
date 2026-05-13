@@ -46,6 +46,21 @@ public class SupermercadoEntity {
     @Column(name = "cor_secundaria_hex", length = 7)
     private String corSecundariaHex;
 
+    @Column
+    private String email;
+
+    @Column(length = 20)
+    private String telefone;
+
+    @Column(length = 10)
+    private String cep;
+
+    @Column(length = 100)
+    private String cidade;
+
+    @Column(length = 2)
+    private String estado;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -90,6 +105,17 @@ public class SupermercadoEntity {
     public void setCorPrimariaHex(String corPrimariaHex) { this.corPrimariaHex = corPrimariaHex; }
     public String getCorSecundariaHex() { return corSecundariaHex; }
     public void setCorSecundariaHex(String corSecundariaHex) { this.corSecundariaHex = corSecundariaHex; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
+    public String getCidade() { return cidade; }
+    public void setCidade(String cidade) { this.cidade = cidade; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }

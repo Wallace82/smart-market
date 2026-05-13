@@ -93,8 +93,11 @@ services:
       DB_NAME: smartmarket
       DB_USER: smartmarket
       DB_PASSWORD: smartmarket
+      MINIO_URL: http://smartmarket-minio:9000
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
   product-service:
@@ -109,6 +112,7 @@ services:
       DB_NAME: smartmarket
       DB_USER: smartmarket
       DB_PASSWORD: smartmarket
+      MINIO_URL: http://smartmarket-minio:9000
     depends_on:
       postgres:
         condition: service_healthy

@@ -19,6 +19,11 @@
     "secure": false,
     "logLevel": "debug"
   },
+  "/api/v1/filiais": {
+    "target": "http://localhost:8082",
+    "secure": false,
+    "logLevel": "debug"
+  },
   "/api/v1/produtos-base": {
     "target": "http://localhost:8083",
     "secure": false,
@@ -43,5 +48,21 @@
     "target": "http://localhost:8083",
     "secure": false,
     "logLevel": "debug"
+  },
+  "/external/cnpj": {
+    "target": "https://brasilapi.com.br",
+    "pathRewrite": {
+      "^/external/cnpj": "/api/cnpj/v1"
+    },
+    "changeOrigin": true,
+    "secure": true
+  },
+  "/external/cep": {
+    "target": "https://viacep.com.br",
+    "pathRewrite": {
+      "^/external/cep": "/ws"
+    },
+    "changeOrigin": true,
+    "secure": true
   }
 }

@@ -9,15 +9,14 @@
 
 ## 1. Visão Geral da Arquitetura
 
-O SmartMarket MVP adota uma **Arquitetura de Monólito Modular**. Para uma equipe de 3 desenvolvedores validando hipóteses de mercado, microserviços introduzem complexidade operacional desnecessária (múltiplos deploys, databases separados, service discovery, comunicação inter-serviço).
+O SmartMarket utiliza uma **Arquitetura de Microserviços**. Esta escolha permite escalabilidade independente dos domínios críticos, isolamento de falhas e especialização tecnológica.
 
-O monólito modular oferece:
-- **Desenvolvimento ágil** com um único ciclo de build e deploy.
-- **Separação lógica clara** entre domínios via módulos internos Java.
-- **Facilidade de extração futura** para microserviços, se o MVP validar escala.
+Principais características:
+- **Isolamento de Dados:** Cada microserviço gerencia seu próprio schema de banco de dados.
+- **Escalabilidade Independente:** Módulos de alto processamento (como o `concierge-service`) podem ser escalados separadamente.
+- **Desenvolvimento Descentralizado:** Facilita a manutenção e evolução de domínios específicos sem impactar o sistema como um todo.
 
-> ⚠️ **API Gateway dedicado, RabbitMQ, database-per-service e Kubernetes são pós-MVP.**
-> Ver seção de Backlog em `REQUIREMENTS.md`.
+> ⚠️ **No MVP, os serviços compartilham a mesma instância de PostgreSQL e RabbitMQ para reduzir custos infraestruturais, mas mantêm isolamento lógico estrito.**
 
 ---
 
@@ -39,21 +38,15 @@ O monólito modular oferece:
 
 ---
 
-## 3. Estrutura de Módulos do Backend (`smartmarket-api`)
+## 3. Estrutura de Microserviços (Backend)
 
-O backend é uma **aplicação Spring Boot única** dividida em módulos internos por domínio. Cada módulo possui seus próprios pacotes de `domain`, `application` e `infrastructure`, sem dependências cruzadas de banco de dados.
+O ecossistema de backend é composto pelos seguintes serviços independentes:
 
-```
-smartmarket-api/
-├── auth/          → Autenticação, JWT, controle de roles (ADMIN, GESTOR)
-├── supermarket/   → Cadastro, aprovação, Whitelabel, coordenadas, QR Code
-├── catalog/       → Catálogo global de produtos e categorias (Admin)
-├── offer/         → Ofertas por supermercado (Gestor)
-├── flyer/         → Encartes digitais e temas sazonais
-├── geo/           → Filtro de proximidade por raio simples (RF-06)
-├── analytics/     → Métricas básicas: views de encarte e scans de QR Code (RF-08)
-└── storage/       → Integração com MinIO (upload de imagens)
-```
+*   **`auth-service`**: Responsável por autenticação, controle de acesso (RBAC) e gestão de usuários.
+*   **`product-service`**: Core business, gerindo Catálogo Global, Ofertas, Encartes e Temas Sazonais.
+*   **`concierge-service`**: Gerencia a operação assistida, upload de listas, **Fila Inteligente** e auditoria.
+*   **`billing-service`**: Módulo de assinaturas e faturamento (integração com gateways de pagamento).
+*   **`api-gateway`**: (Em evolução) Ponto de entrada único para o ecossistema.
 
 ### 3.1 Banco de Dados
 
@@ -116,24 +109,18 @@ Cada módulo interno segue a separação em camadas:
 ┌──────────────────────────────────────────────────────┐
 │              Frontend Angular 18+                     │
 │         (Mobile-First / SPA / Signals)                │
-│  ┌──────────────┐  ┌────────────┐  ┌──────────────┐  │
-│  │ Dashboard    │  │  Vitrine   │  │  Encarte     │  │
-│  │ Admin/Gestor │  │  Pública   │  │  Digital     │  │
-│  └──────────────┘  └────────────┘  └──────────────┘  │
 └─────────────────────────┬────────────────────────────┘
                           │ HTTP REST (JSON)
 ┌─────────────────────────▼────────────────────────────┐
-│                   smartmarket-api                      │
-│  ┌──────────┬──────────┬─────────┬──────────────┐    │
-│  │   auth   │supermarkt│ catalog │    offer     │    │
-│  ├──────────┼──────────┼─────────┼──────────────┤    │
-│  │  flyer   │   geo    │analytic │   storage    │    │
-│  │ (themes) │          │    s    │   (MinIO)    │    │
-│  └──────────┴──────────┴─────────┴──────────────┘    │
+│                    API Gateway / Reverse Proxy        │
 └──────────────┬──────────────┬──────────────┬─────────┘
                │              │              │
+    ┌──────────▼───┐  ┌───────▼──────┐  ┌────▼─────────┐
+    │ auth-service │  │product-servic│  │concierge-serv│
+    └──────────────┘  └──────────────┘  └──────────────┘
+               │              │              │
           PostgreSQL        MinIO          Redis
-          (único BD)       (imgs)         (cache)
+       (Schemas Sep.)      (Object)       (Cache)
 ```
 
 ---
@@ -197,16 +184,21 @@ ORDER BY distance_meters ASC;
 
 ---
 
-## 9. QR Code por Loja (RF-07)
+## 10. Fila Inteligente e Operação Assistida (`concierge-service`)
 
-O QR Code é gerado **dinamicamente** pelo backend via biblioteca Java (ex: `zxing`) e entregue como PNG.
+O microserviço de Concierge utiliza um algoritmo de priorização dinâmica para otimizar o atendimento operacional.
 
-**Fluxo:**
-1. `GET /api/v1/supermarkets/{id}/qrcode` (autenticado, Gestor)
-2. Backend monta a `targetUrl`: `https://smartmarket.app/loja/{id}?utm_source=totem`
-3. Gera PNG do QR Code em memória e retorna a URL MinIO ou `image/png` diretamente.
-4. Ao escanear, o usuário acessa o encarte ativo publicamente (RF-07.3).
-5. O parâmetro `utm_source=totem` é capturado pelo módulo `analytics` como evento `QR_CODE_SCANNED` (RF-07.4, RF-08.2).
+### 10.1 Score de Prioridade Dinâmico
+A prioridade é calculada considerando:
+- **Urgência (SLA):** Peso 0.4 (proximidade do deadline).
+- **Plano do Cliente:** Peso 0.3 (VIP/Premium primeiro).
+- **Tempo de Espera:** Peso 0.2 (evita starvation).
+- **Complexidade:** Peso 0.1 (penaliza itens muito grandes para balanceamento).
+
+### 10.2 Lock de Atendimento
+Para garantir atomicidade, o sistema implementa um **Lock Transacional**:
+- Ao assumir um chamado, o status muda para `EM_PROCESSAMENTO` e o `atendenteId` é vinculado.
+- Qualquer tentativa concorrente de assumir o mesmo chamado resulta em conflito (`HTTP 409`).
 
 ---
 

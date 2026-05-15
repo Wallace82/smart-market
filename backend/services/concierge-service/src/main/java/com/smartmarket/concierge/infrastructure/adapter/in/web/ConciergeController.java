@@ -21,13 +21,19 @@ public class ConciergeController {
     private final CriarSolicitacaoUseCase criarSolicitacaoUseCase;
     private final com.smartmarket.concierge.application.usecase.ConsultarFilaAtendimentoUseCase consultarFilaAtendimentoUseCase;
     private final com.smartmarket.concierge.application.usecase.AssumirSolicitacaoUseCase assumirSolicitacaoUseCase;
+    private final com.smartmarket.concierge.application.usecase.ConcluirProcessamentoUseCase concluirProcessamentoUseCase;
+    private final com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase;
 
     public ConciergeController(CriarSolicitacaoUseCase criarSolicitacaoUseCase,
                                com.smartmarket.concierge.application.usecase.ConsultarFilaAtendimentoUseCase consultarFilaAtendimentoUseCase,
-                               com.smartmarket.concierge.application.usecase.AssumirSolicitacaoUseCase assumirSolicitacaoUseCase) {
+                               com.smartmarket.concierge.application.usecase.AssumirSolicitacaoUseCase assumirSolicitacaoUseCase,
+                               com.smartmarket.concierge.application.usecase.ConcluirProcessamentoUseCase concluirProcessamentoUseCase,
+                               com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase) {
         this.criarSolicitacaoUseCase = criarSolicitacaoUseCase;
         this.consultarFilaAtendimentoUseCase = consultarFilaAtendimentoUseCase;
         this.assumirSolicitacaoUseCase = assumirSolicitacaoUseCase;
+        this.concluirProcessamentoUseCase = concluirProcessamentoUseCase;
+        this.aprovarSolicitacaoUseCase = aprovarSolicitacaoUseCase;
     }
 
     @GetMapping("/fila")
@@ -48,6 +54,23 @@ public class ConciergeController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PatchMapping("/{id}/concluir")
+    @Operation(summary = "Atendente conclui o processamento e envia para aprovação do gestor")
+    public ResponseEntity<SolicitacaoConcierge> concluir(
+            @PathVariable("id") UUID solicitacaoId,
+            @RequestParam("atendenteId") UUID atendenteId,
+            @RequestParam(value = "observacoes", required = false) String observacoes) {
+        return ResponseEntity.ok(concluirProcessamentoUseCase.execute(solicitacaoId, atendenteId, observacoes));
+    }
+
+    @PatchMapping("/{id}/aprovar")
+    @Operation(summary = "Gestor do supermercado aprova o cadastro realizado")
+    public ResponseEntity<SolicitacaoConcierge> aprovar(
+            @PathVariable("id") UUID solicitacaoId,
+            @RequestParam("gestorId") UUID gestorId) {
+        return ResponseEntity.ok(aprovarSolicitacaoUseCase.execute(solicitacaoId, gestorId));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -47,15 +47,16 @@
   </div>
 
   <!-- Barra de Pesquisa e Tabela -->
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
     
     <!-- Search Bar -->
-    <div class="p-4 border-b border-gray-200 bg-white">
+    <div class="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
       <div class="relative w-full max-w-md">
         <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 !text-[20px] !w-5 !h-5">search</mat-icon>
         <input type="text" placeholder="Buscar por nome, e-mail ou perfil..." 
                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors">
       </div>
+      
     </div>
 
     <!-- Tabela Responsiva -->
@@ -71,40 +72,79 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let user of users()" class="hover:bg-gray-50 transition-colors group">
-            
-            <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center gap-3">
-                <img [src]="user.avatarUrl" alt="Avatar" class="w-10 h-10 rounded-full border border-gray-200 shadow-sm">
-                <div>
-                  <p class="text-sm font-bold text-gray-900">{{ user.name }}</p>
-                  <p class="text-xs text-gray-500">{{ user.email }}</p>
+          <!-- Skeleton Loading -->
+          <ng-container *ngIf="isLoading()">
+            <tr *ngFor="let item of [1,2,3,4,5]" class="animate-pulse">
+              <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full skeleton"></div><div><div class="h-4 w-32 skeleton mb-2"></div><div class="h-3 w-20 skeleton"></div></div></div></td>
+              <td class="px-6 py-4"><div class="h-6 w-24 skeleton rounded-md"></div></td>
+              <td class="px-6 py-4"><div class="h-6 w-16 skeleton rounded-full"></div></td>
+              <td class="px-6 py-4"><div class="h-4 w-20 skeleton"></div></td>
+              <td class="px-6 py-4 text-right"><div class="h-8 w-8 skeleton rounded-full ml-auto"></div></td>
+            </tr>
+          </ng-container>
+
+          <!-- Real Data -->
+          <ng-container *ngIf="!isLoading()">
+            <tr *ngFor="let user of users()" class="hover:bg-gray-50 transition-colors group">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                  <img [src]="'https://ui-avatars.com/api/?name=' + user.nome" alt="Avatar" class="w-10 h-10 rounded-full border border-gray-200 shadow-sm">
+                  <div>
+                    <p class="text-sm font-bold text-gray-900">{{ user.nome }}</p>
+                    <p class="text-xs text-gray-500">{{ user.email }}</p>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="text-xs font-medium px-2.5 py-1 rounded-md border"
-                    [ngClass]="{
-                      'bg-green-50 text-green-700 border-green-200': user.role === 'Administrador',
-                      'bg-blue-50 text-blue-700 border-blue-200': user.role === 'Gestor',
-                      'bg-gray-100 text-gray-600 border-gray-200': user.role === 'Cliente'
-                    }">
-                {{ user.role }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
-                [ngClass]="{'bg-green-100 text-green-800': user.status === 'Ativo', 'bg-gray-100 text-gray-800': user.status === 'Inativo', 'bg-red-100 text-red-800': user.status === 'Bloqueado'}">
-                <span class="w-1.5 h-1.5 rounded-full mr-1.5" [ngClass]="{'bg-green-500': user.status === 'Ativo', 'bg-gray-500': user.status === 'Inativo', 'bg-red-500': user.status === 'Bloqueado'}"></span>
-                {{ user.status }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.lastLogin }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button mat-icon-button matTooltip="Editar Perfil" class="!text-gray-400 hover:!text-blue-600 transition-colors"><mat-icon>edit</mat-icon></button>
-              <button mat-icon-button matTooltip="Opções de Conta" class="!text-gray-400 hover:!text-gray-900 transition-colors"><mat-icon>more_vert</mat-icon></button>
-            </td>
-          </tr>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-xs font-medium px-2.5 py-1 rounded-md border"
+                      [ngClass]="{
+                        'bg-green-50 text-green-700 border-green-200': user.role === 'ADMIN',
+                        'bg-blue-50 text-blue-700 border-blue-200': user.role === 'MANAGER',
+                        'bg-gray-100 text-gray-600 border-gray-200': user.role === 'CLIENT'
+                      }">
+                  {{ user.role === 'ADMIN' ? 'Administrador' : (user.role === 'MANAGER' ? 'Gestor' : 'Cliente') }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': user.status === 'ACTIVE', 
+                    'bg-gray-100 text-gray-800': user.status === 'INACTIVE', 
+                    'bg-red-100 text-red-800': user.status === 'BLOCKED'
+                  }">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" 
+                        [ngClass]="{
+                          'bg-green-500': user.status === 'ACTIVE', 
+                          'bg-gray-500': user.status === 'INACTIVE', 
+                          'bg-red-500': user.status === 'BLOCKED'
+                        }"></span>
+                  {{ user.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.ultimoAcesso || 'Nunca' }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button mat-icon-button [matMenuTriggerFor]="userMenu" class="!text-gray-400 hover:!text-gray-900 transition-colors">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                
+                <mat-menu #userMenu="matMenu" xPosition="before">
+                  <button mat-menu-item (click)="alterarStatus(user.id, 'ACTIVE')" [disabled]="user.status === 'ACTIVE'">
+                    <mat-icon class="text-green-600">check_circle</mat-icon>
+                    <span>Ativar Usuário</span>
+                  </button>
+                  <button mat-menu-item (click)="alterarStatus(user.id, 'BLOCKED')" [disabled]="user.status === 'BLOCKED'">
+                    <mat-icon class="text-red-600">block</mat-icon>
+                    <span>Bloquear Usuário</span>
+                  </button>
+                  <mat-divider></mat-divider>
+                  <button mat-menu-item>
+                    <mat-icon>edit</mat-icon>
+                    <span>Editar Perfil</span>
+                  </button>
+                </mat-menu>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>

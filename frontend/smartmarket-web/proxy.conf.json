@@ -1,51 +1,61 @@
 {
   "/api/v1/auth": {
-    "target": "http://localhost:8081",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/users": {
-    "target": "http://localhost:8081",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/supermercados": {
-    "target": "http://localhost:8082",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/plans": {
-    "target": "http://localhost:8082",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/filiais": {
-    "target": "http://localhost:8082",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/produtos-base": {
-    "target": "http://localhost:8083",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/ofertas": {
-    "target": "http://localhost:8083",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/encartes": {
-    "target": "http://localhost:8083",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/temas-encarte": {
-    "target": "http://localhost:8083",
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },
   "/api/v1/categorias": {
-    "target": "http://localhost:8083",
+    "target": "http://localhost:8080",
+    "secure": false,
+    "logLevel": "debug"
+  },
+  "/api/v1/admin/billing": {
+    "target": "http://localhost:8080",
+    "secure": false,
+    "logLevel": "debug"
+  },
+  "/api/v1/subscriptions": {
+    "target": "http://localhost:8080",
     "secure": false,
     "logLevel": "debug"
   },

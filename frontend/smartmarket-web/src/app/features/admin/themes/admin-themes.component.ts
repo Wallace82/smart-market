@@ -1,25 +1,40 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AdminThemesService, SeasonalTheme } from './services/admin-themes.service';
+
+// Services & Models
+import { EncarteService } from '@core/services/encarte.service';
+import { TemaEncarteResponse } from '@core/models/encarte.model';
+
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-admin-themes',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './admin-themes.component.html'
+  imports: [CommonModule, RouterModule, MatProgressSpinnerModule],
+  templateUrl: './admin-themes.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminThemesComponent implements OnInit {
-  private themesService = inject(AdminThemesService);
+  private encarteService = inject(EncarteService);
   
-  themes: SeasonalTheme[] = [];
-  loading = true;
+  // Estados Reativos
+  public themes = signal<TemaEncarteResponse[]>([]);
+  public loading = signal(true);
 
   ngOnInit() {
-    this.themesService.getThemes().subscribe({
+    this.loadThemes();
+  }
+
+  public loadThemes() {
+    this.loading.set(true);
+    this.encarteService.listarTemas().subscribe({
       next: (data) => {
-        this.themes = data;
-        this.loading = false;
+        this.themes.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar temas', err);
+        this.loading.set(false);
       }
     });
   }

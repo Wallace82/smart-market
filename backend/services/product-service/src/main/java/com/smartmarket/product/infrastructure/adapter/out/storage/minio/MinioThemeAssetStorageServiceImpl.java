@@ -30,8 +30,15 @@ public class MinioThemeAssetStorageServiceImpl implements ThemeAssetStorageServi
     }
 
     @Override
-    public String upload(String originalFileName, InputStream inputStream, String contentType) {
+    public String upload(String originalFileName, InputStream inputStream, String contentType, long size) {
         try {
+            // Garante que o bucket existe
+            boolean found = minioClient.bucketExists(io.minio.BucketExistsArgs.builder().bucket(bucketName).build());
+            if (!found) {
+                minioClient.makeBucket(io.minio.MakeBucketArgs.builder().bucket(bucketName).build());
+                logger.info("Bucket {} criado com sucesso.", bucketName);
+            }
+
             String fileExtension = "";
             int dotIndex = originalFileName.lastIndexOf('.');
             if (dotIndex > 0 && dotIndex < originalFileName.length() - 1) {
@@ -43,13 +50,13 @@ public class MinioThemeAssetStorageServiceImpl implements ThemeAssetStorageServi
                     PutObjectArgs.builder()
                             .bucket(bucketName)
                             .object(fileName)
-                            .stream(inputStream, inputStream.available(), -1)
+                            .stream(inputStream, size, -1)
                             .contentType(contentType)
                             .build()
             );
 
             logger.info("Asset de tema {} enviado com sucesso para o MinIO no bucket {}", fileName, bucketName);
-            return publicUrlPrefix + fileName; // Retorna a URL pública completa
+            return publicUrlPrefix + fileName;
         } catch (Exception e) {
             logger.error("Erro ao fazer upload do asset de tema para o MinIO", e);
             throw new RuntimeException("Falha ao salvar o asset de tema", e);

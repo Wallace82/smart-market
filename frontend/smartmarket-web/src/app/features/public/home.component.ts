@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,6 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-public-home',
-  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -24,8 +23,7 @@ export class HomeComponent implements OnInit {
 
   // Sinais de Estado
   isLoading = signal<boolean>(true);
-  locationGranted = signal<boolean>(false);
-  userAddress = signal<string>('Buscando seu endereço...');
+  location = this.catalogService.currentLocation;
   userRadius = this.catalogService.userSelectedRadius;
 
   // Sinais de Dados
@@ -33,34 +31,46 @@ export class HomeComponent implements OnInit {
   supermarkets = signal<any[]>([]);
   flyers = signal<any[]>([]);
 
+  // Efeito: Recarrega o catálogo sempre que a localização ou o raio mudarem
+  private _loadEffect = effect(() => {
+    const loc = this.location();
+    const radius = this.userRadius();
+    if (loc) {
+      this.loadCatalogData();
+    }
+  });
+
   ngOnInit(): void {
-    this.loadCatalog();
-  }
-
-  private async loadCatalog() {
-    this.isLoading.set(true);
-    try {
-      const loc = await this.catalogService.requestUserLocation();
-      this.locationGranted.set(true);
-
-      // Check if user set a custom address, otherwise use geolocation
-      const customAddress = this.catalogService.userSelectedAddress();
-      if (customAddress) {
-        this.userAddress.set(customAddress);
-      } else {
-        // Busca o endereço real por extenso (Reverse Geocoding)
-        const address = await this.catalogService.getAddressFromCoordinates(loc.lat, loc.lng);
-        this.userAddress.set(address);
-      }
-
-      this.catalogService.getTrendingOffersNearby(loc.lat, loc.lng).subscribe(data => this.offers.set(data));
-      this.catalogService.getActiveFlyersNearby(loc.lat, loc.lng).subscribe(data => this.flyers.set(data));
-      this.catalogService.getNearbySupermarkets(loc.lat, loc.lng).subscribe(data => {
-        this.supermarkets.set(data);
-        this.isLoading.set(false);
+    if (!this.location()) {
+      this.catalogService.initializeLocation().then(() => {
+        // O effect cuidará de chamar loadCatalogData
       });
-    } catch (e) {
-      this.isLoading.set(false);
     }
   }
-}
+
+  private loadCatalogData() {
+    this.isLoading.set(true);
+    
+    // Busca paralela de dados baseada na localização atual
+    this.catalogService.getTrendingOffersNearby().subscribe({
+      next: (data) => this.offers.set(data),
+      error: () => this.offers.set([])
+    });
+
+    this.catalogService.getActiveFlyersNearby().subscribe({
+      next: (data) => this.flyers.set(data),
+      error: () => this.flyers.set([])
+    });
+
+    this.catalogService.getNearbySupermarkets().subscribe({
+      next: (data) => {
+        this.supermarkets.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.supermarkets.set([]);
+        this.isLoading.set(false);
+      }
+    });
+  }
+}

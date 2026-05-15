@@ -3,6 +3,7 @@ export interface TemaEncarte {
   nome: string;
   urlBackgroundDecorativo?: string;
   corFundoHex?: string;
+  corDestaqueHex?: string;
   ativo: boolean;
   criadoEm: string;
 }
@@ -11,6 +12,7 @@ export interface TemaEncarteRequest {
   nome: string;
   urlBackgroundDecorativo?: string;
   corFundoHex?: string;
+  corDestaqueHex?: string;
   ativo: boolean;
 }
 
@@ -19,6 +21,7 @@ export interface TemaEncarteResponse {
   nome: string;
   urlBackgroundDecorativo?: string;
   corFundoHex?: string;
+  corDestaqueHex?: string;
   ativo: boolean;
   criadoEm: string;
 }

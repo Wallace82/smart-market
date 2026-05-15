@@ -16,6 +16,7 @@ public class TemaEncarteMapper {
         entity.setNome(domain.getNome());
         entity.setUrlBackgroundDecorativo(domain.getUrlBackgroundDecorativo());
         entity.setCorFundoHex(domain.getCorFundoHex());
+        entity.setCorDestaqueHex(domain.getCorDestaqueHex());
         entity.setAtivo(domain.isAtivo());
         entity.setCriadoEm(domain.getCriadoEm());
         return entity;
@@ -30,6 +31,7 @@ public class TemaEncarteMapper {
         domain.setNome(entity.getNome());
         domain.setUrlBackgroundDecorativo(entity.getUrlBackgroundDecorativo());
         domain.setCorFundoHex(entity.getCorFundoHex());
+        domain.setCorDestaqueHex(entity.getCorDestaqueHex());
         domain.setAtivo(entity.isAtivo());
         domain.setCriadoEm(entity.getCriadoEm());
         return domain;

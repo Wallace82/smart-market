@@ -41,6 +41,7 @@ public class TemaEncarteController {
         tema.setNome(request.getNome());
         tema.setUrlBackgroundDecorativo(request.getUrlBackgroundDecorativo());
         tema.setCorFundoHex(request.getCorFundoHex());
+        tema.setCorDestaqueHex(request.getCorDestaqueHex());
         tema.setAtivo(request.isAtivo());
         return tema;
     }
@@ -51,6 +52,7 @@ public class TemaEncarteController {
                 tema.getNome(),
                 tema.getUrlBackgroundDecorativo(),
                 tema.getCorFundoHex(),
+                tema.getCorDestaqueHex(),
                 tema.isAtivo(),
                 tema.getCriadoEm()
         );
@@ -58,13 +60,20 @@ public class TemaEncarteController {
 
     @PostMapping
     public ResponseEntity<TemaEncarteResponse> cadastrar(@RequestBody TemaEncarteRequest request) {
+        System.out.println("DEBUG - Recebido cadastro de tema: " + request.getNome());
+        System.out.println("DEBUG - Cor Fundo: " + request.getCorFundoHex());
+        System.out.println("DEBUG - Cor Destaque: " + request.getCorDestaqueHex());
         TemaEncarte tema = toDomain(request);
         TemaEncarte salvo = cadastrarTemaEncarteUseCase.execute(tema);
         return ResponseEntity.status(HttpStatus.CREATED).body(fromDomain(salvo));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TemaEncarteResponse> atualizar(@PathVariable UUID id, @RequestBody TemaEncarteRequest request) {
+    public ResponseEntity<TemaEncarteResponse> atualizar(@PathVariable("id") UUID id, @RequestBody TemaEncarteRequest request) {
+        System.out.println("DEBUG - Recebida atualização de tema ID: " + id);
+        System.out.println("DEBUG - Nome: " + request.getNome());
+        System.out.println("DEBUG - Cor Fundo: " + request.getCorFundoHex());
+        System.out.println("DEBUG - Cor Destaque: " + request.getCorDestaqueHex());
         TemaEncarte tema = toDomain(request);
         TemaEncarte atualizado = atualizarTemaEncarteUseCase.execute(id, tema);
         return ResponseEntity.ok(fromDomain(atualizado));
@@ -79,7 +88,7 @@ public class TemaEncarteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TemaEncarteResponse> buscarPorId(@PathVariable UUID id) {
+    public ResponseEntity<TemaEncarteResponse> buscarPorId(@PathVariable("id") UUID id) {
         return listarTemasEncarteUseCase.buscarPorId(id)
                 .map(this::fromDomain)
                 .map(ResponseEntity::ok)
@@ -87,12 +96,12 @@ public class TemaEncarteController {
     }
 
     @PostMapping("/{id}/upload-background")
-    public ResponseEntity<TemaEncarteResponse> uploadBackground(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<TemaEncarteResponse> uploadBackground(@PathVariable("id") UUID id, @RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
-            TemaEncarte temaAtualizado = uploadTemaAssetUseCase.execute(id, file.getOriginalFilename(), file.getInputStream(), file.getContentType());
+            TemaEncarte temaAtualizado = uploadTemaAssetUseCase.execute(id, file.getOriginalFilename(), file.getInputStream(), file.getContentType(), file.getSize());
             return ResponseEntity.ok(fromDomain(temaAtualizado));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

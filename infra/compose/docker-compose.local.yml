@@ -55,13 +55,13 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 admin password;
+      /usr/bin/mc alias set myminio http://minio:9000 admin password;
       /usr/bin/mc mb myminio/smartmarket-products --ignore-existing;
       /usr/bin/mc mb myminio/smartmarket-brands --ignore-existing;
       /usr/bin/mc mb myminio/smartmarket-themes --ignore-existing;
-      /usr/bin/mc anonymous set public myminio/smartmarket-products;
-      /usr/bin/mc anonymous set public myminio/smartmarket-brands;
-      /usr/bin/mc anonymous set public myminio/smartmarket-themes;
+      /usr/bin/mc anonymous set download myminio/smartmarket-products;
+      /usr/bin/mc anonymous set download myminio/smartmarket-brands;
+      /usr/bin/mc anonymous set download myminio/smartmarket-themes;
       exit 0;
       "
 
@@ -129,10 +129,28 @@ services:
       AUTH_SERVICE_URL: http://smartmarket-auth-service:8081
       SUPERMARKET_SERVICE_URL: http://smartmarket-supermarket-service:8082
       PRODUCT_SERVICE_URL: http://smartmarket-product-service:8083
+      BILLING_SERVICE_URL: http://smartmarket-billing-service:8084
     depends_on:
       - auth-service
       - supermarket-service
       - product-service
+      - billing-service
+
+  billing-service:
+    build:
+      context: ../../backend/services/billing-service
+    container_name: smartmarket-billing-service
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   smartmarket_postgres_data:

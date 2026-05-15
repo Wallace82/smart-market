@@ -18,12 +18,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Vitrine pública: ofertas, encartes e eventos de analytics (RF-01.4)
-                .requestMatchers("/api/v1/public/**").permitAll()
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Gestão de catálogo, ofertas e encartes requerem JWT (ADMIN/GESTOR)
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             );
 
         return http.build();

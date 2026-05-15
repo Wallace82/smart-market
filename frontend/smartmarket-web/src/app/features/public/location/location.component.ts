@@ -5,7 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PublicCatalogMockService } from '../public-catalog-mock.service';
+import { PublicCatalogService } from '@core/services/public-catalog.service';
 
 interface ViaCepResponse {
   cep: string;
@@ -23,7 +23,6 @@ interface ViaCepResponse {
 
 @Component({
   selector: 'app-location',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -36,18 +35,18 @@ interface ViaCepResponse {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LocationComponent {
-  private catalogService = inject(PublicCatalogMockService);
+  private catalogService = inject(PublicCatalogService);
   private router = inject(Router);
 
-  cep = '';
-  radius = this.catalogService.userSelectedRadius();
+  cep = signal('');
+  radius = this.catalogService.userSelectedRadius;
   
   isLoading = signal(false);
   isSaving = signal(false);
   address = signal<ViaCepResponse | null>(null);
 
   async searchCep() {
-    const cleanCep = this.cep.replace(/\D/g, '');
+    const cleanCep = this.cep().replace(/\D/g, '');
     if (cleanCep.length !== 8) return;
 
     this.isLoading.set(true);
@@ -58,7 +57,7 @@ export class LocationComponent {
       const data: ViaCepResponse = await response.json();
 
       if (data.erro) {
-        // Tratar erro de CEP não encontrado se necessário
+        this.address.set(null);
       } else {
         this.address.set(data);
       }
@@ -77,12 +76,13 @@ export class LocationComponent {
     
     // Simula um pequeno delay para feedback visual
     setTimeout(() => {
-      const formattedAddress = `${currentAddress.logradouro}, ${currentAddress.bairro}, ${currentAddress.localidade}`;
-      this.catalogService.userSelectedAddress.set(formattedAddress);
-      this.catalogService.userSelectedRadius.set(Number(this.radius));
+      const formattedAddress = `${currentAddress.logradouro}, ${currentAddress.bairro}, ${currentAddress.localidade} - ${currentAddress.uf}`;
+      
+      this.catalogService.setManualLocation(currentAddress.cep, formattedAddress);
+      this.catalogService.userSelectedRadius.set(Number(this.radius()));
       
       this.isSaving.set(false);
       this.router.navigate(['/']);
-    }, 800);
+    }, 600);
   }
 }

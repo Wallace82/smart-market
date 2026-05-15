@@ -8,6 +8,7 @@ com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\OfertaSup
 com\smartmarket\product\infrastructure\adapter\out\persistence\TemaEncarteRepository.class
 com\smartmarket\product\application\usecase\ListarEncartesDigitaisUseCase.class
 com\smartmarket\product\infrastructure\adapter\in\web\TemaEncarteController.class
+com\smartmarket\product\application\usecase\AlterarStatusEncarteDigitalUseCase$1.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\ProdutoBaseRepository.class
 com\smartmarket\product\infrastructure\adapter\out\storage\minio\MinioThemeAssetStorageServiceImpl.class
 com\smartmarket\product\infrastructure\adapter\out\storage\minio\MinioImageStorageServiceImpl.class

@@ -42,6 +42,10 @@ export class SupermarketService {
     return this.http.patch<SupermarketResponse>(`${this.apiUrl}/${id}/status`, { status });
   }
 
+  getQRCodeUrl(id: string): string {
+    return `${this.apiUrl}/${id}/qrcode`;
+  }
+
   // Métodos Públicos (Vitrine)
   listarProximos(lat: number, lng: number, raio: number = 3000): Observable<SupermarketResponse[]> {
     const params = new HttpParams()
@@ -49,6 +53,13 @@ export class SupermarketService {
       .set('longitude', lng.toString())
       .set('radiusMeters', raio.toString());
     return this.http.get<SupermarketResponse[]>(`${this.apiUrl}/public/nearby`, { params });
+  }
+
+  buscarPorLocalizacao(cep?: string, bairro?: string, page = 0, size = 20): Observable<any> {
+    let params = new HttpParams().set('page', page.toString()).set('size', size.toString());
+    if (cep) params = params.set('cep', cep);
+    if (bairro) params = params.set('bairro', bairro);
+    return this.http.get<any>(`${this.apiUrl}/public/by-location`, { params });
   }
 
   // Métodos de Filiais

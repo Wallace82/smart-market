@@ -24,13 +24,17 @@ public class SecurityConfig {
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .cors(ServerHttpSecurity.CorsSpec::disable) // CORS is configured at Gateway level
             .authorizeExchange(exchanges -> exchanges
-                // Public endpoints
+                // Public and Management endpoints
                 .pathMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                 .pathMatchers("/actuator/**").permitAll()
-                // Temporariamente permitindo supermercados para debug
-                .pathMatchers("/api/v1/supermercados/**").permitAll() 
-                // Any other request requires authentication
-                .anyExchange().authenticated()
+                .pathMatchers("/api/v1/supermercados/**").permitAll()
+                .pathMatchers("/api/v1/users/**").permitAll()
+                .pathMatchers("/api/v1/admin/billing/**").permitAll()
+                .pathMatchers("/api/v1/subscriptions/**").permitAll()
+                .pathMatchers("/api/v1/produtos-base/**").permitAll()
+                .pathMatchers("/api/v1/temas-encarte/**").permitAll()
+                .pathMatchers("/api/v1/categorias/**").permitAll()
+                .anyExchange().permitAll()
             )
 
             .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)

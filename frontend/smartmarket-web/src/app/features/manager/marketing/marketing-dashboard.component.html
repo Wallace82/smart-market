@@ -1,0 +1,137 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Header -->
+  <header class="mb-8 flex justify-between items-end">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Marketing & Canal Físico</h1>
+      <p class="text-gray-500 mt-1">Gerencie a integração do seu supermercado físico com o encarte digital.</p>
+    </div>
+    <div class="hidden md:block">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+        <mat-icon class="text-sm h-4 w-4 mr-1">check_circle</mat-icon>
+        Canal Ativo
+      </span>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- QR Code Section -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-50 bg-gray-50/50">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+            <mat-icon class="mr-2 text-primary">qr_code_2</mat-icon>
+            QR Code da Loja
+          </h2>
+        </div>
+        
+        <div class="p-8 flex flex-col items-center text-center">
+          <div class="relative group">
+            @if (isLoading()) {
+              <div class="w-64 h-64 flex items-center justify-center bg-gray-50 rounded-xl">
+                <mat-spinner diameter="40"></mat-spinner>
+              </div>
+            } @else if (qrCodeUrl()) {
+              <div class="p-4 bg-white border-2 border-dashed border-gray-200 rounded-2xl shadow-inner transition-all duration-300 group-hover:border-primary/50">
+                <img [src]="qrCodeUrl()" alt="QR Code da Loja" class="w-56 h-56 object-contain">
+              </div>
+            } @else {
+              <div class="w-64 h-64 flex flex-col items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                <mat-icon class="text-gray-400 text-5xl mb-2">error_outline</mat-icon>
+                <p class="text-sm text-gray-500 px-4">Não foi possível carregar o QR Code</p>
+              </div>
+            }
+          </div>
+
+          <div class="mt-8 w-full space-y-3">
+            <button mat-flat-button color="primary" class="w-full !rounded-xl !py-6" 
+                    (click)="downloadQRCode()" [disabled]="isLoading() || !qrCodeUrl()">
+              <mat-icon class="mr-2">download</mat-icon>
+              Baixar PNG para Impressão
+            </button>
+            
+            <button mat-stroked-button class="w-full !rounded-xl !py-6" 
+                    (click)="copyStoreLink()" [disabled]="isLoading()">
+              <mat-icon class="mr-2">content_copy</mat-icon>
+              Copiar Link Direto
+            </button>
+          </div>
+        </div>
+
+        <div class="p-6 bg-orange-50/50 border-t border-orange-100">
+          <div class="flex">
+            <mat-icon class="text-orange-500 mr-3">lightbulb</mat-icon>
+            <p class="text-xs text-orange-800 leading-relaxed">
+              <strong>Dica:</strong> Imprima este QR Code em totens, cartazes ou etiquetas de preço para que os clientes acessem seu encarte instantaneamente.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features & Strategy Section -->
+    <div class="lg:col-span-2 space-y-8">
+      <!-- Integration Guide -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <h3 class="text-xl font-bold text-gray-900 mb-6">Como funciona o Canal Físico-Digital?</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">1</div>
+            <div class="ml-4">
+              <h4 class="font-semibold text-gray-900">Impressão do Totem</h4>
+              <p class="text-sm text-gray-500 mt-1">O QR Code aponta para o encarte ativo da sua loja com rastreamento UTM.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold">2</div>
+            <div class="ml-4">
+              <h4 class="font-semibold text-gray-900">Acesso sem Fricção</h4>
+              <p class="text-sm text-gray-500 mt-1">O cliente aponta a câmera e abre o encarte na hora. Sem baixar apps, sem login.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">3</div>
+            <div class="ml-4">
+              <h4 class="font-semibold text-gray-900">Conversão Imediata</h4>
+              <p class="text-sm text-gray-500 mt-1">Ofertas visualizadas no celular incentivam a compra de itens adicionais na loja.</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">4</div>
+            <div class="ml-4">
+              <h4 class="font-semibold text-gray-900">Métricas Reais</h4>
+              <p class="text-sm text-gray-500 mt-1">Acompanhe quantos clientes acessaram via QR Code no seu dashboard.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Features (Glassmorphism effect) -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-white/20 p-8">
+        <div class="relative z-10">
+          <div class="flex items-center mb-4">
+            <span class="px-2 py-1 bg-primary text-white text-[10px] font-bold rounded uppercase tracking-wider mr-3">Em Breve</span>
+            <h3 class="text-xl font-bold text-gray-900">Notificações por Proximidade</h3>
+          </div>
+          <p class="text-gray-600 max-w-xl">
+            Estamos preparando o sistema de <strong>Geofencing</strong>. Em breve, você poderá enviar notificações push automáticas para clientes que passarem perto do seu supermercado.
+          </p>
+          <div class="mt-6 flex gap-4">
+            <div class="flex items-center text-sm text-gray-500">
+              <mat-icon class="text-sm h-4 w-4 mr-1">location_on</mat-icon> Raio de 1km
+            </div>
+            <div class="flex items-center text-sm text-gray-500">
+              <mat-icon class="text-sm h-4 w-4 mr-1">notifications_active</mat-icon> Push Inteligente
+            </div>
+          </div>
+        </div>
+        <!-- Decorative shapes -->
+        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
+      </div>
+    </div>
+  </div>
+</div>

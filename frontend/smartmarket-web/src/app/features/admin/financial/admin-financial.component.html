@@ -10,28 +10,43 @@
     </div>
   </div>
 
-  <div *ngIf="loading" class="flex justify-center items-center h-64">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)]"></div>
+  <div *ngIf="loading()" class="flex flex-col justify-center items-center h-96">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)] mb-4"></div>
+    <p class="text-gray-500 font-medium animate-pulse">Sincronizando métricas financeiras...</p>
   </div>
 
-  <div *ngIf="!loading && data" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div *ngIf="error()" class="bg-red-50 border border-red-200 p-8 rounded-2xl text-center max-w-2xl mx-auto my-12">
+    <div class="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+    </div>
+    <h2 class="text-xl font-bold text-gray-900 mb-2">Ops! Algo deu errado</h2>
+    <p class="text-gray-600 mb-6">{{ error() }}</p>
+    <button (click)="loadFinancialData()" class="bg-gray-900 text-white font-bold px-6 py-2 rounded-xl hover:bg-gray-800 transition-all">Tentar Novamente</button>
+  </div>
+
+  <div *ngIf="!loading() && !error() && !data()" class="bg-gray-50 border border-gray-200 p-12 rounded-2xl text-center my-12">
+    <h2 class="text-xl font-bold text-gray-900 mb-2">Sem dados financeiros</h2>
+    <p class="text-gray-500">Ainda não há transações ou assinaturas registradas no sistema.</p>
+  </div>
+
+  <div *ngIf="!loading() && data()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Card 1 -->
     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Receita Mensal (MRR)</h3>
       <div class="mt-2 flex items-baseline">
-        <span class="text-3xl font-black text-gray-900">R$ {{ data.monthlyRevenue.toFixed(2).replace('.', ',') }}</span>
+        <span class="text-3xl font-black text-gray-900">{{ data()!.monthlyRevenue | currency:'BRL' }}</span>
       </div>
-      <p class="text-sm text-[color:var(--color-primary)] mt-2 font-medium flex items-center">
+      <p class="text-sm text-green-600 mt-2 font-medium flex items-center">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-        +12.5% este mês
+        Crescimento constante
       </p>
     </div>
 
     <!-- Card 2 -->
     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
-      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Receita Anual Estimada</h3>
+      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Receita Acumulada</h3>
       <div class="mt-2 flex items-baseline">
-        <span class="text-3xl font-black text-gray-900">R$ {{ (data.monthlyRevenue * 12).toFixed(2).replace('.', ',') }}</span>
+        <span class="text-3xl font-black text-gray-900">{{ data()!.totalRevenue | currency:'BRL' }}</span>
       </div>
     </div>
 
@@ -39,7 +54,7 @@
     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Assinaturas Ativas</h3>
       <div class="mt-2 flex items-baseline">
-        <span class="text-3xl font-black text-gray-900">{{ data.activeSubscriptions }}</span>
+        <span class="text-3xl font-black text-gray-900">{{ data()!.activeSubscriptionsCount }}</span>
       </div>
     </div>
 
@@ -47,13 +62,13 @@
     <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition-transform hover:-translate-y-1">
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Churn Rate</h3>
       <div class="mt-2 flex items-baseline">
-        <span class="text-3xl font-black text-red-600">{{ data.churnRate }}%</span>
+        <span class="text-3xl font-black text-red-600">{{ data()!.churnRate }}%</span>
       </div>
       <p class="text-sm text-gray-500 mt-2">Média de cancelamentos</p>
     </div>
   </div>
   
-  <div *ngIf="!loading && data" class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+  <div *ngIf="!loading() && data()" class="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
     <h3 class="text-lg font-bold text-gray-900 mb-6">Receita por Período (Mockado)</h3>
     <div class="h-64 flex items-end gap-4 justify-between border-b border-gray-200 pb-4 relative">
        <!-- Mocking a bar chart -->

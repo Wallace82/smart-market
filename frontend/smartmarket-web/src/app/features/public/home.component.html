@@ -79,7 +79,7 @@
           </div>
           <div>
             <p class="text-sm font-medium text-gray-500">Mostrando ofertas perto de:</p>
-            <p class="text-gray-900 font-bold">{{ userAddress() }} <span class="text-gray-400 text-sm font-normal ml-1 block sm:inline">(Raio de {{ userRadius() }} KM)</span></p>
+            <p class="text-gray-900 font-bold">{{ location()?.address || 'Buscando...' }} <span class="text-gray-400 text-sm font-normal ml-1 block sm:inline">(Raio de {{ userRadius() }} KM)</span></p>
           </div>
         </div>
         <button mat-button routerLink="/location" class="!text-green-600">Alterar</button>

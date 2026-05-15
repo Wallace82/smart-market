@@ -20,6 +20,9 @@ public class TemaEncarteEntity {
     @Column(name = "cor_fundo_hex", length = 7)
     private String corFundoHex;
 
+    @Column(name = "cor_destaque_hex", length = 7)
+    private String corDestaqueHex;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
@@ -42,6 +45,8 @@ public class TemaEncarteEntity {
     public void setUrlBackgroundDecorativo(String urlBackgroundDecorativo) { this.urlBackgroundDecorativo = urlBackgroundDecorativo; }
     public String getCorFundoHex() { return corFundoHex; }
     public void setCorFundoHex(String corFundoHex) { this.corFundoHex = corFundoHex; }
+    public String getCorDestaqueHex() { return corDestaqueHex; }
+    public void setCorDestaqueHex(String corDestaqueHex) { this.corDestaqueHex = corDestaqueHex; }
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }

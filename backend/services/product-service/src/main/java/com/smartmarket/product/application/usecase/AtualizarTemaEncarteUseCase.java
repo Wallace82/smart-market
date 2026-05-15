@@ -20,9 +20,14 @@ public class AtualizarTemaEncarteUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Tema de encarte não encontrado com ID: " + id));
 
         temaExistente.setNome(temaAtualizado.getNome());
-        temaExistente.setUrlBackgroundDecorativo(temaAtualizado.getUrlBackgroundDecorativo());
         temaExistente.setCorFundoHex(temaAtualizado.getCorFundoHex());
+        temaExistente.setCorDestaqueHex(temaAtualizado.getCorDestaqueHex());
         temaExistente.setAtivo(temaAtualizado.isAtivo());
+
+        // Só atualiza a URL se vier uma nova, para não apagar o banner existente ao editar cores
+        if (temaAtualizado.getUrlBackgroundDecorativo() != null && !temaAtualizado.getUrlBackgroundDecorativo().isEmpty()) {
+            temaExistente.setUrlBackgroundDecorativo(temaAtualizado.getUrlBackgroundDecorativo());
+        }
 
         return repository.save(temaExistente);
     }

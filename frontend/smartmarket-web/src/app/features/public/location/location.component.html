@@ -24,7 +24,8 @@
           <div class="flex gap-3">
             <input 
               type="text" 
-              [(ngModel)]="cep" 
+              [ngModel]="cep()" 
+              (ngModelChange)="cep.set($event)"
               (keyup.enter)="searchCep()"
               placeholder="00000-000" 
               maxlength="9"
@@ -47,7 +48,8 @@
         <div class="mb-6">
           <label class="block text-sm font-bold text-gray-700 mb-2">Raio de Busca (KM)</label>
           <select 
-            [(ngModel)]="radius" 
+            [ngModel]="radius()" 
+            (ngModelChange)="radius.set($event)"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-lg rounded-xl focus:ring-green-500 focus:border-green-500 block w-full p-4 transition-all">
             <option [ngValue]="1">1 KM (Apenas a pé)</option>
             <option [ngValue]="3">3 KM (Bairro)</option>

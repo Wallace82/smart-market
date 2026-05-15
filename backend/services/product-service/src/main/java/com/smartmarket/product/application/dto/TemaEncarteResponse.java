@@ -8,14 +8,16 @@ public class TemaEncarteResponse {
     private String nome;
     private String urlBackgroundDecorativo;
     private String corFundoHex;
+    private String corDestaqueHex;
     private boolean ativo;
     private LocalDateTime criadoEm;
 
-    public TemaEncarteResponse(UUID id, String nome, String urlBackgroundDecorativo, String corFundoHex, boolean ativo, LocalDateTime criadoEm) {
+    public TemaEncarteResponse(UUID id, String nome, String urlBackgroundDecorativo, String corFundoHex, String corDestaqueHex, boolean ativo, LocalDateTime criadoEm) {
         this.id = id;
         this.nome = nome;
         this.urlBackgroundDecorativo = urlBackgroundDecorativo;
         this.corFundoHex = corFundoHex;
+        this.corDestaqueHex = corDestaqueHex;
         this.ativo = ativo;
         this.criadoEm = criadoEm;
     }
@@ -25,6 +27,7 @@ public class TemaEncarteResponse {
     public String getNome() { return nome; }
     public String getUrlBackgroundDecorativo() { return urlBackgroundDecorativo; }
     public String getCorFundoHex() { return corFundoHex; }
+    public String getCorDestaqueHex() { return corDestaqueHex; }
     public boolean isAtivo() { return ativo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 
@@ -33,6 +36,7 @@ public class TemaEncarteResponse {
     public void setNome(String nome) { this.nome = nome; }
     public void setUrlBackgroundDecorativo(String urlBackgroundDecorativo) { this.urlBackgroundDecorativo = urlBackgroundDecorativo; }
     public void setCorFundoHex(String corFundoHex) { this.corFundoHex = corFundoHex; }
+    public void setCorDestaqueHex(String corDestaqueHex) { this.corDestaqueHex = corDestaqueHex; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
 }

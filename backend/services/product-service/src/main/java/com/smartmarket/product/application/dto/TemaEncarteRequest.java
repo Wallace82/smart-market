@@ -4,6 +4,7 @@ public class TemaEncarteRequest {
     private String nome;
     private String urlBackgroundDecorativo;
     private String corFundoHex;
+    private String corDestaqueHex;
     private boolean ativo;
 
     // Getters e Setters
@@ -29,6 +30,14 @@ public class TemaEncarteRequest {
 
     public void setCorFundoHex(String corFundoHex) {
         this.corFundoHex = corFundoHex;
+    }
+
+    public String getCorDestaqueHex() {
+        return corDestaqueHex;
+    }
+
+    public void setCorDestaqueHex(String corDestaqueHex) {
+        this.corDestaqueHex = corDestaqueHex;
     }
 
     public boolean isAtivo() {

@@ -18,6 +18,7 @@
         <module>services/auth-service</module>
         <module>services/supermarket-service</module>
         <module>services/product-service</module>
+        <module>services/billing-service</module>
     </modules>
 
     <properties>

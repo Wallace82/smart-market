@@ -59,9 +59,11 @@ services:
       /usr/bin/mc mb myminio/smartmarket-products --ignore-existing;
       /usr/bin/mc mb myminio/smartmarket-brands --ignore-existing;
       /usr/bin/mc mb myminio/smartmarket-themes --ignore-existing;
+      /usr/bin/mc mb myminio/smartmarket-concierge --ignore-existing;
       /usr/bin/mc anonymous set download myminio/smartmarket-products;
       /usr/bin/mc anonymous set download myminio/smartmarket-brands;
       /usr/bin/mc anonymous set download myminio/smartmarket-themes;
+      /usr/bin/mc anonymous set download myminio/smartmarket-concierge;
       exit 0;
       "
 
@@ -150,6 +152,25 @@ services:
       DB_PASSWORD: smartmarket
     depends_on:
       postgres:
+        condition: service_healthy
+
+  concierge-service:
+    build:
+      context: ../../backend/services/concierge-service
+    container_name: smartmarket-concierge-service
+    ports:
+      - "8085:8085"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
+      MINIO_URL: http://smartmarket-minio:9000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
 volumes:

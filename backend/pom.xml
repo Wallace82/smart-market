@@ -19,6 +19,7 @@
         <module>services/supermarket-service</module>
         <module>services/product-service</module>
         <module>services/billing-service</module>
+        <module>services/concierge-service</module>
     </modules>
 
     <properties>

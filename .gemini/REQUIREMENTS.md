@@ -1,4 +1,4 @@
-﻿# 📋 SmartMarket — Documento de Requisitos (MVP)
+# 📋 SmartMarket — Documento de Requisitos (MVP)
 
 > **Versão:** 2.0.0
 > **Data:** 2026-05-03
@@ -72,6 +72,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | Perfil | Descrição | Acesso Principal |
 |---|---|---|
 | **Admin** (ROLE_ADMIN) | Gestor total da plataforma SmartMarket. Responsável pelo Catálogo Global e pelos **Temas Base**. | Painel administrativo (Backoffice). |
+| **Atendente** (ROLE_ATENDENTE) | Operador interno da SmartMarket que auxilia supermercados no cadastro de ofertas e montagem de encartes. | Fila de Atendimento (Painel Concierge). |
 | **Gestor Supermercado** (ROLE_GESTOR) | Responsável pela operação comercial de um supermercado. Adiciona ofertas e cria encartes usando sua marca e **temas**. | Painel do estabelecimento (Dashboard Loja). |
 | **Cliente** (Anônimo ou ROLE_CLIENTE) | Consumidor que visualiza promoções e encartes. **Não precisa de login para navegar.** | App web responsivo / Mobile-first. |
 
@@ -92,6 +93,12 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 *   Home com supermercados e ofertas filtrados por proximidade.
 *   Visualização imersiva do encarte digital (tablóide) com identidade visual da loja.
 *   Acesso 100% público — sem login obrigatório.
+
+#### 4. Dashboard Atendente (Fila Concierge)
+*   **Fila Inteligente:** Visualização de solicitações ordenada dinamicamente por Score de Prioridade e Faixas de Urgência.
+*   Download e visualização de arquivos enviados pelos supermercados.
+*   Processamento de solicitações: cadastro de ofertas e montagem de encartes em nome da loja.
+*   **Métricas de Atendimento:** Tempo em fila, status de SLA e produtividade individual.
 
 ---
 
@@ -146,6 +153,36 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 *   **RF-08.2:** Registrar número de **escaneamentos do QR Code** (por parâmetro UTM).
 *   **RF-08.3:** Exibir no Dashboard do Gestor: encartes publicados, total de visualizações e acessos via QR Code.
 
+### 3.9 RF-09 — Operação Assistida (Concierge)
+
+Este módulo permite que o supermercado envie listagens de ofertas para serem cadastradas por um atendente da SmartMarket, reduzindo o esforço manual do gestor da loja.
+
+*   **RF-09.1: Upload de Listagem:** O Gestor deve poder enviar arquivos contendo ofertas (Excel .xlsx, CSV, TXT, Word ou Imagem).
+*   **RF-09.2: Fila de Atendimento:** O Atendente visualiza uma fila de solicitações pendentes, com registro de data/hora do envio e vínculo com o supermercado.
+*   **RF-09.3: Gestão de SLA:** O sistema deve aplicar um SLA padrão de 3 horas (configurável via parâmetro do sistema) para o processamento. O SLA deve ser exibido ao gestor no upload e persistido na solicitação.
+*   **RF-09.4: Estados da Solicitação:** O processo deve seguir os estados: PENDENTE, EM_PROCESSAMENTO, AGUARDANDO_APROVACAO, APROVADO, REJEITADO, PUBLICADO.
+*   **RF-09.5: Processamento Manual:** O Atendente acessa os arquivos, interpreta os dados e utiliza as funcionalidades existentes (RF-04 e RF-05) para cadastrar ofertas e montar o encarte em nome do supermercado.
+*   **RF-09.6: Notificação e Prévia:** Após o processamento, o Gestor deve receber uma notificação (e-mail/sistema) com um link seguro (deep link) para visualizar a prévia do encarte e das ofertas.
+*   **RF-09.7: Aprovação do Gestor:** O Gestor pode aprovar a publicação completa, rejeitar ofertas individualmente ou revogar a publicação antes da ativação final.
+*   **RF-09.8: Auditoria Completa:** O sistema deve registrar logs detalhados: quem enviou a listagem, quando foi enviada, SLA definido, atendente responsável pelo processamento, tempo real de processamento e ações do supermercado (aprovação/rejeição/edição).
+*   **RF-09.9: Priorização Automática:** A fila de atendentes deve ser priorizada automaticamente com base no tempo restante para o vencimento do SLA (solicitações mais antigas ou críticas primeiro).
+
+### 3.10 RF-10 — Fila Inteligente de Atendimento
+
+Sistema de priorização dinâmica para organizar as solicitações de criação de ofertas enviadas pelos supermercados, garantindo eficiência e cumprimento de SLA.
+
+*   **RF-10.1: Cálculo de Score de Prioridade:** Cada solicitação deve possuir um score dinâmico calculado pela fórmula:
+    `Score = (W1 * Urgência) + (W2 * PrioridadePlano) + (W3 * TempoEspera) - (W4 * Complexidade)`
+    *   *Urgência (SLA):* Baseada no tempo restante até o deadline (`1 - tempo_restante / tempo_total_sla`).
+    *   *PrioridadePlano:* Básico (1), Pro (2), Premium (3).
+    *   *TempoEspera:* Tempo decorrido desde o upload (fator para evitar starvation).
+    *   *Complexidade:* Baseada na estimativa de itens (Pequena=1, Média=2, Grande=3).
+*   **RF-10.2: Classificação por Faixas:** As solicitações devem ser categorizadas em: **URGENTE** (SLA próximo do fim), **NORMAL** e **BAIXA PRIORIDADE**.
+*   **RF-10.3: Atualização Dinâmica:** O score de prioridade deve ser recalculado em tempo real ao consultar a fila ou via job periódico (ex: a cada 1 minuto).
+*   **RF-10.4: Distribuição de Atendimento:** Suporte a atribuição manual (atendente seleciona o topo da fila) ou automática (sistema empurra para o atendente disponível).
+*   **RF-10.5: Controle de Concorrência (Lock):** Ao iniciar o processamento, o sistema deve garantir atomicidade: status muda para `EM_PROCESSAMENTO`, vincula `assignedTo` e registra `lockAt`.
+*   **RF-10.6: Métricas e Monitoramento:** Registro de Tempo Médio de Atendimento (TAT), cumprimento de SLA por atendente e tempo total em fila.
+
 > **Fora do escopo MVP:** Heatmaps, funis de conversão, tracking de sessão anônima, analytics comportamental avançado, footfall attribution.
 
 ---
@@ -189,6 +226,8 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 | **Oferta** | id, supermercadoId, produtoBaseId, preco, dataInicio, dataFim, ativa |
 | **EncarteDigital** | id, supermercadoId, temaId, titulo, dataInicio, dataFim, status (RASCUNHO, ATIVO, ENCERRADO) |
 | **EncarteOferta** | id, encarteId, ofertaId (tabela associativa) |
+| **SolicitacaoConcierge** | id, supermercadoId, atendenteId, titulo, status, dataCriacao, dataInicioProcessamento, dataConclusao, slaDefinido, prioridadeScore, complexidade, planoCliente, lockAt, urlArquivoOriginal |
+| **AuditoriaConcierge** | id, solicitacaoId, usuarioId, acao, timestamp, detalhes |
 
 ---
 
@@ -211,6 +250,7 @@ smartmarket-api/
 ├── catalog/       → Catálogo global de produtos e categorias
 ├── offer/         → Ofertas por supermercado
 ├── flyer/         → Encartes digitais e temas sazonais
+├── concierge/     → Operação assistida (upload e fila de atendimento)
 ├── geo/           → Filtro de proximidade (raio simples)
 ├── analytics/     → Métricas básicas (contadores de views)
 └── storage/       → Integração com MinIO (upload de imagens)

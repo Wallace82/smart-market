@@ -31,7 +31,7 @@ import { UserResponse } from '@core/models/user.model';
 })
 export class UserListComponent implements OnInit {
   private userService = inject(UserService);
-  private snackBar = inject(MatSnackBar);
+  private notificationService = inject(NotificationService);
 
   // Estados Reativos
   public isLoading = signal(false);
@@ -69,13 +69,13 @@ export class UserListComponent implements OnInit {
   public alterarStatus(id: string, novoStatus: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'): void {
     this.userService.alterarStatus(id, novoStatus).subscribe({
       next: () => {
-        this.snackBar.open(`Status do usuário alterado com sucesso!`, 'Sucesso', { duration: 2000 });
+        this.notificationService.success(`Status do usuário alterado com sucesso!`);
         this.carregarUsuarios();
       },
       error: (err) => {
         console.error('Erro ao alterar status do usuário', err);
-        this.snackBar.open('Erro ao alterar status.', 'Erro', { duration: 3000 });
+        this.notificationService.error('Erro ao alterar status.');
       }
     });
   }
-}
+}

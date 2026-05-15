@@ -10,6 +10,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { EncarteService } from '@core/services/encarte.service';
 import { TemaEncarteRequest, TemaEncarteResponse } from '@core/models/encarte.model';
 
+import { NotificationService } from '@core/services/notification.service';
+
 @Component({
   selector: 'app-theme-editor',
   imports: [CommonModule, RouterModule, FormsModule, MatSnackBarModule],
@@ -20,6 +22,7 @@ export class ThemeEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private encarteService = inject(EncarteService);
+  private notificationService = inject(NotificationService);
   private snackBar = inject(MatSnackBar);
 
   // Estado Reativo
@@ -52,7 +55,7 @@ export class ThemeEditorComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar tema', err);
-        this.snackBar.open('Erro ao carregar tema', 'Fechar', { duration: 3000 });
+        this.notificationService.error('Não foi possível carregar os dados do tema.');
         this.loading.set(false);
       }
     });
@@ -77,7 +80,7 @@ export class ThemeEditorComponent implements OnInit {
   public saveTheme() {
     const currentTheme = this.theme();
     if (!currentTheme.nome) {
-      this.snackBar.open('O nome do tema é obrigatório', 'Fechar', { duration: 3000 });
+      this.notificationService.warn('O nome do tema é obrigatório para salvar.');
       return;
     }
 
@@ -98,13 +101,13 @@ export class ThemeEditorComponent implements OnInit {
         if (this.pendingFile()) {
           this.uploadBackground(savedTheme.id);
         } else {
-          this.snackBar.open('Tema salvo com sucesso!', 'Sucesso', { duration: 3000 });
+          this.notificationService.success('Configurações do tema salvas com sucesso!');
           this.router.navigate(['/admin/themes']);
         }
       },
       error: (err) => {
         console.error('Erro ao salvar tema', err);
-        this.snackBar.open('Erro ao salvar tema', 'Fechar', { duration: 3000 });
+        this.notificationService.error('Falha ao salvar as alterações do tema.');
         this.loading.set(false);
       }
     });
@@ -114,12 +117,12 @@ export class ThemeEditorComponent implements OnInit {
     const file = this.pendingFile()!;
     this.encarteService.uploadTemaBackground(id, file).subscribe({
       next: () => {
-        this.snackBar.open('Tema e imagem salvos com sucesso!', 'Sucesso', { duration: 3000 });
+        this.notificationService.success('Tema e imagem atualizados com sucesso!');
         this.router.navigate(['/admin/themes']);
       },
       error: (err) => {
         console.error('Erro ao subir imagem', err);
-        this.snackBar.open('Tema salvo, mas erro ao subir imagem', 'Aviso', { duration: 5000 });
+        this.notificationService.warn('Dados salvos, mas houve um erro no processamento da imagem.');
         this.router.navigate(['/admin/themes']);
       }
     });

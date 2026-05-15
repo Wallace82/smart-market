@@ -36,6 +36,53 @@
   }
 }
 
+/* --- SmartMarket Premium SnackBars --- */
+.smart-toast-success {
+  background: rgba(16, 185, 129, 0.95) !important;
+  backdrop-filter: blur(8px);
+  color: white !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  font-weight: 700 !important;
+  border-left: 6px solid #064e3b !important;
+  margin-bottom: 24px !important;
+}
+
+.smart-toast-error {
+  background: rgba(239, 68, 68, 0.95) !important;
+  backdrop-filter: blur(8px);
+  color: white !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  font-weight: 700 !important;
+  border-left: 6px solid #7f1d1d !important;
+  margin-bottom: 24px !important;
+}
+
+.smart-toast-warning {
+  background: rgba(245, 158, 11, 0.95) !important;
+  backdrop-filter: blur(8px);
+  color: #451a03 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  font-weight: 700 !important;
+  border-left: 6px solid #92400e !important;
+  margin-bottom: 24px !important;
+}
+
+.mat-mdc-snack-bar-label {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+}
+
+.mat-mdc-snack-bar-button {
+  color: white !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
 .shimmer {
   overflow: hidden;
   position: relative;

@@ -31,7 +31,7 @@ import { SupermarketResponse } from '@core/models/supermarket.model';
 })
 export class StoreListComponent implements OnInit {
   private supermarketService = inject(SupermarketService);
-  private snackBar = inject(MatSnackBar);
+  private notificationService = inject(NotificationService);
 
   // Estados Reativos
   public isLoading = signal(false);
@@ -65,13 +65,13 @@ export class StoreListComponent implements OnInit {
   public alterarStatus(id: string, novoStatus: 'ATIVO' | 'INATIVO' | 'PENDENTE'): void {
     this.supermarketService.alterarStatus(id, novoStatus).subscribe({
       next: () => {
-        this.snackBar.open(`Status alterado para ${novoStatus} com sucesso!`, 'Sucesso', { duration: 2000 });
+        this.notificationService.success(`Status alterado para ${novoStatus} com sucesso!`);
         this.carregarLojas(); // Recarrega a lista
       },
       error: (err) => {
         console.error('Erro ao alterar status', err);
-        this.snackBar.open('Erro ao alterar status da loja.', 'Erro', { duration: 3000 });
+        this.notificationService.error('Erro ao alterar status da loja.');
       }
     });
   }
-}
+}

@@ -34,7 +34,7 @@ spring:
         - id: billing-service
           uri: ${BILLING_SERVICE_URL:http://localhost:8084}
           predicates:
-            - Path=/api/v1/admin/billing/**, /api/v1/subscriptions/**, /api/v1/plans/**
+            - Path=/api/v1/admin/billing/**, /api/v1/subscriptions/**, /api/v1/planos/**, /api/v1/assinaturas/**
 
       globalcors:
         cors-configurations:

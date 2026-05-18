@@ -12,6 +12,7 @@ export interface Plano {
   precoMensal: number;
   precoSemestral: number;
   precoAnual: number;
+  ativo: boolean;
 }
 
 export type CicloCobranca = 'MENSAL' | 'SEMESTRAL' | 'ANUAL';

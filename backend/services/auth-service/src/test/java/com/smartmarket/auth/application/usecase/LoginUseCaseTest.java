@@ -41,6 +41,9 @@ class LoginUseCaseTest {
     @Mock
     private UsuarioDomainRepository usuarioRepository;
 
+    @Mock
+    private com.smartmarket.auth.application.service.RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private LoginUseCase loginUseCase;
 
@@ -77,6 +80,10 @@ class LoginUseCaseTest {
         when(jwtUtils.getJwtExpirationSecs()).thenReturn(3600L);
         
         when(usuarioRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(usuario));
+
+        com.smartmarket.auth.infrastructure.adapter.out.persistence.RefreshTokenEntity refreshToken = new com.smartmarket.auth.infrastructure.adapter.out.persistence.RefreshTokenEntity();
+        refreshToken.setToken("mocked-refresh-token");
+        when(refreshTokenService.createRefreshToken(usuario.getId())).thenReturn(refreshToken);
 
         // Act
         AuthTokenResponseDTO response = loginUseCase.execute(request);

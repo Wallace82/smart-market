@@ -15,6 +15,18 @@ export class BillingService {
     return this.http.get<Plano[]>(this.plansUrl);
   }
 
+  getPlanById(id: string): Observable<Plano> {
+    return this.http.get<Plano>(`${this.plansUrl}/${id}`);
+  }
+
+  createPlan(plan: Partial<Plano>): Observable<Plano> {
+    return this.http.post<Plano>(this.plansUrl, plan);
+  }
+
+  updatePlan(id: string, plan: Partial<Plano>): Observable<Plano> {
+    return this.http.put<Plano>(`${this.plansUrl}/${id}`, plan);
+  }
+
   getCurrentSubscription(supermercadoId: string): Observable<Assinatura> {
     return this.http.get<Assinatura>(`${this.subsUrl}/supermercado/${supermercadoId}`);
   }

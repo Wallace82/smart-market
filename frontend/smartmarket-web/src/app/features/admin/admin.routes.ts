@@ -48,5 +48,20 @@ export const ADMIN_ROUTES: Routes = [
     path: 'themes/:id/edit',
     loadComponent: () => import('./themes/editor/theme-editor.component').then(m => m.ThemeEditorComponent),
     data: { animation: 'theme-editor' }
+  },
+  {
+    path: 'planos',
+    loadComponent: () => import('./planos/admin-plan-list.component').then(m => m.AdminPlanListComponent),
+    data: { animation: 'plans' }
+  },
+  {
+    path: 'planos/new',
+    loadComponent: () => import('./planos/admin-plan-edit.component').then(m => m.AdminPlanEditComponent),
+    data: { animation: 'plan-editor' }
+  },
+  {
+    path: 'planos/:id/edit',
+    loadComponent: () => import('./planos/admin-plan-edit.component').then(m => m.AdminPlanEditComponent),
+    data: { animation: 'plan-editor' }
   }
 ];

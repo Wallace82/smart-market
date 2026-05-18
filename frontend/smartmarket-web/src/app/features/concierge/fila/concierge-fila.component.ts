@@ -337,7 +337,8 @@ export class ConciergeFilaComponent implements OnInit {
         this.solicitacoes.set(dados);
         this.loading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('ERRO DETALHADO DO CONCIERGE:', err);
         this.notificationService.error('Erro ao buscar a fila de atendimento.');
         this.loading.set(false);
       }

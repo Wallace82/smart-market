@@ -16,7 +16,7 @@ spring:
         - id: minio-storage
           uri: ${MINIO_URL:http://smartmarket-minio:9000}
           predicates:
-            - Path=/smartmarket-themes/**, /smartmarket-products/**
+            - Path=/smartmarket-themes/**, /smartmarket-products/**, /smartmarket-brands/**, /smartmarket-concierge/**
         
         # Rota para o supermarket-service
         - id: supermarket-service
@@ -35,6 +35,12 @@ spring:
           uri: ${BILLING_SERVICE_URL:http://localhost:8084}
           predicates:
             - Path=/api/v1/admin/billing/**, /api/v1/subscriptions/**, /api/v1/planos/**, /api/v1/assinaturas/**
+
+        # Rota para o concierge-service
+        - id: concierge-service
+          uri: ${CONCIERGE_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/v1/concierge/**
 
       globalcors:
         cors-configurations:

@@ -66,6 +66,8 @@ export class LoginComponent {
           this.router.navigate(['/admin/dashboard']);
         } else if (user?.roles.includes('ROLE_GESTOR')) {
           this.router.navigate(['/manager/dashboard']);
+        } else if (user?.roles.includes('ROLE_ATENDENTE')) {
+          this.router.navigate(['/concierge/fila']);
         } else {
           this.router.navigate(['/client/home']); // Mantém para o perfil de cliente
         }

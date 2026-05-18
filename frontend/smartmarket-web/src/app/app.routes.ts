@@ -76,6 +76,12 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/manager/manager.routes').then((m) => m.MANAGER_ROUTES),
   },
+  {
+    path: 'concierge',
+    component: MainLayoutComponent,
+    loadChildren: () =>
+      import('./features/concierge/concierge.routes').then((m) => m.CONCIERGE_ROUTES),
+  },
 
   // ==================================================
   // Rota de Fallback (Página não encontrada)

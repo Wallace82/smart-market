@@ -60,5 +60,14 @@
         <span>Configurações</span>
       </a>
     }
+
+    <!-- Menu do Atendente (Concierge) -->
+    @if (isAttendant()) {
+      <div class="nav-subheader">Atendimento</div>
+      <a routerLink="/concierge/fila" routerLinkActive="active-link" class="nav-item">
+        <mat-icon class="nav-icon">assignment</mat-icon>
+        <span>Fila Concierge</span>
+      </a>
+    }
   </nav>
 </div>

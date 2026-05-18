@@ -8,21 +8,24 @@ CREATE SCHEMA IF NOT EXISTS product;
 INSERT INTO auth.papeis (id, nome, descricao)
 VALUES ('00000000-0000-0000-0000-000000000001', 'ROLE_GESTOR', 'Gestor de Supermercado'),
        ('00000000-0000-0000-0000-000000000002', 'ROLE_ADMIN', 'Administrador da Plataforma'),
-       ('00000000-0000-0000-0000-000000000003', 'ROLE_CLIENTE', 'Cliente Final')
+       ('00000000-0000-0000-0000-000000000003', 'ROLE_CLIENTE', 'Cliente Final'),
+       ('00000000-0000-0000-0000-000000000004', 'ROLE_ATENDENTE', 'Atendente Concierge')
 ON CONFLICT (nome) DO NOTHING;
 
 -- 1.2 Inserir Usuários (Senha padrão para todos: "password")
 INSERT INTO auth.usuarios (id, nome, email, senha_hash, status, criado_em)
-VALUES ('11111111-1111-1111-1111-111111111111', 'Gestor Modelo', 'gestor@smartmarket.com', '$2a$10$Y50UaMFOxteibQEYfV30hOx886sh6DCHvT7G4I2AoxjF6FqG2v.eC', 'ATIVO', now()),
-       ('11111111-1111-1111-1111-111111111112', 'Admin Plataforma', 'admin@smartmarket.com', '$2a$10$Y50UaMFOxteibQEYfV30hOx886sh6DCHvT7G4I2AoxjF6FqG2v.eC', 'ATIVO', now()),
-       ('11111111-1111-1111-1111-111111111113', 'Cliente Exemplo', 'cliente@smartmarket.com', '$2a$10$Y50UaMFOxteibQEYfV30hOx886sh6DCHvT7G4I2AoxjF6FqG2v.eC', 'ATIVO', now())
+VALUES ('11111111-1111-1111-1111-111111111111', 'Gestor Modelo', 'gestor@smartmarket.com', '$2b$12$SR7riOqjOyt3m3gI8ntNCuB4Zioat8CHk1EEOUXccqK09kwZoqAku', 'ATIVO', now()),
+       ('11111111-1111-1111-1111-111111111112', 'Admin Plataforma', 'admin@smartmarket.com', '$2b$12$SR7riOqjOyt3m3gI8ntNCuB4Zioat8CHk1EEOUXccqK09kwZoqAku', 'ATIVO', now()),
+       ('11111111-1111-1111-1111-111111111113', 'Cliente Exemplo', 'cliente@smartmarket.com', '$2b$12$SR7riOqjOyt3m3gI8ntNCuB4Zioat8CHk1EEOUXccqK09kwZoqAku', 'ATIVO', now()),
+       ('11111111-1111-1111-1111-111111111114', 'Atendente Modelo', 'atendente@smartmarket.com', '$2b$12$SR7riOqjOyt3m3gI8ntNCuB4Zioat8CHk1EEOUXccqK09kwZoqAku', 'ATIVO', now())
 ON CONFLICT (email) DO UPDATE SET senha_hash = EXCLUDED.senha_hash;
 
 -- 1.3 Vincular Usuários aos Papeis correspondentes
 INSERT INTO auth.usuarios_papeis (usuario_id, papel_id)
 VALUES ('11111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000001'), -- Gestor
        ('11111111-1111-1111-1111-111111111112', '00000000-0000-0000-0000-000000000002'), -- Admin
-       ('11111111-1111-1111-1111-111111111113', '00000000-0000-0000-0000-000000000003')  -- Cliente
+       ('11111111-1111-1111-1111-111111111113', '00000000-0000-0000-0000-000000000003'), -- Cliente
+       ('11111111-1111-1111-1111-111111111114', '00000000-0000-0000-0000-000000000004')  -- Atendente
 ON CONFLICT (usuario_id, papel_id) DO NOTHING;
 
 -- 2. Inserir Supermercado (supermarket-service)

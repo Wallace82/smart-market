@@ -22,4 +22,5 @@ export class SidebarComponent {
   // Reage ao estado de autenticação e papéis do usuário
   public isAdmin = computed(() => this.authService.user()?.roles.includes('ROLE_ADMIN'));
   public isManager = computed(() => this.authService.user()?.roles.includes('ROLE_GESTOR'));
+  public isAttendant = computed(() => this.authService.user()?.roles.includes('ROLE_ATENDENTE') || this.authService.user()?.roles.includes('ROLE_ADMIN'));
 }

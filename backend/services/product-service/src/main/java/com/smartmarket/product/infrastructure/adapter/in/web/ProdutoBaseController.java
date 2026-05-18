@@ -16,13 +16,17 @@ public class ProdutoBaseController {
 
     private final CadastrarProdutoBaseUseCase cadastrarProdutoBaseUseCase;
     private final ListarProdutoBaseUseCase listarProdutoBaseUseCase;
+    private final com.smartmarket.product.application.usecase.AtualizarProdutoBaseUseCase atualizarProdutoBaseUseCase;
 
-    public ProdutoBaseController(CadastrarProdutoBaseUseCase cadastrarProdutoBaseUseCase, ListarProdutoBaseUseCase listarProdutoBaseUseCase) {
+    public ProdutoBaseController(CadastrarProdutoBaseUseCase cadastrarProdutoBaseUseCase, 
+                                 ListarProdutoBaseUseCase listarProdutoBaseUseCase,
+                                 com.smartmarket.product.application.usecase.AtualizarProdutoBaseUseCase atualizarProdutoBaseUseCase) {
         this.cadastrarProdutoBaseUseCase = cadastrarProdutoBaseUseCase;
         this.listarProdutoBaseUseCase = listarProdutoBaseUseCase;
+        this.atualizarProdutoBaseUseCase = atualizarProdutoBaseUseCase;
     }
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<ProdutoBase> cadastrar(
             @RequestPart("produto") ProdutoBase produto,
             @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
@@ -30,10 +34,31 @@ public class ProdutoBaseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
+    @PostMapping(consumes = {"application/json"})
+    public ResponseEntity<ProdutoBase> cadastrarJson(@RequestBody ProdutoBase produto) {
+        ProdutoBase salvo = cadastrarProdutoBaseUseCase.execute(produto, null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    }
+
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<ProdutoBase> atualizar(
+            @PathVariable("id") java.util.UUID id,
+            @RequestPart("produto") ProdutoBase produto,
+            @RequestPart(value = "imagem", required = false) MultipartFile imagem) {
+        return ResponseEntity.ok(atualizarProdutoBaseUseCase.execute(id, produto, imagem));
+    }
+
+    @PutMapping(value = "/{id}", consumes = {"application/json"})
+    public ResponseEntity<ProdutoBase> atualizarJson(
+            @PathVariable("id") java.util.UUID id,
+            @RequestBody ProdutoBase produto) {
+        return ResponseEntity.ok(atualizarProdutoBaseUseCase.execute(id, produto, null));
+    }
+
     @GetMapping
     public ResponseEntity<List<ProdutoBase>> listarTodos(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         List<ProdutoBase> produtos = listarProdutoBaseUseCase.execute(page, size);
         return ResponseEntity.ok(produtos);
     }

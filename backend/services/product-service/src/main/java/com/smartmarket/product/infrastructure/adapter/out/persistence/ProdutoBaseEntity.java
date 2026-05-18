@@ -18,6 +18,9 @@ public class ProdutoBaseEntity {
     private String descricao;
     private String marca;
 
+    @Column(name = "marca_id")
+    private UUID marcaId;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "unidade_medida", nullable = false)
     private UnidadeMedida unidadeMedida;
@@ -75,5 +78,7 @@ public class ProdutoBaseEntity {
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
+    public UUID getMarcaId() { return marcaId; }
+    public void setMarcaId(UUID marcaId) { this.marcaId = marcaId; }
 }
 

@@ -45,8 +45,8 @@ public class ConciergeController {
     @PatchMapping("/{id}/assumir")
     @Operation(summary = "Atendente assume o processamento de uma solicitação (Lock)")
     public ResponseEntity<SolicitacaoConcierge> assumir(
-            @PathVariable("id") UUID solicitacaoId,
-            @RequestParam("atendenteId") UUID atendenteId) {
+            @PathVariable(name = "id") UUID solicitacaoId,
+            @RequestParam(name = "atendenteId") UUID atendenteId) {
         try {
             return ResponseEntity.ok(assumirSolicitacaoUseCase.execute(solicitacaoId, atendenteId));
         } catch (IllegalStateException e) {
@@ -59,33 +59,32 @@ public class ConciergeController {
     @PatchMapping("/{id}/concluir")
     @Operation(summary = "Atendente conclui o processamento e envia para aprovação do gestor")
     public ResponseEntity<SolicitacaoConcierge> concluir(
-            @PathVariable("id") UUID solicitacaoId,
-            @RequestParam("atendenteId") UUID atendenteId,
-            @RequestParam(value = "observacoes", required = false) String observacoes) {
+            @PathVariable(name = "id") UUID solicitacaoId,
+            @RequestParam(name = "atendenteId") UUID atendenteId,
+            @RequestParam(name = "observacoes", required = false) String observacoes) {
         return ResponseEntity.ok(concluirProcessamentoUseCase.execute(solicitacaoId, atendenteId, observacoes));
     }
 
     @PatchMapping("/{id}/aprovar")
     @Operation(summary = "Gestor do supermercado aprova o cadastro realizado")
     public ResponseEntity<SolicitacaoConcierge> aprovar(
-            @PathVariable("id") UUID solicitacaoId,
-            @RequestParam("gestorId") UUID gestorId) {
+            @PathVariable(name = "id") UUID solicitacaoId,
+            @RequestParam(name = "gestorId") UUID gestorId) {
         return ResponseEntity.ok(aprovarSolicitacaoUseCase.execute(solicitacaoId, gestorId));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Cria uma nova solicitação de concierge com upload de listagem")
-    public ResponseEntity<SolicitacaoConcierge> criar(
-            @RequestParam("supermercadoId") UUID supermercadoId,
-            @RequestParam("titulo") String titulo,
-            @RequestParam(value = "observacoes", required = false) String observacoes,
-            @RequestParam(value = "complexidade", defaultValue = "1") Integer complexidade,
-            @RequestParam(value = "plano", defaultValue = "BASICO") String plano,
-            @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<?> criar(
+            @RequestParam(name = "supermercadoId") UUID supermercadoId,
+            @RequestParam(name = "titulo") String titulo,
+            @RequestParam(name = "observacoes", required = false) String observacoes,
+            @RequestParam(name = "complexidade", defaultValue = "1") Integer complexidade,
+            @RequestPart(name = "file") MultipartFile file) {
         
         try {
             if (file.isEmpty()) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("Arquivo não enviado.");
             }
 
             SolicitacaoConcierge solicitacao = criarSolicitacaoUseCase.execute(
@@ -93,7 +92,6 @@ public class ConciergeController {
                     titulo,
                     observacoes,
                     complexidade,
-                    plano,
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getContentType(),
@@ -102,6 +100,8 @@ public class ConciergeController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(solicitacao);
             
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

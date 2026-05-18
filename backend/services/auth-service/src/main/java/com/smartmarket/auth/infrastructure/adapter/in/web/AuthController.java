@@ -5,6 +5,7 @@ import com.smartmarket.auth.application.dto.LoginRequestDTO;
 import com.smartmarket.auth.application.dto.RefreshTokenRequestDTO;
 import com.smartmarket.auth.application.dto.RegistroUsuarioRequestDTO;
 import com.smartmarket.auth.application.usecase.LoginUseCase;
+import com.smartmarket.auth.application.usecase.RefreshTokenUseCase;
 import com.smartmarket.auth.application.usecase.RegistrarUsuarioUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,10 +24,14 @@ public class AuthController {
 
     private final LoginUseCase loginUseCase;
     private final RegistrarUsuarioUseCase registrarUsuarioUseCase;
+    private final RefreshTokenUseCase refreshTokenUseCase;
 
-    public AuthController(LoginUseCase loginUseCase, RegistrarUsuarioUseCase registrarUsuarioUseCase) {
+    public AuthController(LoginUseCase loginUseCase, 
+                          RegistrarUsuarioUseCase registrarUsuarioUseCase,
+                          RefreshTokenUseCase refreshTokenUseCase) {
         this.loginUseCase = loginUseCase;
         this.registrarUsuarioUseCase = registrarUsuarioUseCase;
+        this.refreshTokenUseCase = refreshTokenUseCase;
     }
 
     @PostMapping("/login")
@@ -46,8 +51,8 @@ public class AuthController {
     @Operation(summary = "Atualizar Token", description = "Atualiza o Access Token utilizando um Refresh Token válido")
     public ResponseEntity<AuthTokenResponseDTO> refreshToken(@RequestBody RefreshTokenRequestDTO request) {
         log.info("Recebida requisição para refresh token");
-        // Mock implementation to satisfy OpenAPI contract
-        return ResponseEntity.ok(new AuthTokenResponseDTO("mocked-new-jwt", request.getRefreshToken(), 3600L));
+        AuthTokenResponseDTO response = refreshTokenUseCase.execute(request);
+        return ResponseEntity.ok(response);
     }
 
     /**

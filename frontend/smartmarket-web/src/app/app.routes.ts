@@ -14,7 +14,7 @@ export const routes: Routes = [
   {
     path: 'planos',
     title: 'SmartMarket - Conheça nossos planos',
-    loadComponent: () => import('./features/public/plans/plans.component').then(m => m.PlansComponent)
+    loadComponent: () => import('./features/billing/pages/pricing-page.component').then(m => m.PricingPageComponent)
   },
   {
     path: 'location',

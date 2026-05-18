@@ -13,6 +13,7 @@ public class ProdutoBase {
     private Double pesoVolume;
     private String urlImagem;
     private UUID categoriaId;
+    private UUID marcaId;
     private boolean ativo;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
@@ -53,6 +54,8 @@ public class ProdutoBase {
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
+    public UUID getMarcaId() { return marcaId; }
+    public void setMarcaId(UUID marcaId) { this.marcaId = marcaId; }
 
     @Override
     public boolean equals(Object o) {

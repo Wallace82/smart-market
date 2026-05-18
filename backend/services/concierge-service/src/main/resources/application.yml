@@ -41,6 +41,10 @@ concierge:
   scheduler:
     recalculation-rate-ms: 60000 # 1 minuto
 
+services:
+  billing-service:
+    url: ${BILLING_SERVICE_URL:http://localhost:8084}
+
 logging:
   level:
     com.smartmarket.concierge: DEBUG

@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 // Services & Models
 import { SupermarketService } from '@core/services/supermarket.service';
 import { SupermarketResponse } from '@core/models/supermarket.model';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-store-list',
@@ -57,7 +58,7 @@ export class StoreListComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao carregar lojas', err);
         this.isLoading.set(false);
-        this.snackBar.open('Erro ao carregar lista de supermercados.', 'Fechar', { duration: 3000 });
+        this.notificationService.error('Erro ao carregar lista de supermercados.');
       }
     });
   }

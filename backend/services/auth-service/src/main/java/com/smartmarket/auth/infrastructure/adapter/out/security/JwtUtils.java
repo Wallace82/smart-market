@@ -36,9 +36,13 @@ public class JwtUtils {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        return generateTokenFromUsername(userPrincipal.getUsername(), roles, userPrincipal.getId());
+    }
+
+    public String generateTokenFromUsername(String username, List<String> roles, java.util.UUID id) {
         return Jwts.builder()
-                .subject((userPrincipal.getUsername()))
-                .claim("id", userPrincipal.getId().toString())
+                .subject(username)
+                .claim("id", id.toString())
                 .claim("roles", roles)
                 .issuedAt(new Date())
                 .expiration(new Date((new Date()).getTime() + jwtExpirationMs))

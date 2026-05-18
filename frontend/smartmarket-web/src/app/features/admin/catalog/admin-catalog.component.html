@@ -9,7 +9,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
         Importar Lote
       </button>
-      <button class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] text-white font-bold px-4 py-2 rounded-md transition-colors flex items-center gap-2 shadow-sm">
+      <button (click)="openProductDialog()" class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] text-white font-bold px-4 py-2 rounded-md transition-colors flex items-center gap-2 shadow-sm">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Novo Produto
       </button>
@@ -69,7 +69,7 @@
             <span *ngIf="!product.ativo" class="bg-gray-100 text-gray-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase border border-gray-200">Inativo</span>
           </td>
           <td class="p-4 text-right">
-            <button class="text-gray-400 hover:text-[color:var(--color-primary)] transition-colors p-1" title="Editar">
+            <button (click)="openProductDialog(product)" class="text-gray-400 hover:text-[color:var(--color-primary)] transition-colors p-1" title="Editar">
               <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
             </button>
           </td>

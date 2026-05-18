@@ -50,5 +50,10 @@ export const MANAGER_ROUTES: Routes = [
     path: 'campaigns',
     loadComponent: () => import('./campaigns/campaign-list.component').then(m => m.CampaignListComponent),
     title: 'SmartMarket - Campanhas Inteligentes'
+  },
+  {
+    path: 'subscription',
+    loadComponent: () => import('../billing/pages/subscription-page.component').then(m => m.SubscriptionPageComponent),
+    title: 'SmartMarket - Minha Assinatura'
   }
 ];

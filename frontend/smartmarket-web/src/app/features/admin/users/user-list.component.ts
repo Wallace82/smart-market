@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 // Services & Models
 import { UserService } from '@core/services/user.service';
 import { UserResponse } from '@core/models/user.model';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-user-list',
@@ -61,7 +62,7 @@ export class UserListComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao carregar usuários', err);
         this.isLoading.set(false);
-        this.snackBar.open('Erro ao carregar lista de usuários.', 'Fechar', { duration: 3000 });
+        this.notificationService.error('Erro ao carregar lista de usuários.');
       }
     });
   }

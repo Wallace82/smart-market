@@ -19,8 +19,10 @@
 8. [Roadmap MVP](#8-roadmap-mvp)
 9. [Glossário](#9-glossário)
 10. [Diferencial: Canal Físico-Digital (QR Code)](#10-diferencial-canal-físico-digital-qr-code)
-11. [Diferencial: Acesso Público sem Fricção (PLG)](#11-diferencial-acesso-público-sem-fricção-plg)
-12. [🧾 Backlog (Fase Pós-MVP)](#12--backlog-fase-pós-mvp)
+11. [Gestão de Assinaturas e Billing](#11-gestão-de-assinaturas-e-billing)
+12. [Diferencial: Acesso Público sem Fricção (PLG)](#12-diferencial-acesso-público-sem-fricção-plg)
+13. [Simulação de Faturamento (Estratégico)](#13-simulação-de-faturamento-estratégico)
+14. [🧾 Backlog (Fase Pós-MVP)](#14--backlog-fase-pós-mvp)
 
 ---
 
@@ -84,6 +86,7 @@ O **SmartMarket** é uma plataforma SaaS web responsiva do modelo **B2B2C**, que
 *   **Gestão de Temas Sazonais:** Criar temas globais (ex: Natal, Black Friday) com backgrounds e cores.
 
 #### 2. Dashboard Gestor Supermercado (Visão da Loja)
+*   **Assinatura e Billing:** Upgrade/downgrade de plano, seleção de ciclo e histórico de faturamento.
 *   **Personalização de Loja:** Configuração de Logomarca, Cor Primária e Secundária.
 *   Gestão de Ofertas (Selecionar produtos do catálogo e definir preço promocional).
 *   **Gestão de Encartes Digitais:** Criar encartes escolhendo um Tema Sazonal e uma lista de Ofertas.
@@ -227,7 +230,8 @@ Sistema de priorização dinâmica para organizar as solicitações de criação
 | **EncarteDigital** | id, supermercadoId, temaId, titulo, dataInicio, dataFim, status (RASCUNHO, ATIVO, ENCERRADO) |
 | **EncarteOferta** | id, encarteId, ofertaId (tabela associativa) |
 | **SolicitacaoConcierge** | id, supermercadoId, atendenteId, titulo, status, dataCriacao, dataInicioProcessamento, dataConclusao, slaDefinido, prioridadeScore, complexidade, planoCliente, lockAt, urlArquivoOriginal |
-| **AuditoriaConcierge** | id, solicitacaoId, usuarioId, acao, timestamp, detalhes |
+| **Plano** | id, nome, limiteOfertas, limiteEncartes, raioMaximo, limiteNotificacoes, possuiConcierge, slaHoras, precoMensal, precoSemestral, precoAnual |
+| **Assinatura** | id, supermercadoId, planoId, ciclo (MENSAL, SEMESTRAL, ANUAL), status (ATIVA, INADIMPLENTE, CANCELADA), dataInicio, dataFim, renovacaoAutomatica |
 
 ---
 
@@ -349,33 +353,85 @@ Esta funcionalidade cria uma ponte entre o ambiente físico do supermercado e a 
 
 ---
 
-## 11. Diferencial: Acesso Público sem Fricção (PLG)
+## 11. Gestão de Assinaturas e Billing
+
+### 11.1 Tabela de Planos e Níveis de Serviço (SLA)
+
+| Recurso | STARTER | ESSENCIAL | PRO | PREMIUM |
+| :--- | :--- | :--- | :--- | :--- |
+| **Ofertas/mês** | Até 30 | Até 100 | Até 300 | Ilimitadas |
+| **Encartes Ativos** | 1 | 3 | Ilimitados | Ilimitados |
+| **Raio de Alcance** | 3 km | 5 km | 10 km | Customizável |
+| **Notificações/mês** | - | 200 | 1.000 | Ilimitadas (Fair Use) |
+| **Concierge** | Não | Não | Parcial (2/mês) | Avançado |
+| **SLA Atendimento** | 6 horas | 4 horas | 3 horas | 1 hora |
+| **Prioridade na Fila** | Baixa | Normal | Alta | Máxima |
+
+### 11.2 Ciclos de Cobrança e Precificação
+
+| Plano | Mensal | Semestral (~10% off) | Anual (~20% off) |
+| :--- | :--- | :--- | :--- |
+| **STARTER** | R$ 49 | R$ 264 | R$ 470 |
+| **ESSENCIAL** | R$ 129 | R$ 696 | R$ 1.240 |
+| **PRO** | R$ 299 | R$ 1.620 | R$ 2.880 |
+| **PREMIUM** | R$ 699 | R$ 3.780 | R$ 6.700 |
+
+### 11.3 Requisitos Funcionais (Billing)
+
+*   **RF-11.1: Seleção de Ciclo:** O sistema deve permitir que o Gestor escolha o ciclo de faturamento (mensal, semestral ou anual) no momento da contratação ou upgrade.
+*   **RF-11.2: Transparência de Descontos:** A interface deve exibir claramente o valor original e o valor com desconto aplicado para ciclos semestrais e anuais.
+*   **RF-11.3: Persistência de Ciclo:** O ciclo escolhido deve ser persistido na assinatura do supermercado para renovações automáticas.
+*   **RF-11.4: Add-ons (Upsell):** O sistema deve permitir a compra avulsa de recursos excedentes (ex: pacotes de notificações, concierge sob demanda).
+*   **RF-11.5: Integração de Pagamentos:** Suporte a pagamentos via PIX (confirmação imediata), Cartão de Crédito (recorrência) e Boleto.
+
+### 11.4 Regras de Negócio (Billing)
+
+*   **RN-11.1: Bloqueio de Recursos:** Recursos que atingirem o limite do plano devem ser bloqueados automaticamente, oferecendo a opção de upgrade ou compra de add-on.
+*   **RN-11.2: Upgrade Imediato:** Upgrades de plano devem ser aplicados instantaneamente, com cobrança pró-rata se necessário.
+*   **RN-11.3: Downgrade no Ciclo:** Downgrades de plano só entram em vigor ao final do ciclo de faturamento atual.
+*   **RN-11.4: Prioridade de Fila:** O Score de Prioridade do Concierge (RF-10.1) deve obrigatoriamente incluir o peso do plano contratado.
+
+---
+
+## 12. Diferencial: Acesso Público sem Fricção (PLG)
 
 ### 🎯 Visão de Negócio
 
 O SmartMarket adota a estratégia de *Product-Led Growth*: o usuário percebe valor nos primeiros 5 segundos, sem precisar criar conta. A conversão para usuário logado ocorre de forma orgânica.
 
-### 11.1 Vitrine Universal
+### 12.1 Vitrine Universal
 *   A página inicial (`/`) exibe imediatamente: Supermercados Próximos, Ofertas em Destaque e Encartes Ativos.
 *   Navegação completa sem login: abrir encartes, buscar produtos, usar filtros.
 
-### 11.2 Geolocalização Pública
+### 12.2 Geolocalização Pública
 *   Solicitar permissão de GPS via prompt nativo.
 *   Se concedido: filtrar por raio de 3 km.
 *   Se negado: exibir campo para CEP/Bairro no header.
 
-### 11.3 UX da Vitrine
+### 12.3 UX da Vitrine
 *   **Header para anônimos:** Botões claros de "Entrar" e "Criar Conta" no canto superior direito.
 *   **Skeleton Screens:** Usar loaders visuais durante carregamento para reter atenção.
 *   **Carregamento rápido:** Conteúdo público servido via cache Redis.
 
-### 11.4 Privacidade (LGPD)
+### 12.4 Privacidade (LGPD)
 *   Texto explicativo claro antes do prompt de localização do OS.
 *   Não rastrear nem armazenar localização bruta do usuário no MVP.
 
 ---
 
-## 12. 🧾 Backlog (Fase Pós-MVP)
+## 13. Simulação de Faturamento (Estratégico)
+
+Seção ilustrativa baseada no mix de adoção dos planos:
+
+| Cenário | Qtd. Clientes | Receita Mensal Estimada | Foco |
+| :--- | :--- | :--- | :--- |
+| **Cenário Inicial** | 50 | ~R$ 9.400 | Validação de MVP (Starter/Essencial) |
+| **Cenário Crescimento** | 200 | ~R$ 40.000 | Expansão Regional (Essencial/Pro) |
+| **Cenário Escala** | 500 | ~R$ 100.000+ | Domínio de Mercado (Pro/Premium) |
+
+---
+
+## 14. 🧾 Backlog (Fase Pós-MVP)
 
 As funcionalidades abaixo foram **documentadas e planejadas**, mas removidas do escopo do MVP para reduzir complexidade e acelerar a validação. Devem ser priorizadas após confirmação das hipóteses H1, H2 e H3.
 
@@ -419,18 +475,10 @@ As funcionalidades abaixo foram **documentadas e planejadas**, mas removidas do 
 *   Testes A/B nativos: duas versões de Copy, audiência dividida, vencedor automático.
 *   Testes A/B de mensagens no totem QR Code.
 
-### 💳 Billing e Assinatura Automatizada
-*   Planos de assinatura dinâmicos (Mensal, Semestral, Anual) com limites configuráveis.
-*   Integração com gateway de pagamentos (PIX, Cartão de Crédito, Boleto).
-*   Assinatura recorrente com renovação automática.
-*   Controle de status: Ativa, Pendente, Cancelada, Expirada.
-*   Dashboard Financeiro: receita por período, ranking de planos, churn rate.
-*   Bloqueio automático de funcionalidades ao atingir limite do plano.
-*   Regras de negócio: downgrade mantém acesso até fim do ciclo pago.
-*   Upsell contextual in-app e módulo de add-ons (pacotes avulsos de push).
-*   Free Trial de 14 dias.
-*   Planos corporativos para redes multi-loja.
-*   Conformidade PCI-DSS para dados de cartão.
+### 💳 Billing e Assinatura Automatizada (Ver Seção 11)
+*   Finalização da automação de renovação via Webhooks.
+*   Painel de métricas financeiras (MRR, Churn).
+*   Configuração de Free Trial de 14 dias.
 
 ### 🔗 Integrações Externas
 *   Integração com WhatsApp Business API para alertas.

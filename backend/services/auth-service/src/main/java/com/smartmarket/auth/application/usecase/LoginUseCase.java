@@ -24,11 +24,16 @@ public class LoginUseCase {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final UsuarioDomainRepository usuarioRepository;
+    private final com.smartmarket.auth.application.service.RefreshTokenService refreshTokenService;
 
-    public LoginUseCase(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UsuarioDomainRepository usuarioRepository) {
+    public LoginUseCase(AuthenticationManager authenticationManager, 
+                        JwtUtils jwtUtils, 
+                        UsuarioDomainRepository usuarioRepository,
+                        com.smartmarket.auth.application.service.RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.usuarioRepository = usuarioRepository;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public AuthTokenResponseDTO execute(LoginRequestDTO loginRequest) {
@@ -39,21 +44,18 @@ public class LoginUseCase {
         String jwt = jwtUtils.generateJwtToken(authentication);
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
+        
         // Atualiza a data do último login
         Usuario usuario = usuarioRepository.findByEmail(loginRequest.getEmail()).orElseThrow();
         usuario.setUltimoLoginEm(LocalDateTime.now());
         usuarioRepository.save(usuario);
 
-        // Mock de refresh token para satisfazer o contrato
-        String refreshToken = UUID.randomUUID().toString();
+        // Gera Refresh Token real
+        var refreshTokenEntity = refreshTokenService.createRefreshToken(usuario.getId());
 
         return new AuthTokenResponseDTO(
                 jwt,
-                refreshToken,
+                refreshTokenEntity.getToken(),
                 jwtUtils.getJwtExpirationSecs()
         );
     }

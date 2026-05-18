@@ -2,11 +2,15 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed } 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+// Angular Material
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
 // Services & Models
 import { ProductBaseService } from '@core/services/product-base.service';
+import { NotificationService } from '@core/services/notification.service';
 import { ProductBaseResponse } from '@core/models/product.model';
-
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProductFormDialogComponent } from './product-form-dialog.component';
 
 @Component({
   selector: 'app-admin-catalog',
@@ -16,6 +20,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 })
 export class AdminCatalogComponent implements OnInit {
   private catalogService = inject(ProductBaseService);
+  private dialog = inject(MatDialog);
+  private notificationService = inject(NotificationService);
   
   // Estados Reativos
   public products = signal<ProductBaseResponse[]>([]);
@@ -52,5 +58,33 @@ export class AdminCatalogComponent implements OnInit {
   public changePage(newPage: number) {
     this.page.set(newPage);
     this.loadProducts();
+  }
+
+  public openProductDialog(product?: ProductBaseResponse) {
+    const dialogRef = this.dialog.open(ProductFormDialogComponent, {
+      width: '600px',
+      data: product
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.salvarProduto(result.produto, result.imagem);
+      }
+    });
+  }
+
+  private salvarProduto(product: any, imagem?: File) {
+    this.loading.set(true);
+    this.catalogService.salvar(product, imagem).subscribe({
+      next: () => {
+        this.notificationService.success(product.id ? 'Produto atualizado!' : 'Produto cadastrado!');
+        this.loadProducts();
+      },
+      error: (err) => {
+        console.error('Erro ao salvar produto', err);
+        this.notificationService.error('Erro ao salvar produto no catálogo.');
+        this.loading.set(false);
+      }
+    });
   }
 }

@@ -40,9 +40,70 @@ export class FlyerViewerComponent implements OnInit {
   supermarket = signal<SupermarketResponse | null>(null);
   tema = signal<TemaEncarteResponse | null>(null);
   ofertas = signal<OfertaSupermercado[]>([]);
+  favoritos = signal<Set<string>>(new Set());
   
   loading = signal(true);
   error = signal(false);
+
+  // Computeds de Tema e Whitelabel
+  themeType = computed(() => {
+    const name = this.tema()?.nome?.toLowerCase() || '';
+    
+    // Prioridade absoluta para o Tema Sazonal cadastrado e selecionado no select
+    if (name) {
+      if (name.includes('mãe') || name.includes('mae')) {
+        return 'mothersday';
+      }
+      if (name.includes('páscoa') || name.includes('pascoa')) {
+        return 'easter';
+      }
+      if (name.includes('natal') || name.includes('fim de ano')) {
+        return 'christmas';
+      }
+      if (name.includes('black') || name.includes('sexta')) {
+        return 'blackfriday';
+      }
+      return 'default'; // Para outros temas cadastrados sem sazonalidade específica (ex: Semana do Consumidor)
+    }
+
+    // Fallback secundário pelo título do encarte apenas se NENHUM tema foi vinculado no select
+    const title = this.encarte()?.titulo?.toLowerCase() || '';
+    if (title.includes('mãe') || title.includes('mae')) {
+      return 'mothersday';
+    }
+    if (title.includes('páscoa') || title.includes('pascoa')) {
+      return 'easter';
+    }
+    if (title.includes('natal') || title.includes('fim de ano')) {
+      return 'christmas';
+    }
+    if (title.includes('black') || title.includes('sexta')) {
+      return 'blackfriday';
+    }
+    
+    return 'default';
+  });
+
+  themeSubtitle = computed(() => {
+    const type = this.themeType();
+    switch (type) {
+      case 'mothersday':
+        return 'Especial Dia das Mães — O carinho que ela merece com a economia que você precisa!';
+      case 'easter':
+        return 'Especial de Páscoa — Ofertas doces e preços imperdíveis para toda a família!';
+      case 'christmas':
+        return 'Natal Solidário e Feliz — Celebre as festas com os melhores preços!';
+      case 'blackfriday':
+        return 'Black Friday SmartMarket — Descontos insanos e estoque limitado!';
+      default:
+        return 'Aproveite nossas ofertas exclusivas!';
+    }
+  });
+
+  hasBrand = computed(() => {
+    const s = this.supermarket();
+    return !!s?.urlLogomarca || !!s?.corPrimariaHex || !!s?.corSecundariaHex;
+  });
 
   constructor(
     private route: ActivatedRoute,
@@ -52,6 +113,16 @@ export class FlyerViewerComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Carrega favoritos salvos localmente
+    const saved = localStorage.getItem('smartmarket_favoritos');
+    if (saved) {
+      try {
+        this.favoritos.set(new Set(JSON.parse(saved)));
+      } catch (e) {
+        console.error('Erro ao carregar favoritos:', e);
+      }
+    }
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.carregarEncarte(id);
@@ -168,16 +239,83 @@ export class FlyerViewerComponent implements OnInit {
 
   get viewerStyle() {
     const t = this.tema();
-    const isDark = t?.id === 't4' || t?.nome?.toLowerCase().includes('black');
+    const type = this.themeType();
     
+    let bgColor = t?.corFundoHex || '#f8fafc';
+    let color = '#1f2937';
+    let bgImage = 'none';
+
+    if (type === 'blackfriday') {
+      bgColor = '#050505'; // Absolute black
+      color = '#ffffff';
+    } else if (type === 'mothersday') {
+      bgColor = '#fff5f7'; // Soft pastel pink rose
+      color = '#1f2937';
+    } else if (type === 'easter') {
+      bgColor = '#fffbeb'; // Warm soft cream/amber
+      color = '#1f2937';
+    } else if (type === 'christmas') {
+      bgColor = '#f3f7f4'; // Festive snowy mint
+      color = '#1f2937';
+    }
+
+    if (t?.urlBackgroundDecorativo) {
+      const isDark = type === 'blackfriday';
+      bgImage = `linear-gradient(${isDark ? 'rgba(5,5,5,0.93)' : 'rgba(255,255,255,0.90)'}, ${isDark ? 'rgba(5,5,5,0.93)' : 'rgba(255,255,255,0.90)'}), url(${t.urlBackgroundDecorativo})`;
+    }
+
     return {
-      'background-image': t?.urlBackgroundDecorativo 
-        ? `linear-gradient(${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}, ${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}), url(${t.urlBackgroundDecorativo})` 
-        : 'none',
+      'background-image': bgImage,
       'background-size': 'cover',
       'background-position': 'center',
-      'background-color': t?.corFundoHex || '#f8fafc',
-      'color': isDark ? '#ffffff' : '#1f2937'
+      'background-color': bgColor,
+      'color': color
     };
+  }
+
+  get headerStyle() {
+    const t = this.tema();
+    const type = this.themeType();
+    let bg = '';
+
+    if (type === 'mothersday') {
+      bg = 'linear-gradient(to right, #f43f5e, #ec4899, #f43f5e)';
+    } else if (type === 'easter') {
+      bg = 'linear-gradient(to right, #451a03, #78350f, #451a03)';
+    } else if (type === 'christmas') {
+      bg = 'linear-gradient(to right, #b91c1c, #115e59, #b91c1c)';
+    } else if (type === 'blackfriday') {
+      bg = 'linear-gradient(to right, #09090b, #18181b, #09090b)';
+    } else {
+      bg = 'linear-gradient(to right, var(--color-primary), var(--color-secondary))';
+    }
+
+    if (t?.urlBackgroundDecorativo) {
+      const isDark = type === 'blackfriday' || type === 'easter' || type === 'christmas';
+      const overlayStart = isDark ? 'rgba(0,0,0,0.55)' : 'rgba(244,63,94,0.2)';
+      const overlayEnd = isDark ? 'rgba(0,0,0,0.75)' : 'rgba(244,63,94,0.35)';
+      bg = `linear-gradient(${overlayStart}, ${overlayEnd}), url(${t.urlBackgroundDecorativo})`;
+    }
+
+    return {
+      'background-image': bg,
+      'background-size': 'cover',
+      'background-position': 'center'
+    };
+  }
+
+  toggleFavorito(ofertaId: string): void {
+    const favs = new Set(this.favoritos());
+    if (favs.has(ofertaId)) {
+      favs.delete(ofertaId);
+    } else {
+      favs.add(ofertaId);
+    }
+    this.favoritos.set(favs);
+    localStorage.setItem('smartmarket_favoritos', JSON.stringify(Array.from(favs)));
+  }
+
+  isFavorito(ofertaId: string): boolean {
+    return this.favoritos().has(ofertaId);
   }
 }

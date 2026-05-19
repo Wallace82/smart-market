@@ -1,162 +1,687 @@
-<div class="min-h-screen font-sans" [ngStyle]="viewerStyle" [appWhitelabelTheme]="supermarket()">
+<style>
+  /* Import elegant google fonts for a premium look */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,600&family=Outfit:wght@400;600;800;900&display=swap');
+
+  /* Typography helpers */
+  .font-serif-classic {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
   
+  .font-outfit {
+    font-family: 'Outfit', sans-serif;
+  }
+
+  /* GPU-accelerated Animations */
+  @keyframes floatUp {
+    0% {
+      transform: translateY(105vh) translateX(0) rotate(0deg) scale(0.8);
+      opacity: 0;
+    }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% {
+      transform: translateY(-10vh) translateX(30px) rotate(360deg) scale(1.1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes floatDownSnow {
+    0% {
+      transform: translateY(-10vh) translateX(0) rotate(0deg) scale(0.6);
+      opacity: 0;
+    }
+    15% { opacity: 0.9; }
+    85% { opacity: 0.9; }
+    100% {
+      transform: translateY(105vh) translateX(-30px) rotate(180deg) scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes pulseGoldBorder {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(245, 158, 11, 0.2), 0 0 15px rgba(245, 158, 11, 0.05);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.6), 0 0 30px rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.8);
+    }
+  }
+
+  @keyframes textShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes floatBanner {
+    0%, 100% {
+      transform: translateY(-50%) translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-50%) translateY(-10px) scale(1.05);
+    }
+  }
+
+  .animate-float-banner {
+    animation: floatBanner 4s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* Floating particles styles */
+  .particle-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .heart-particle, .egg-particle, .bf-particle {
+    position: absolute;
+    bottom: -50px;
+    font-size: 1.8rem;
+    animation: floatUp 16s linear infinite;
+    will-change: transform, opacity;
+  }
+
+  .snow-particle {
+    position: absolute;
+    top: -50px;
+    font-size: 1.5rem;
+    animation: floatDownSnow 14s linear infinite;
+    will-change: transform, opacity;
+  }
+
+  /* Particles custom speeds & positions (Renamed to prevent Tailwind clashes) */
+  .particle-p1 { left: 8%; animation-duration: 11s; animation-delay: 0s; }
+  .particle-p2 { left: 22%; animation-duration: 17s; animation-delay: 2.5s; font-size: 2.2rem; }
+  .particle-p3 { left: 40%; animation-duration: 13s; animation-delay: 5s; }
+  .particle-p4 { left: 58%; animation-duration: 19s; animation-delay: 1.2s; font-size: 2rem; }
+  .particle-p5 { left: 76%; animation-duration: 15s; animation-delay: 3.8s; }
+  .particle-p6 { left: 91%; animation-duration: 12s; animation-delay: 6s; }
+
+  /* Chocolate drip pattern for Easter */
+  .chocolate-dripping {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 18px;
+    background-image: radial-gradient(circle at 10px -5px, transparent 12px, #3f2214 13px),
+                      radial-gradient(circle at 30px 15px, #3f2214 12px, transparent 13px);
+    background-size: 40px 20px;
+    z-index: 10;
+  }
+
+  /* Snowy cap for Christmas */
+  .snow-cap {
+    position: absolute;
+    top: -5px;
+    left: 5%;
+    width: 90%;
+    height: 12px;
+    background: #ffffff;
+    border-radius: 10px 10px 4px 4px;
+    box-shadow: 0 2px 4px rgba(255,255,255,0.8);
+    z-index: 20;
+  }
+
+  /* Black Friday Custom Styles */
+  .theme-blackfriday .bf-card {
+    background: rgba(20, 20, 20, 0.95) !important;
+    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+    animation: pulseGoldBorder 3.5s infinite ease-in-out;
+  }
+
+  .theme-blackfriday .bf-card:hover {
+    border-color: rgba(245, 158, 11, 0.8) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25) !important;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(to right, #ffe082 0%, #fbbf24 50%, #ffe082 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textShimmer 3s linear infinite;
+  }
+
+  /* Mother's Day Custom Styles */
+  .theme-mothersday .mothers-card {
+    border: 1px solid rgba(244, 63, 94, 0.15) !important;
+  }
+  .theme-mothersday .mothers-card:hover {
+    border-color: rgba(244, 63, 94, 0.5) !important;
+    box-shadow: 0 10px 25px rgba(244, 63, 94, 0.15) !important;
+  }
+
+  /* Easter pricing egg shape */
+  .easter-egg-price {
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40% !important;
+  }
+</style>
+
+<div class="min-h-screen font-outfit transition-colors duration-500 relative" [ngStyle]="viewerStyle" [appWhitelabelTheme]="supermarket()" [ngClass]="'theme-' + themeType()">
+  
+  <!-- Particle Systems Background Layer -->
+  <div class="particle-container">
+    <!-- Dia das Mães Particles -->
+    <ng-container *ngIf="themeType() === 'mothersday'">
+      <div class="heart-particle particle-p1">💖</div>
+      <div class="heart-particle particle-p2">🌸</div>
+      <div class="heart-particle particle-p3">❤️</div>
+      <div class="heart-particle particle-p4">🌸</div>
+      <div class="heart-particle particle-p5">🌹</div>
+      <div class="heart-particle particle-p6">💖</div>
+    </ng-container>
+
+    <!-- Páscoa Particles -->
+    <ng-container *ngIf="themeType() === 'easter'">
+      <div class="egg-particle particle-p1">🥚</div>
+      <div class="egg-particle particle-p2">🐰</div>
+      <div class="egg-particle particle-p3">🍫</div>
+      <div class="egg-particle particle-p4">🥚</div>
+      <div class="egg-particle particle-p5">🐰</div>
+      <div class="egg-particle particle-p6">🥕</div>
+    </ng-container>
+
+    <!-- Natal Particles -->
+    <ng-container *ngIf="themeType() === 'christmas'">
+      <div class="snow-particle particle-p1">❄️</div>
+      <div class="snow-particle particle-p2">❄️</div>
+      <div class="snow-particle particle-p3">✨</div>
+      <div class="snow-particle particle-p4">❄️</div>
+      <div class="snow-particle particle-p5">✨</div>
+      <div class="snow-particle particle-p6">❄️</div>
+    </ng-container>
+
+    <!-- Black Friday Particles -->
+    <ng-container *ngIf="themeType() === 'blackfriday'">
+      <div class="bf-particle particle-p1">🔥</div>
+      <div class="bf-particle particle-p2">⚡</div>
+      <div class="bf-particle particle-p3">💎</div>
+      <div class="bf-particle particle-p4">💥</div>
+      <div class="bf-particle particle-p5">⚡</div>
+      <div class="bf-particle particle-p6">🔥</div>
+    </ng-container>
+  </div>
+
   <!-- Loading State -->
-  <div *ngIf="loading()" class="fixed inset-0 flex flex-col items-center justify-center bg-white z-50">
-    <mat-spinner diameter="40" color="primary"></mat-spinner>
-    <p class="mt-4 text-gray-500 font-bold animate-pulse">Abrindo Encarte Digital...</p>
+  <div *ngIf="loading()" class="fixed inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-md z-50">
+    <mat-spinner diameter="48" color="primary"></mat-spinner>
+    <p class="mt-4 text-gray-700 font-extrabold uppercase tracking-widest animate-pulse text-sm">Abrindo Encarte Digital...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error()" class="fixed inset-0 flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
-    <mat-icon class="text-gray-300 text-6xl mb-4">sentiment_very_dissatisfied</mat-icon>
-    <h2 class="text-xl font-bold text-gray-800">Encarte não encontrado</h2>
-    <p class="text-gray-500 mt-2">Este link pode ter expirado ou o encarte foi removido.</p>
-    <button mat-flat-button color="primary" class="mt-6" routerLink="/">Voltar ao Início</button>
+  <div *ngIf="error()" class="fixed inset-0 flex flex-col items-center justify-center bg-gray-50 p-6 text-center z-50">
+    <mat-icon class="text-rose-500 text-7xl mb-4">sentiment_very_dissatisfied</mat-icon>
+    <h2 class="text-2xl font-black text-gray-800 uppercase tracking-tight">Encarte não encontrado</h2>
+    <p class="text-gray-500 mt-2 font-medium">Este link pode ter expirado ou o encarte foi removido.</p>
+    <button mat-flat-button color="primary" class="mt-6 !rounded-full !px-8 !py-3 font-bold uppercase tracking-wider shadow-lg" routerLink="/">Voltar ao Início</button>
   </div>
 
   <!-- Main Content (Digital Flyer) -->
-  <div *ngIf="!loading() && !error()" class="max-w-7xl mx-auto min-h-screen flex flex-col shadow-2xl bg-white/10 backdrop-blur-sm relative overflow-hidden">
+  <div *ngIf="!loading() && !error()" 
+       class="max-w-6xl mx-auto min-h-screen flex flex-col shadow-2xl relative z-10 overflow-hidden border-x border-gray-200/30"
+       [ngStyle]="viewerStyle">
     
-    <!-- Header Imersivo -->
-    <header class="relative z-10 p-10 pt-16 text-center overflow-hidden bg-[var(--color-primary)]">
-      
-      <!-- Overlay Decorativo -->
-      <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <!-- Whitelabel / Validity Sticky Top Bar -->
+    <div *ngIf="supermarket()" 
+         class="w-full py-3 px-6 flex flex-col sm:flex-row items-center justify-between sticky top-0 z-50 shadow-sm border-b transition-all duration-300"
+         [ngClass]="{
+           'bg-white/90 backdrop-blur-md border-gray-100': themeType() !== 'blackfriday',
+           'bg-zinc-950/90 backdrop-blur-md border-zinc-800 text-white': themeType() === 'blackfriday'
+         }">
+      <div class="flex items-center gap-3 mb-2 sm:mb-0">
+        <!-- Led pulse -->
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                [ngClass]="themeType() === 'blackfriday' ? 'bg-amber-400' : 'bg-[var(--color-primary)]'"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3"
+                [ngClass]="themeType() === 'blackfriday' ? 'bg-amber-500' : 'bg-[var(--color-primary)]'"></span>
+        </span>
+        <span class="text-xs font-black uppercase tracking-wider"
+              [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-gray-800'">
+          Encarte Oficial de {{ supermarket()?.nomeFantasia }}
+        </span>
+        <span *ngIf="hasBrand()" 
+              class="px-2 py-0.5 text-[9px] font-extrabold uppercase rounded-full tracking-wider shadow-sm animate-pulse"
+              [ngClass]="{
+                'bg-[var(--color-primary)] text-white': themeType() !== 'blackfriday',
+                'bg-amber-500 text-black': themeType() === 'blackfriday'
+              }">
+          Verificado
+        </span>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest"
+           [ngClass]="themeType() === 'blackfriday' ? 'text-gray-300' : 'text-gray-600'">
+        <span class="opacity-60 text-[10px]">Ofertas válidas:</span>
+        <span [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-gray-900'">{{ encarte()?.dataInicio | date:'dd/MM' }}</span>
+        <span class="opacity-60">até</span>
+        <span [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-gray-900'">{{ encarte()?.dataFim | date:'dd/MM' }}</span>
+      </div>
+    </div>
 
-      <div class="relative z-20">
-        <!-- Logo -->
-        <div class="w-24 h-24 bg-white rounded-3xl p-3 mx-auto mb-6 shadow-xl transform -rotate-3 border-4 border-white transition-transform hover:rotate-0 duration-500">
+    <!-- Immersive Header -->
+    <header class="relative z-10 p-8 sm:p-12 text-center overflow-hidden border-b transition-all duration-500"
+            [ngStyle]="headerStyle"
+            [ngClass]="{
+              'border-rose-400 text-white': themeType() === 'mothersday',
+              'border-amber-900 text-amber-50': themeType() === 'easter',
+              'border-red-950 text-white': themeType() === 'christmas',
+              'border-zinc-900 text-white shadow-[inset_0_-2px_15px_rgba(245,158,11,0.1)]': themeType() === 'blackfriday',
+              'border-black/10 text-white': themeType() === 'default'
+            }">
+      
+      <!-- Graphic Textures -->
+      <div class="absolute inset-0 opacity-[0.06] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+
+      <!-- Easter Chocolate Drip -->
+      <div *ngIf="themeType() === 'easter'" class="chocolate-dripping"></div>
+
+      <!-- Left & Right Floating Thematic Accents (Visual framing) -->
+      <div class="absolute left-8 lg:left-14 top-1/2 -translate-y-1/2 opacity-25 text-6xl lg:text-7xl hidden md:block select-none pointer-events-none animate-float-banner"
+           [ngClass]="{
+             'text-white': themeType() === 'mothersday',
+             'text-amber-300': themeType() === 'easter',
+             'text-yellow-300': themeType() === 'christmas',
+             'text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]': themeType() === 'blackfriday',
+             'text-white/40': themeType() === 'default'
+           }">
+        {{ 
+          themeType() === 'mothersday' ? '🌸' :
+          themeType() === 'easter' ? '🐰' :
+          themeType() === 'christmas' ? '🔔' :
+          themeType() === 'blackfriday' ? '🔥' : '✨'
+        }}
+      </div>
+      <div class="absolute right-8 lg:right-14 top-1/2 -translate-y-1/2 opacity-25 text-6xl lg:text-7xl hidden md:block select-none pointer-events-none animate-float-banner"
+           style="animation-delay: 1.5s;"
+           [ngClass]="{
+             'text-white': themeType() === 'mothersday',
+             'text-amber-300': themeType() === 'easter',
+             'text-yellow-300': themeType() === 'christmas',
+             'text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]': themeType() === 'blackfriday',
+             'text-white/40': themeType() === 'default'
+           }">
+        {{ 
+          themeType() === 'mothersday' ? '💖' :
+          themeType() === 'easter' ? '🥚' :
+          themeType() === 'christmas' ? '🎁' :
+          themeType() === 'blackfriday' ? '⚡' : '✨'
+        }}
+      </div>
+
+      <div class="relative z-20 flex flex-col items-center">
+        
+        <!-- Premium Whitelabel Logo Container (Smaller as requested) -->
+        <div class="relative w-28 h-28 sm:w-32 sm:h-32 bg-white rounded-[1.5rem] p-3 sm:p-4 mb-4 shadow-2xl transition-all duration-300 hover:scale-105"
+             [ngClass]="{
+               'border-4 border-rose-300 ring-4 ring-rose-200/30': themeType() === 'mothersday',
+               'border-4 border-amber-600 ring-4 ring-amber-500/20': themeType() === 'easter',
+               'border-4 border-white ring-4 ring-white/10': themeType() === 'christmas' || themeType() === 'default',
+               'border-4 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.5)] ring-4 ring-amber-500/25': themeType() === 'blackfriday'
+             }">
+          
+          <!-- Snowy Cap Decoration for Christmas Logo -->
+          <div *ngIf="themeType() === 'christmas'" class="snow-cap"></div>
+
+          <!-- Logo Image or Fallback Store Initial (More personalized whitelabel fallback) -->
           <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
-          <mat-icon *ngIf="!supermarket()?.urlLogomarca" class="text-green-600 w-full h-full flex items-center justify-center text-5xl">store</mat-icon>
+          <div *ngIf="!supermarket()?.urlLogomarca" class="w-full h-full flex items-center justify-center bg-gray-50 rounded-[1.25rem]">
+            <span class="text-4xl sm:text-5xl font-black uppercase tracking-tight text-center"
+                  [ngClass]="themeType() === 'blackfriday' ? 'text-amber-500' : 'text-[var(--color-primary)]'">
+              {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
+            </span>
+          </div>
+          
+          <!-- Gold Verified Badge -->
+          <div *ngIf="hasBrand()" 
+               class="absolute -bottom-1 -right-1 rounded-full p-1 shadow-lg border-2 flex items-center justify-center scale-100"
+               [ngClass]="{
+                 'bg-rose-500 border-white text-white': themeType() === 'mothersday',
+                 'bg-amber-600 border-amber-900 text-white': themeType() === 'easter',
+                 'bg-amber-400 border-zinc-950 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]': themeType() === 'blackfriday',
+                 'bg-amber-400 border-white text-black': themeType() === 'christmas' || themeType() === 'default'
+               }"
+               matTooltip="Supermercado Homologado Oficial">
+            <mat-icon class="!text-[10px] !w-3.5 !h-3.5 flex items-center justify-center font-black">verified</mat-icon>
+          </div>
         </div>
 
-        <!-- Título -->
-        <h1 class="text-white text-3xl font-black uppercase tracking-tighter leading-none drop-shadow-lg mb-2">
+        <!-- Supermarket Brand Name (Highly Evident & Customizable) -->
+        <h2 class="text-xs font-black uppercase tracking-widest mb-2"
+            [ngClass]="{
+              'text-pink-100 font-serif-classic italic text-base normal-case font-bold': themeType() === 'mothersday',
+              'text-amber-200': themeType() === 'easter',
+              'text-red-100': themeType() === 'christmas',
+              'text-amber-400': themeType() === 'blackfriday',
+              'text-white/80': themeType() === 'default'
+            }">
+          {{ supermarket()?.nomeFantasia }}
+        </h2>
+
+        <!-- Thematic Banner/Badge (Enlarged and styled to be extremely visible) -->
+        <div class="px-6 py-2 rounded-full text-xs sm:text-sm font-black uppercase tracking-widest mb-5 inline-flex items-center gap-2 shadow-lg border transition-all duration-300"
+             [ngClass]="{
+               'bg-gradient-to-r from-rose-600 to-pink-700 text-white border-rose-300/40 shadow-rose-500/20': themeType() === 'mothersday',
+               'bg-gradient-to-r from-amber-600 to-amber-500 text-white border-amber-400/40 shadow-amber-900/30': themeType() === 'easter',
+               'bg-gradient-to-r from-red-600 to-emerald-600 text-white border-yellow-400/40 shadow-emerald-950/30': themeType() === 'christmas',
+               'bg-gradient-to-r from-amber-400 to-amber-500 text-black border-amber-300 shadow-amber-500/30': themeType() === 'blackfriday',
+               'bg-white/20 text-white backdrop-blur-md border-white/20': themeType() === 'default'
+             }">
+          <mat-icon class="!text-base !w-4 !h-4 flex items-center justify-center">
+            {{ 
+              themeType() === 'mothersday' ? 'favorite' :
+              themeType() === 'easter' ? 'spa' :
+              themeType() === 'christmas' ? 'ac_unit' :
+              themeType() === 'blackfriday' ? 'local_fire_department' : 'campaign'
+            }}
+          </mat-icon>
+          <span>
+            {{ 
+              themeType() === 'mothersday' ? 'Especial Dia das Mães' :
+              themeType() === 'easter' ? 'Páscoa Premiada' :
+              themeType() === 'christmas' ? 'Feliz Natal' :
+              themeType() === 'blackfriday' ? 'Black Friday Imbatível' : 'Ofertas do Dia'
+            }}
+          </span>
+        </div>
+
+        <!-- Título principal -->
+        <h1 class="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none mb-3"
+            [ngClass]="{
+              'font-serif-classic text-white italic drop-shadow-md normal-case': themeType() === 'mothersday',
+              'text-amber-50 font-black drop-shadow-md': themeType() === 'easter',
+              'text-white font-extrabold drop-shadow-lg': themeType() === 'christmas',
+              'text-gradient-gold font-black drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]': themeType() === 'blackfriday',
+              'text-white drop-shadow-lg': themeType() === 'default'
+            }">
           {{ encarte()?.titulo }}
         </h1>
-        <h2 class="text-white/80 text-sm font-bold uppercase tracking-widest">{{ supermarket()?.nomeFantasia }}</h2>
+
+        <!-- Subtítulo -->
+        <p class="max-w-2xl text-sm sm:text-base font-bold leading-relaxed opacity-90"
+           [ngClass]="{
+             'text-pink-100 font-serif-classic italic': themeType() === 'mothersday',
+             'text-amber-200': themeType() === 'easter',
+             'text-red-100': themeType() === 'christmas',
+             'text-gray-300': themeType() === 'blackfriday',
+             'text-white/90': themeType() === 'default'
+           }">
+          {{ themeSubtitle() }}
+        </p>
         
-        <div class="w-16 h-1.5 bg-white/30 mx-auto mt-6 rounded-full"></div>
+        <div class="w-20 h-1 mt-6 rounded-full"
+             [ngClass]="{
+               'bg-rose-300': themeType() === 'mothersday',
+               'bg-amber-500': themeType() === 'easter',
+               'bg-yellow-400': themeType() === 'christmas',
+               'bg-amber-400': themeType() === 'blackfriday',
+               'bg-white/40': themeType() === 'default'
+             }"></div>
       </div>
     </header>
 
-    <!-- Validade Floating Bar -->
-    <div class="bg-gray-900 text-white text-[10px] sm:text-xs uppercase font-black tracking-widest text-center py-3 sticky top-0 z-40 shadow-lg border-b border-white/5">
-      <span class="opacity-50">Válido de</span> 
-      {{ encarte()?.dataInicio | date:'dd/MM' }} 
-      <span class="mx-2 text-green-500">até</span> 
-      {{ encarte()?.dataFim | date:'dd/MM' }}
-    </div>
-
-    <!-- Lista de Ofertas em Grid -->
-    <main class="flex-1 p-4 sm:p-6 relative z-10">
+    <!-- Lista de Ofertas em Grid (p-6 restored to standard Tailwind padding) -->
+    <main class="flex-1 p-6 relative z-10"
+          [ngClass]="{
+            'bg-rose-50/20': themeType() === 'mothersday',
+            'bg-amber-50/10': themeType() === 'easter',
+            'bg-emerald-50/10': themeType() === 'christmas',
+            'bg-zinc-950': themeType() === 'blackfriday',
+            'bg-slate-50/50': themeType() === 'default'
+          }">
       
-      <div *ngIf="ofertas().length === 0" class="text-center py-20">
-        <mat-icon class="text-gray-300 text-6xl mb-2">inventory_2</mat-icon>
-        <p class="text-gray-500 font-bold uppercase">Nenhuma oferta ativa</p>
+      <div *ngIf="ofertas().length === 0" class="text-center py-24">
+        <mat-icon class="text-gray-300 text-7xl mb-3">inventory_2</mat-icon>
+        <p class="text-gray-500 font-extrabold uppercase tracking-wider text-sm">Nenhuma oferta ativa neste encarte</p>
       </div>
 
-      <!-- Grid de Tabloide (Denso e Vibrante) -->
+      <!-- Tabloid Grid -->
       <div *ngIf="ofertas().length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         
-        <!-- Card de Oferta Estilo Varejo -->
+        <!-- Card de Oferta -->
         <div *ngFor="let oferta of ofertas()" 
-             class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all border-b-4 relative flex flex-col group overflow-hidden border-b-[var(--color-primary)]">
+             class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 border-b-4 relative flex flex-col group overflow-hidden"
+             [ngClass]="{
+               'mothers-card border-b-rose-500': themeType() === 'mothersday',
+               'border-b-amber-700 border-amber-900/5': themeType() === 'easter',
+               'border-b-emerald-600': themeType() === 'christmas',
+               'bf-card border-b-amber-500': themeType() === 'blackfriday',
+               'border-b-[var(--color-primary)] border-gray-100': themeType() === 'default'
+             }">
           
-          <!-- Selo de Preço "Splash" (Estilo Tradicional) -->
-          <div class="absolute -right-1 -top-1 w-20 h-20 z-20 pointer-events-none transform group-hover:scale-110 transition-transform">
-            <div class="absolute inset-0 bg-yellow-400 rounded-full shadow-lg border-4 border-red-600 flex flex-col items-center justify-center rotate-12">
-              <span class="text-[10px] font-black text-red-700 leading-none uppercase">R$</span>
-              <span class="text-2xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+          <!-- Seasonal Snowy Cap overlay on images for Christmas -->
+          <div *ngIf="themeType() === 'christmas'" class="snow-cap"></div>
+
+          <!-- Price Tag Badge (Custom overlays per seasonal theme) -->
+          <div class="absolute -right-1.5 -top-1.5 w-20 h-20 z-20 pointer-events-none transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+            
+            <!-- Mother's Day Price Splash -->
+            <div *ngIf="themeType() === 'mothersday'" 
+                 class="absolute inset-0 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full shadow-lg border-2 border-amber-300 flex flex-col items-center justify-center rotate-6">
+              <span class="text-[9px] font-black text-amber-200 leading-none uppercase">R$</span>
+              <span class="text-xl font-black text-white leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+              <span class="text-[8px] font-bold text-rose-100 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            </div>
+
+            <!-- Easter Price Splash -->
+            <div *ngIf="themeType() === 'easter'" 
+                 class="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-300 easter-egg-price shadow-lg border-2 border-amber-800 flex flex-col items-center justify-center rotate-12">
+              <span class="text-[9px] font-black text-amber-900 leading-none uppercase">R$</span>
+              <span class="text-xl font-black text-amber-950 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+              <span class="text-[8px] font-bold text-amber-900 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            </div>
+
+            <!-- Christmas Price Splash -->
+            <div *ngIf="themeType() === 'christmas'" 
+                 class="absolute inset-0 bg-gradient-to-br from-red-600 to-rose-700 rounded-full shadow-lg border-2 border-yellow-400 flex flex-col items-center justify-center -rotate-6">
+              <span class="text-[9px] font-black text-yellow-300 leading-none uppercase">R$</span>
+              <span class="text-xl font-black text-white leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+              <span class="text-[8px] font-bold text-red-100 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            </div>
+
+            <!-- Black Friday Price Splash -->
+            <div *ngIf="themeType() === 'blackfriday'" 
+                 class="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl shadow-xl border-2 border-black flex flex-col items-center justify-center rotate-6">
+              <span class="text-[9px] font-black text-black leading-none uppercase">R$</span>
+              <span class="text-xl font-black text-black leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+              <span class="text-[8px] font-bold text-zinc-900 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            </div>
+
+            <!-- Default Price Splash -->
+            <div *ngIf="themeType() === 'default'" 
+                 class="absolute inset-0 bg-yellow-400 rounded-full shadow-md border-2 border-red-600 flex flex-col items-center justify-center rotate-12">
+              <span class="text-[9px] font-black text-red-700 leading-none uppercase">R$</span>
+              <span class="text-xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
               <span class="text-[8px] font-bold text-red-800 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
             </div>
+
           </div>
 
-          <!-- Área da Imagem -->
-          <div class="aspect-square w-full p-4 bg-gray-50 flex items-center justify-center relative overflow-hidden">
+          <!-- Product Image Wrapper (Enhanced with pure white backgrounds for dark modes/Black Friday visibility) -->
+          <div class="aspect-square w-full p-4 flex items-center justify-center relative overflow-hidden transition-colors"
+               [ngClass]="{
+                 'bg-rose-50/50': themeType() === 'mothersday',
+                 'bg-amber-100/20': themeType() === 'easter',
+                 'bg-white rounded-t-3xl': themeType() === 'blackfriday',
+                 'bg-gray-50': themeType() !== 'blackfriday' && themeType() !== 'mothersday' && themeType() !== 'easter'
+               }">
             <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" 
-                 class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500">
-            <mat-icon *ngIf="!oferta.urlImagem" class="text-gray-200 text-5xl">image</mat-icon>
+                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                 [ngClass]="{
+                   'mix-blend-multiply': themeType() !== 'blackfriday',
+                   'mix-blend-normal': themeType() === 'blackfriday'
+                 }">
+            <mat-icon *ngIf="!oferta.urlImagem" class="text-gray-200 text-6xl">image</mat-icon>
             
-            <!-- Badge de Categoria (Simulado) -->
-            <div class="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 text-[8px] text-white font-bold rounded uppercase tracking-wider backdrop-blur-sm">
-              {{ 'Super Oferta' }}
+            <!-- Category Badge -->
+            <div class="absolute bottom-3 left-3 px-2.5 py-0.5 text-[9px] font-black rounded uppercase tracking-wider backdrop-blur-sm shadow-sm"
+                 [ngClass]="{
+                   'bg-rose-500 text-white': themeType() === 'mothersday',
+                   'bg-amber-700 text-white': themeType() === 'easter',
+                   'bg-emerald-600 text-white': themeType() === 'christmas',
+                   'bg-amber-500 text-black': themeType() === 'blackfriday',
+                   'bg-black/60 text-white': themeType() === 'default'
+                 }">
+              {{ themeType() === 'blackfriday' ? 'Super Oferta' : 'Oferta' }}
             </div>
           </div>
 
-          <!-- Info do Produto -->
-          <div class="p-3 sm:p-4 flex-1 flex flex-col">
-            <h3 class="text-xs sm:text-sm font-black text-gray-900 leading-tight mb-2 line-clamp-2 h-8 sm:h-10">
+          <!-- Product Info -->
+          <div class="p-4 flex-1 flex flex-col justify-between"
+               [ngClass]="{'bg-zinc-950 text-white': themeType() === 'blackfriday'}">
+            <h3 class="text-xs sm:text-sm font-extrabold leading-snug mb-3 line-clamp-2 h-9"
+                [ngClass]="{
+                  'text-rose-900 font-serif-classic normal-case': themeType() === 'mothersday',
+                  'text-zinc-800': themeType() !== 'blackfriday' && themeType() !== 'mothersday',
+                  'text-gray-100': themeType() === 'blackfriday'
+                }">
               {{ oferta.nomeProduto }}
             </h3>
             
-            <!-- Botão de Ação Rápida -->
-            <button class="mt-auto w-full py-2 bg-gray-100 hover:bg-green-600 hover:text-white text-gray-600 font-black text-[10px] uppercase tracking-tighter rounded-lg transition-all flex items-center justify-center gap-1">
-              <mat-icon class="!text-xs !w-3 !h-3">add_shopping_cart</mat-icon>
-              Adicionar
+            <!-- CTA Favorite Button -->
+            <button (click)="toggleFavorito(oferta.id)"
+                    class="w-full py-2.5 font-black text-[10px] uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm animate-pulse-subtle"
+                    [ngClass]="{
+                      'bg-rose-100 hover:bg-rose-600 text-rose-800 hover:text-white': themeType() === 'mothersday' && !isFavorito(oferta.id),
+                      'bg-rose-500 text-white shadow-rose-200': themeType() === 'mothersday' && isFavorito(oferta.id),
+                      
+                      'bg-amber-100 hover:bg-amber-700 text-amber-900 hover:text-white': themeType() === 'easter' && !isFavorito(oferta.id),
+                      'bg-amber-600 text-white shadow-amber-200': themeType() === 'easter' && isFavorito(oferta.id),
+                      
+                      'bg-emerald-100 hover:bg-emerald-600 text-emerald-800 hover:text-white': themeType() === 'christmas' && !isFavorito(oferta.id),
+                      'bg-emerald-600 text-white shadow-emerald-200': themeType() === 'christmas' && isFavorito(oferta.id),
+                      
+                      'bg-zinc-900 hover:bg-zinc-800 border border-amber-500/25 text-amber-400': themeType() === 'blackfriday' && !isFavorito(oferta.id),
+                      'bg-amber-500 text-black font-black shadow-amber-500/25': themeType() === 'blackfriday' && isFavorito(oferta.id),
+                      
+                      'bg-gray-100 hover:bg-gray-200 text-gray-700': themeType() === 'default' && !isFavorito(oferta.id),
+                      'bg-[var(--color-primary)] text-white shadow-md': themeType() === 'default' && isFavorito(oferta.id)
+                    }">
+              <mat-icon class="!text-xs !w-3.5 !h-3.5 flex items-center justify-center">
+                {{ isFavorito(oferta.id) ? 'favorite' : 'favorite_border' }}
+              </mat-icon>
+              {{ isFavorito(oferta.id) ? 'Favoritado' : 'Favoritar' }}
             </button>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Footer / Informações da Loja (Estilo Tabloide) -->
-    <footer class="p-8 sm:p-12 text-center relative z-10 border-t border-gray-100 bg-gray-900 text-white">
-      <div class="max-w-4xl mx-auto">
+    <!-- Footer / Store Details (Includes premium whitelabel brand showcase in footer) -->
+    <footer class="p-8 sm:p-12 text-center relative z-10 border-t"
+            [ngClass]="{
+              'bg-zinc-950 text-white border-zinc-800': themeType() === 'blackfriday',
+              'bg-gray-900 text-white border-black/10': themeType() !== 'blackfriday'
+            }">
+      <div class="max-w-5xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 text-left">
+          
+          <!-- Column 1: A Marca do Supermercado (Highly Prominent Brand Signature) -->
+          <div class="flex flex-col items-start gap-4">
+            <div class="flex items-center gap-4">
+              <!-- Logo Container in Footer (Extremely Enlarged as requested) -->
+              <div class="w-32 h-32 sm:w-36 sm:h-36 bg-white rounded-[1.75rem] p-4 sm:p-5 shadow-md flex items-center justify-center border transition-transform duration-300 hover:scale-105"
+                   [ngClass]="themeType() === 'blackfriday' ? 'border-amber-500/30' : 'border-gray-200'">
+                <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
+                <div *ngIf="!supermarket()?.urlLogomarca" class="w-full h-full flex items-center justify-center bg-gray-50 rounded-2xl">
+                  <span class="text-5xl sm:text-6xl font-black uppercase text-center"
+                        [ngClass]="themeType() === 'blackfriday' ? 'text-amber-500' : 'text-[var(--color-primary)]'">
+                    {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex flex-col justify-center">
+                <h4 class="font-black text-lg uppercase tracking-wider mb-1.5"
+                    [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-yellow-400'">
+                  {{ supermarket()?.nomeFantasia }}
+                </h4>
+                <span class="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                  Loja Oficial
+                  <mat-icon class="!text-xs !w-4 !h-4 flex items-center justify-center text-green-400 font-black">verified</mat-icon>
+                </span>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 leading-relaxed font-semibold">
+              Obrigado por nos escolher! Nosso compromisso é levar a melhor qualidade e economia para a sua família todos os dias.
+            </p>
+          </div>
+
+          <!-- Column 2: Onde Estamos -->
           <div>
-            <h4 class="text-yellow-400 font-black uppercase text-xs mb-3 tracking-widest">Onde Estamos</h4>
-            <p *ngIf="supermarket()?.endereco" class="text-sm text-gray-400 leading-relaxed font-semibold">
+            <h4 class="font-black uppercase text-[10px] mb-4 tracking-widest"
+                [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-yellow-400'">
+              Onde Estamos
+            </h4>
+            <p *ngIf="supermarket()?.endereco" class="text-xs text-gray-400 leading-relaxed font-semibold">
               {{ supermarket()?.endereco }}<br>
               {{ supermarket()?.cidade }}/{{ supermarket()?.estado }} &bull; CEP {{ supermarket()?.cep }}
             </p>
-            <p *ngIf="!supermarket()?.endereco" class="text-sm text-gray-400 leading-relaxed italic">
+            <p *ngIf="!supermarket()?.endereco" class="text-xs text-gray-400 leading-relaxed italic">
               Consulte o endereço da loja mais próxima em nosso site oficial.
             </p>
           </div>
-          <div>
-            <h4 class="text-yellow-400 font-black uppercase text-xs mb-3 tracking-widest">Atendimento</h4>
-            <div *ngIf="supermarket()?.telefone" class="flex items-center gap-2 text-green-400 font-black">
-              <mat-icon class="!text-lg">phone</mat-icon>
-              <span>{{ supermarket()?.telefone }}</span>
+
+          <!-- Column 3: Atendimento e Pagamento -->
+          <div class="flex flex-col gap-5">
+            <div>
+              <h4 class="font-black uppercase text-[10px] mb-3 tracking-widest"
+                  [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-yellow-400'">
+                Atendimento
+              </h4>
+              <div *ngIf="supermarket()?.telefone" class="flex items-center gap-2 text-green-400 font-extrabold text-xs">
+                <mat-icon class="!text-base !w-4 !h-4 flex items-center justify-center">phone</mat-icon>
+                <span>{{ supermarket()?.telefone }}</span>
+              </div>
+              <div *ngIf="supermarket()?.email" class="flex items-center gap-2 text-slate-400 text-[11px] font-bold mt-1.5">
+                <mat-icon class="!text-xs !w-3.5 !h-3.5 flex items-center justify-center">email</mat-icon>
+                <span>{{ supermarket()?.email }}</span>
+              </div>
+              <div *ngIf="!supermarket()?.telefone" class="flex items-center gap-2 text-green-400 font-bold text-xs">
+                <mat-icon class="!text-base !w-4 !h-4 flex items-center justify-center">phone</mat-icon>
+                <span>(61) 99999-9999</span>
+              </div>
             </div>
-            <div *ngIf="supermarket()?.email" class="flex items-center gap-2 text-slate-400 text-xs font-bold mt-2">
-              <mat-icon class="!text-sm !w-4 !h-4 flex items-center justify-center">email</mat-icon>
-              <span>{{ supermarket()?.email }}</span>
-            </div>
-            <div *ngIf="!supermarket()?.telefone" class="flex items-center gap-2 text-green-400 font-bold">
-              <mat-icon class="!text-lg">whatsapp</mat-icon>
-              <span>(61) 99999-9999</span>
-            </div>
-          </div>
-          <div>
-            <h4 class="text-yellow-400 font-black uppercase text-xs mb-3 tracking-widest">Pagamento</h4>
-            <div class="flex gap-2 opacity-50 grayscale hover:grayscale-0 transition-all">
-              <mat-icon>credit_card</mat-icon>
-              <mat-icon>payments</mat-icon>
-              <mat-icon>qr_code_scanner</mat-icon>
+            
+            <div>
+              <h4 class="font-black uppercase text-[10px] mb-2 tracking-widest"
+                  [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-yellow-400'">
+                Formas de Pagamento
+              </h4>
+              <div class="flex gap-3 opacity-60 grayscale hover:grayscale-0 transition-all duration-300">
+                <mat-icon matTooltip="Cartão de Crédito">credit_card</mat-icon>
+                <mat-icon matTooltip="Dinheiro / Pix">payments</mat-icon>
+                <mat-icon matTooltip="Pagamento por QR Code">qr_code_scanner</mat-icon>
+              </div>
             </div>
           </div>
         </div>
  
         <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div class="flex items-center gap-3">
-            <mat-icon class="text-yellow-400">verified</mat-icon>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+            <mat-icon class="text-yellow-400 !text-xl !w-5 !h-5 flex items-center justify-center">verified</mat-icon>
+            <span class="text-[9px] font-black uppercase tracking-widest text-gray-500 text-left">
               <span *ngIf="supermarket()?.cnpj">CNPJ: {{ supermarket()?.cnpj }} &bull; </span>
-              Ofertas válidas enquanto durarem os estoques.
+              Ofertas válidas enquanto durarem os estoques. Imagens meramente ilustrativas.
             </span>
           </div>
-          <button mat-flat-button class="!bg-green-600 !text-white !rounded-full !px-8">
-            <mat-icon class="mr-2">share</mat-icon> Compartilhar
+          <button mat-flat-button 
+                  class="!rounded-full !px-8 !py-2.5 font-bold uppercase tracking-wider"
+                  [ngClass]="{
+                    '!bg-amber-500 !text-black shadow-[0_0_15px_rgba(245,158,11,0.3)]': themeType() === 'blackfriday',
+                    '!bg-green-600 !text-white': themeType() !== 'blackfriday'
+                  }">
+            <mat-icon class="mr-2 !text-sm flex items-center justify-center">share</mat-icon> Compartilhar Encarte
           </button>
         </div>
       </div>
     </footer>
 
   </div>
-
-  <!-- Decorative Background Elements -->
-  <div class="fixed top-0 left-0 w-64 h-64 bg-green-500/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none"></div>
-  <div class="fixed bottom-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl pointer-events-none"></div>
 </div>

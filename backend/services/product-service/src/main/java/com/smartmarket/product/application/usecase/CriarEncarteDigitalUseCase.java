@@ -46,6 +46,9 @@ public class CriarEncarteDigitalUseCase implements CriarEncarteDigitalPort {
                     log.error("Tentativa de criar encarte com oferta inexistente: {}", item.getOfertaId());
                     throw new IllegalArgumentException("Oferta com ID " + item.getOfertaId() + " não encontrada.");
                 }
+                if (item.getId() == null) {
+                    item.setId(UUID.randomUUID());
+                }
                 item.setEncarteId(encarteDigital.getId()); // Associa o item ao encarte
             }).collect(Collectors.toList()));
         }

@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PublicCatalogMockService, MockFlyer } from '../public-catalog-mock.service';
-
+import { PublicCatalogService } from '@core/services/public-catalog.service';
+ 
 @Component({
   selector: 'app-flyer-list',
   standalone: true,
@@ -14,15 +14,36 @@ import { PublicCatalogMockService, MockFlyer } from '../public-catalog-mock.serv
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlyerListComponent implements OnInit {
-  private catalogService = inject(PublicCatalogMockService);
-
+  private catalogService = inject(PublicCatalogService);
+ 
   isLoading = signal<boolean>(true);
-  flyers = signal<MockFlyer[]>([]);
-
+  flyers = signal<any[]>([]);
+  location = this.catalogService.currentLocation;
+ 
+  constructor() {
+    effect(() => {
+      if (this.location()) {
+        this.loadFlyers();
+      }
+    });
+  }
+ 
   ngOnInit(): void {
-    this.catalogService.getAllFlyers().subscribe(data => {
-      this.flyers.set(data);
-      this.isLoading.set(false);
+    if (!this.location()) {
+      this.catalogService.initializeLocation();
+    }
+  }
+ 
+  private loadFlyers() {
+    this.isLoading.set(true);
+    this.catalogService.getActiveFlyersNearby().subscribe({
+      next: (data) => {
+        this.flyers.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
     });
   }
 }

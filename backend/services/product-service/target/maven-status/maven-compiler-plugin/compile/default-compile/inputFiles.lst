@@ -13,11 +13,13 @@ C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\c
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\CadastrarProdutoBaseUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\CriarOfertaUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\ProdutoBaseRepositoryAdapter.java
+C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\ExcluirOfertaUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\domain\model\EncarteItem.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\domain\model\TemaEncarte.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\CategoriaRepository.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\EncarteDigitalEntity.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\MarcaRepository.java
+C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\AtualizarOfertaUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\OfertaSupermercadoRepository.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\OfertaSupermercadoEntity.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\storage\minio\MinioImageStorageServiceImpl.java
@@ -38,6 +40,7 @@ C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\c
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\dto\EncarteDigitalRequest.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\OfertaRepositoryAdapter.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\dto\EncarteItemResponse.java
+C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\ListarOfertasUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\mapper\ProdutoBaseMapper.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\EncarteDigitalRepository.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\dto\TemaEncarteRequest.java

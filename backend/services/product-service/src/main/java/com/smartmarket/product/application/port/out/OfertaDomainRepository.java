@@ -11,5 +11,6 @@ public interface OfertaDomainRepository {
     List<OfertaSupermercado> findBySupermercadoId(UUID supermercadoId);
     boolean existsBySupermercadoIdAndProdutoBaseIdAndAtivoTrue(UUID supermercadoId, UUID produtoBaseId);
     OfertaSupermercado save(OfertaSupermercado oferta);
+    void deleteById(UUID id);
 }
 

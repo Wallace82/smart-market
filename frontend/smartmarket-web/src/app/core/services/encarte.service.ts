@@ -56,7 +56,7 @@ export class EncarteService {
     return this.http.get<EncarteDigitalResponse>(`${this.encartesUrl}/${id}`);
   }
 
-  alterarStatusEncarte(id: string, status: 'RASCUNHO' | 'PUBLICADO' | 'ARQUIVADO' | 'EXPIRADO'): Observable<EncarteDigitalResponse> {
+  alterarStatusEncarte(id: string, status: 'RASCUNHO' | 'ATIVO' | 'ENCERRADO'): Observable<EncarteDigitalResponse> {
     return this.http.patch<EncarteDigitalResponse>(`${this.encartesUrl}/${id}/status`, null, {
       params: { status }
     });

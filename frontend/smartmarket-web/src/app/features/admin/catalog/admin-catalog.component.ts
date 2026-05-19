@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 // Angular Material
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 
 // Services & Models
 import { ProductBaseService } from '@core/services/product-base.service';
@@ -14,7 +15,7 @@ import { ProductFormDialogComponent } from './product-form-dialog.component';
 
 @Component({
   selector: 'app-admin-catalog',
-  imports: [CommonModule, FormsModule, MatProgressSpinnerModule],
+  imports: [CommonModule, FormsModule, MatProgressSpinnerModule, MatDialogModule, MatIconModule],
   templateUrl: './admin-catalog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

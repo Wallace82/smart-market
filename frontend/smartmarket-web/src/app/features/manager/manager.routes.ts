@@ -37,6 +37,11 @@ export const MANAGER_ROUTES: Routes = [
     loadComponent: () => import('./flyers/flyer-create/flyer-create.component').then(m => m.FlyerCreateComponent),
     title: 'SmartMarket - Novo Encarte'
   },
+  { 
+    path: 'flyers/edit/:id', 
+    loadComponent: () => import('./flyers/flyer-create/flyer-create.component').then(m => m.FlyerCreateComponent),
+    title: 'SmartMarket - Editar Encarte'
+  },
   
   // ==========================================================
   // RF-12 e RF-13 - Growth, Marketing e QR Code

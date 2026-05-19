@@ -1,12 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, forkJoin, of, from } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { SupermarketService } from './supermarket.service';
 import { EncarteService } from './encarte.service';
 import { OfertaService } from './oferta.service';
-import { SupermarketResponse } from '../models/supermarket.model';
-import { EncarteDigitalResponse } from '../models/encarte.model';
-import { OfertaSupermercado } from './oferta.service';
 
 export interface UserLocation {
   lat?: number;
@@ -27,16 +24,23 @@ export class PublicCatalogService {
 
   // Estados Reativos de Localização
   public currentLocation = signal<UserLocation | null>(null);
-  public userSelectedRadius = signal<number>(3); // Raio padrão em KM
+  public userSelectedRadius = signal<number>(10); // Raio padrão em KM
 
   /**
-   * Inicializa a localização do usuário. 
-   * Tenta GPS primeiro, se falhar ou se já houver preferência salva, usa a salva.
+   * Inicializa a localização do usuário.
+   * Tenta GPS primeiro. Se falhar, usa localização salva ou tenta enriquecer com coords via CEP.
    */
   async initializeLocation(): Promise<void> {
     const saved = localStorage.getItem('user_location');
     if (saved) {
-      this.currentLocation.set(JSON.parse(saved));
+      const loc: UserLocation = JSON.parse(saved);
+      // Se a localização salva não tem coordenadas, tenta enriquecer via CEP
+      if (!loc.lat && loc.cep) {
+        const enriched = await this.enrichLocationWithCoords(loc);
+        this.currentLocation.set(enriched);
+      } else {
+        this.currentLocation.set(loc);
+      }
       return;
     }
 
@@ -46,9 +50,39 @@ export class PublicCatalogService {
       const loc: UserLocation = { ...coords, address, isGps: true };
       this.setLocation(loc);
     } catch (e) {
-      // Fallback para localização padrão (ex: São Paulo) se GPS falhar
-      const loc: UserLocation = { lat: -23.5505, lng: -46.6333, address: 'São Paulo, SP', isGps: false };
+      // GPS falhou: usa Brasília como coordenada de fallback genérica
+      const loc: UserLocation = { lat: -15.7801, lng: -47.9292, address: 'Brasília, DF', isGps: false };
       this.setLocation(loc);
+    }
+  }
+
+  /**
+   * Enriquece uma localização sem coordenadas usando ViaCEP + Nominatim.
+   */
+  private async enrichLocationWithCoords(loc: UserLocation): Promise<UserLocation> {
+    if (!loc.cep) return loc;
+    try {
+      const cepNorm = loc.cep.replace(/-/g, '');
+      // ViaCEP para obter logradouro/cidade
+      const viaCepRes = await fetch(`https://viacep.com.br/ws/${cepNorm}/json/`);
+      if (!viaCepRes.ok) return loc;
+      const viaCepData = await viaCepRes.json();
+      if (viaCepData.erro) return loc;
+
+      const query = `${viaCepData.logradouro || ''} ${viaCepData.localidade} ${viaCepData.uf} Brasil`;
+      const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+      if (!nomRes.ok) return loc;
+      const nomData = await nomRes.json();
+      if (!nomData?.length) return loc;
+
+      return {
+        ...loc,
+        lat: parseFloat(nomData[0].lat),
+        lng: parseFloat(nomData[0].lon),
+        address: `${viaCepData.logradouro || ''}, ${viaCepData.localidade} - ${viaCepData.uf}`.trim()
+      };
+    } catch {
+      return loc;
     }
   }
 
@@ -61,29 +95,57 @@ export class PublicCatalogService {
     this.setLocation({ address, cep, isGps: false });
   }
 
+  /**
+   * Busca supermercados próximos usando coordenadas.
+   * Se não houver coords, tenta enriquecer via CEP antes de usar fallback total.
+   */
   getNearbySupermarkets(): Observable<any[]> {
     const loc = this.currentLocation();
-    if (!loc) return of([]);
+    if (!loc) return this.getAllActiveStores();
 
-    if (loc.isGps && loc.lat && loc.lng) {
+    if (loc.lat && loc.lng) {
+      // Temos coordenadas: usa Haversine
       return this.supermarketService.listarProximos(loc.lat, loc.lng, this.userSelectedRadius() * 1000).pipe(
-        map(stores => this.mapStores(stores))
-      );
-    } else {
-      return this.supermarketService.buscarPorLocalizacao(loc.cep, loc.bairro).pipe(
-        map(res => this.mapStores(res.content || res))
+        map(stores => this.mapStores(stores)),
+        catchError(() => this.getAllActiveStores())
       );
     }
+
+    // Sem coordenadas: tenta enriquecer via CEP e retry
+    if (loc.cep) {
+      return from(this.enrichLocationWithCoords(loc)).pipe(
+        switchMap(enriched => {
+          if (enriched.lat && enriched.lng) {
+            // Atualiza localização com as coords obtidas (sem salvar no localStorage para não sobrescrever)
+            this.currentLocation.set(enriched);
+            return this.supermarketService.listarProximos(enriched.lat, enriched.lng, this.userSelectedRadius() * 1000).pipe(
+              map(stores => this.mapStores(stores)),
+              catchError(() => this.getAllActiveStores())
+            );
+          }
+          return this.getAllActiveStores();
+        })
+      );
+    }
+
+    return this.getAllActiveStores();
+  }
+
+  private getAllActiveStores(): Observable<any[]> {
+    return this.supermarketService.listarTodos(0, 50).pipe(
+      map((res: any) => this.mapStores(res.content || res)),
+      catchError(() => of([]))
+    );
   }
 
   getActiveFlyersNearby(): Observable<any[]> {
     return this.getNearbySupermarkets().pipe(
       switchMap(stores => {
         if (stores.length === 0) return of([]);
-        
-        const requests = stores.map(s => 
+
+        const requests = stores.map(s =>
           this.encarteService.listarEncartes(s.id).pipe(
-            map(encartes => encartes.filter(e => e.status === 'PUBLICADO').map(e => ({
+            map(encartes => encartes.filter(e => e.status === 'ATIVO').map(e => ({
               ...e,
               supermarketName: s.name,
               supermarketLogo: s.logoUrl
@@ -91,7 +153,7 @@ export class PublicCatalogService {
             catchError(() => of([]))
           )
         );
-        
+
         return forkJoin(requests).pipe(
           map(results => results.flat().map(e => ({
             id: e.id,
@@ -111,19 +173,19 @@ export class PublicCatalogService {
     return this.getNearbySupermarkets().pipe(
       switchMap(stores => {
         if (stores.length === 0) return of([]);
-        
-        const requests = stores.map(s => 
+
+        const requests = stores.map(s =>
           this.ofertaService.buscarPorSupermercado(s.id).pipe(
-            map(ofertas => ofertas.filter(o => o.ativo).map(o => ({
+            map(ofertas => ofertas.filter((o: any) => o.ativo).map((o: any) => ({
               ...o,
               supermarketName: s.name
             }))),
             catchError(() => of([]))
           )
         );
-        
+
         return forkJoin(requests).pipe(
-          map(results => results.flat().map(o => ({
+          map(results => results.flat().map((o: any) => ({
             id: o.id,
             productName: o.nomeProduto,
             imageUrl: o.urlImagem || 'https://images.unsplash.com/photo-1586201375761-83865001e8ac?auto=format&fit=crop&w=400&q=80',
@@ -144,7 +206,7 @@ export class PublicCatalogService {
       name: s.nomeFantasia,
       logoUrl: s.urlLogomarca || `https://ui-avatars.com/api/?name=${s.nomeFantasia}&background=16a34a&color=fff&size=128`,
       primaryColor: s.corPrimariaHex || '#16a34a',
-      distanceKm: s.distance_meters ? (s.distance_meters / 1000).toFixed(1) : '0.5'
+      distanceKm: s.distance_meters ? (s.distance_meters / 1000).toFixed(1) : '< 1'
     }));
   }
 

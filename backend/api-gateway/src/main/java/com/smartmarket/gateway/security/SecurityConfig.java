@@ -34,6 +34,8 @@ public class SecurityConfig {
                 .pathMatchers("/api/v1/produtos-base/**").permitAll()
                 .pathMatchers("/api/v1/temas-encarte/**").permitAll()
                 .pathMatchers("/api/v1/categorias/**").permitAll()
+                .pathMatchers("/api/v1/encartes/**").permitAll()
+                .pathMatchers("/api/v1/ofertas/**").permitAll()
                 .anyExchange().permitAll()
             )
 

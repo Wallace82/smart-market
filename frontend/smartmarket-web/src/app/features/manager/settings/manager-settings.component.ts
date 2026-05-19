@@ -16,7 +16,6 @@ import { effect } from '@angular/core';
 
 @Component({
   selector: 'app-manager-settings',
-  standalone: true,
   imports: [
     CommonModule, 
     FormsModule,

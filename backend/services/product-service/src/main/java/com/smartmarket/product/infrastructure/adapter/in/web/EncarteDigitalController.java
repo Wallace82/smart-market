@@ -69,7 +69,7 @@ public class EncarteDigitalController {
             @ApiResponse(responseCode = "200", description = "Encarte atualizado com sucesso"),
             @ApiResponse(responseCode = "404", description = "Encarte não encontrado")
     })
-    public ResponseEntity<EncarteDigitalResponse> atualizar(@PathVariable @Parameter(description = "ID do Encarte") UUID id, @RequestBody EncarteDigitalRequest request) {
+    public ResponseEntity<EncarteDigitalResponse> atualizar(@PathVariable("id") @Parameter(description = "ID do Encarte") UUID id, @RequestBody EncarteDigitalRequest request) {
         log.info("Atualizando encarte digital. ID: {}", id);
         EncarteDigital encarte = mapper.toDomain(request);
         EncarteDigital atualizado = atualizarEncarteDigitalUseCase.execute(id, encarte);
@@ -78,7 +78,7 @@ public class EncarteDigitalController {
 
     @GetMapping
     @Operation(summary = "Listar Encartes", description = "Lista todos os encartes, com opção de filtrar por supermercado")
-    public ResponseEntity<List<EncarteDigitalResponse>> listarTodos(@RequestParam(required = false) @Parameter(description = "ID opcional do supermercado") UUID supermercadoId) {
+    public ResponseEntity<List<EncarteDigitalResponse>> listarTodos(@RequestParam(value = "supermercadoId", required = false) @Parameter(description = "ID opcional do supermercado") UUID supermercadoId) {
         log.info("Listando encartes digitais. Filtro Supermercado: {}", supermercadoId);
         List<EncarteDigital> encartes;
         if (supermercadoId != null) {
@@ -99,7 +99,7 @@ public class EncarteDigitalController {
             @ApiResponse(responseCode = "200", description = "Encarte encontrado"),
             @ApiResponse(responseCode = "404", description = "Encarte não encontrado")
     })
-    public ResponseEntity<EncarteDigitalResponse> buscarPorId(@PathVariable @Parameter(description = "ID do Encarte") UUID id) {
+    public ResponseEntity<EncarteDigitalResponse> buscarPorId(@PathVariable("id") @Parameter(description = "ID do Encarte") UUID id) {
         log.info("Buscando encarte digital por ID: {}", id);
         return listarEncartesDigitaisUseCase.buscarPorId(id)
                 .map(mapper::toResponse)
@@ -112,7 +112,7 @@ public class EncarteDigitalController {
 
     @PatchMapping("/{id}/status")
     @Operation(summary = "Alterar Status", description = "Altera o status (ex: ATIVO, INATIVO) de um encarte digital")
-    public ResponseEntity<EncarteDigitalResponse> alterarStatus(@PathVariable @Parameter(description = "ID do Encarte") UUID id, @RequestParam @Parameter(description = "Novo status") EncarteStatus status) {
+    public ResponseEntity<EncarteDigitalResponse> alterarStatus(@PathVariable("id") @Parameter(description = "ID do Encarte") UUID id, @RequestParam("status") @Parameter(description = "Novo status") EncarteStatus status) {
         log.info("Alterando status do encarte digital. ID: {}, Novo Status: {}", id, status);
         EncarteDigital atualizado = alterarStatusEncarteDigitalUseCase.execute(id, status);
         return ResponseEntity.ok(mapper.toResponse(atualizado));

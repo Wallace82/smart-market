@@ -7,10 +7,11 @@ import { EncarteService } from '@core/services/encarte.service';
 import { TemaEncarteResponse } from '@core/models/encarte.model';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-admin-themes',
-  imports: [CommonModule, RouterModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterModule, MatProgressSpinnerModule, MatIconModule],
   templateUrl: './admin-themes.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

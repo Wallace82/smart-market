@@ -64,7 +64,7 @@ public class ProdutoBaseController {
     }
 
     @GetMapping("/busca")
-    public ResponseEntity<List<ProdutoBase>> buscarPorNome(@RequestParam String nome) {
+    public ResponseEntity<List<ProdutoBase>> buscarPorNome(@RequestParam("nome") String nome) {
         List<ProdutoBase> produtos = listarProdutoBaseUseCase.buscarPorNome(nome);
         return ResponseEntity.ok(produtos);
     }

@@ -17,6 +17,7 @@ com\smartmarket\product\infrastructure\adapter\out\storage\minio\MinioThemeAsset
 com\smartmarket\product\infrastructure\adapter\out\persistence\CategoriaEntity$CategoriaEntityBuilder.class
 com\smartmarket\product\infrastructure\adapter\out\storage\minio\MinioImageStorageServiceImpl.class
 com\smartmarket\product\application\port\out\OfertaSupermercadoDomainRepository.class
+com\smartmarket\product\application\usecase\AtualizarOfertaUseCase.class
 com\smartmarket\product\application\port\out\OfertaDomainRepository.class
 com\smartmarket\product\infrastructure\adapter\in\web\mapper\EncarteDigitalWebMapper.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\EncarteItemEntity.class
@@ -46,6 +47,7 @@ com\smartmarket\product\application\usecase\AtualizarTemaEncarteUseCase.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\EncarteItemRepository.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\EncarteDigitalEntity.class
 com\smartmarket\product\domain\model\EncarteItem.class
+com\smartmarket\product\application\usecase\ListarOfertasUseCase.class
 com\smartmarket\product\infrastructure\adapter\in\web\ProdutoBaseController.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\TemaEncarteRepositoryAdapter.class
 com\smartmarket\product\application\dto\TemaEncarteResponse.class
@@ -72,4 +74,5 @@ com\smartmarket\product\application\dto\EncarteDigitalResponse.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\OfertaRepository.class
 com\smartmarket\product\infrastructure\adapter\in\web\OfertaController.class
 com\smartmarket\product\domain\model\EncarteStatus.class
+com\smartmarket\product\application\usecase\ExcluirOfertaUseCase.class
 com\smartmarket\product\application\usecase\ListarTemasEncarteUseCase.class

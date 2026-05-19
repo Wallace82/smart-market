@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -26,7 +26,6 @@ import { AuthService } from '@core/auth/auth.service';
 
 @Component({
   selector: 'app-flyer-create',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -48,6 +47,15 @@ import { AuthService } from '@core/auth/auth.service';
   styleUrl: './flyer-create.component.scss'
 })
 export class FlyerCreateComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private encarteService = inject(EncarteService);
+  private supermarketService = inject(SupermarketService);
+  private ofertaService = inject(OfertaService);
+  private authService = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   form: FormGroup;
   encarteId = signal<string | null>(null);
   temas = signal<TemaEncarteResponse[]>([]);
@@ -102,16 +110,7 @@ export class FlyerCreateComponent implements OnInit {
   selectedThemeId = signal<string | null>(null);
   currentTheme = computed(() => this.temas().find(t => t.id === this.selectedThemeId()));
 
-  constructor(
-    private fb: FormBuilder,
-    private encarteService: EncarteService,
-    private supermarketService: SupermarketService,
-    private ofertaService: OfertaService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
     this.form = this.fb.group({
       titulo: ['', Validators.required],
       temaId: [null],
@@ -126,9 +125,6 @@ export class FlyerCreateComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.encarteId.set(id);
-    } else {
-      // Simula um ID para fins de demonstração da interface (botões de visualização)
-      this.encarteId.set('mock-flyer-id');
     }
     this.carregarDadosIniciais();
   }
@@ -191,8 +187,8 @@ export class FlyerCreateComponent implements OnInit {
     this.form.patchValue({
       titulo: encarte.titulo,
       temaId: encarte.temaId,
-      dataInicio: encarte.dataInicio ? new Date(encarte.dataInicio).toISOString().split('T')[0] : '',
-      dataFim: encarte.dataFim ? new Date(encarte.dataFim).toISOString().split('T')[0] : ''
+      dataInicio: encarte.dataInicio ? encarte.dataInicio.split('T')[0] : '',
+      dataFim: encarte.dataFim ? encarte.dataFim.split('T')[0] : ''
     });
 
     if (encarte.itens) {
@@ -238,8 +234,12 @@ export class FlyerCreateComponent implements OnInit {
       destaque: false
     }));
 
+    const val = this.form.value;
     const request: EncarteDigitalRequest = {
-      ...this.form.value,
+      titulo: val.titulo,
+      temaId: val.temaId || undefined,
+      dataInicio: val.dataInicio ? `${val.dataInicio}T00:00:00` : '',
+      dataFim: val.dataFim ? `${val.dataFim}T23:59:59` : '',
       supermercadoId: this.supermarket()?.id || 'mock-id',
       itens: itens
     };

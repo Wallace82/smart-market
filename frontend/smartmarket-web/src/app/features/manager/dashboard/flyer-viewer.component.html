@@ -106,11 +106,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 text-left">
           <div>
             <h4 class="text-yellow-400 font-black uppercase text-xs mb-3 tracking-widest">Onde Estamos</h4>
-            <p class="text-sm text-gray-400 leading-relaxed italic">Consulte o endereço da loja mais próxima em nosso site oficial.</p>
+            <p *ngIf="supermarket()?.endereco" class="text-sm text-gray-400 leading-relaxed font-semibold">
+              {{ supermarket()?.endereco }}<br>
+              {{ supermarket()?.cidade }}/{{ supermarket()?.estado }} &bull; CEP {{ supermarket()?.cep }}
+            </p>
+            <p *ngIf="!supermarket()?.endereco" class="text-sm text-gray-400 leading-relaxed italic">
+              Consulte o endereço da loja mais próxima em nosso site oficial.
+            </p>
           </div>
           <div>
             <h4 class="text-yellow-400 font-black uppercase text-xs mb-3 tracking-widest">Atendimento</h4>
-            <div class="flex items-center gap-2 text-green-400 font-bold">
+            <div *ngIf="supermarket()?.telefone" class="flex items-center gap-2 text-green-400 font-black">
+              <mat-icon class="!text-lg">phone</mat-icon>
+              <span>{{ supermarket()?.telefone }}</span>
+            </div>
+            <div *ngIf="supermarket()?.email" class="flex items-center gap-2 text-slate-400 text-xs font-bold mt-2">
+              <mat-icon class="!text-sm !w-4 !h-4 flex items-center justify-center">email</mat-icon>
+              <span>{{ supermarket()?.email }}</span>
+            </div>
+            <div *ngIf="!supermarket()?.telefone" class="flex items-center gap-2 text-green-400 font-bold">
               <mat-icon class="!text-lg">whatsapp</mat-icon>
               <span>(61) 99999-9999</span>
             </div>
@@ -124,11 +138,14 @@
             </div>
           </div>
         </div>
-
+ 
         <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div class="flex items-center gap-3">
             <mat-icon class="text-yellow-400">verified</mat-icon>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Ofertas válidas enquanto durarem os estoques.</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+              <span *ngIf="supermarket()?.cnpj">CNPJ: {{ supermarket()?.cnpj }} &bull; </span>
+              Ofertas válidas enquanto durarem os estoques.
+            </span>
           </div>
           <button mat-flat-button class="!bg-green-600 !text-white !rounded-full !px-8">
             <mat-icon class="mr-2">share</mat-icon> Compartilhar

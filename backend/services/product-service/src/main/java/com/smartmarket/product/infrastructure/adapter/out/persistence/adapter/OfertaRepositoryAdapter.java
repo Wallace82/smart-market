@@ -46,6 +46,11 @@ public class OfertaRepositoryAdapter implements OfertaDomainRepository {
         OfertaSupermercadoEntity savedEntity = jpaRepository.save(entity);
         return mapper.toDomain(savedEntity);
     }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
 }
 
 

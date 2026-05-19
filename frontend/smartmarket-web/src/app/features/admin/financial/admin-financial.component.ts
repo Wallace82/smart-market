@@ -7,10 +7,11 @@ import { BillingService } from '@core/services/billing.service';
 import { FinancialSummaryResponse } from '@core/models/billing.model';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-admin-financial',
-  imports: [CommonModule, RouterModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterModule, MatProgressSpinnerModule, MatIconModule],
   templateUrl: './admin-financial.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

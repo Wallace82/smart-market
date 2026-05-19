@@ -32,9 +32,9 @@ import { Plano } from '@core/models/billing.model';
               Monitore, customize e ative os planos SaaS disponíveis. Defina limites de ofertas, encartes ativos, alcance de geolocalização e suporte Concierge.
             </p>
           </div>
-          <a mat-flat-button color="primary" routerLink="/admin/planos/new" 
-             class="!rounded-2xl !px-6 !py-6 !font-bold hover:!scale-105 active:!scale-95 transition-transform shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
-            <mat-icon class="mr-1">add</mat-icon> Criar Novo Plano
+          <a routerLink="/admin/planos/new" 
+             class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] text-white rounded-2xl px-6 py-4 font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer border-0 shrink-0 no-underline">
+            <mat-icon class="mr-1">add_circle</mat-icon> Criar Novo Plano
           </a>
         </div>
       </div>

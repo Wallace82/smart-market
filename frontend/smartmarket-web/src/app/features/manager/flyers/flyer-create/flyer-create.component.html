@@ -1,230 +1,281 @@
-<div class="p-6 max-w-7xl mx-auto font-sans">
-  <div class="flex items-center gap-4 mb-8">
-    <button routerLink="/manager/flyers" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <div class="flex-1">
-      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Novo Encarte Digital</h1>
-      <p class="text-gray-500 mt-1">Configure o tabloide, selecione ofertas e veja o preview em tempo real.</p>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-sans">
+  
+  <!-- Premium Header Section -->
+  <div class="relative bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 rounded-3xl p-8 sm:p-10 shadow-xl border border-slate-700/50 mb-8 overflow-hidden">
+    <div class="absolute -right-10 -top-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
+    <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-secondary/15 rounded-full blur-3xl"></div>
+    
+    <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <button routerLink="/manager/flyers" class="w-11 h-11 rounded-full hover:bg-slate-700 text-white flex items-center justify-center transition-colors border border-slate-600 cursor-pointer">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="bg-primary/25 text-primary text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest border border-primary/30">Supermercado</span>
+            <span class="bg-slate-700/50 text-slate-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Tabloides</span>
+          </div>
+          <h1 class="text-3xl font-black text-white tracking-tight">Novo Encarte Digital</h1>
+          <p class="text-slate-400 mt-2 max-w-xl text-sm leading-relaxed">
+            Configure o tabloide, selecione as ofertas da sua loja e visualize o layout em tempo real no mockup do celular.
+          </p>
+        </div>
+      </div>
+      
+      @if (encarteId()) {
+        <button (click)="visualizarPublico()" 
+                class="bg-white hover:bg-slate-50 text-slate-850 rounded-2xl px-6 py-4 font-bold hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer border-0 shrink-0">
+          <mat-icon>visibility</mat-icon>
+          Visualizar Público
+        </button>
+      }
     </div>
-    <button *ngIf="encarteId()" (click)="visualizarPublico()" 
-            class="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-100 hover:border-green-500 hover:text-green-600 text-gray-600 font-bold rounded-2xl transition-all shadow-sm hover:shadow-md">
-      <mat-icon>visibility</mat-icon>
-      Visualizar Público
-    </button>
   </div>
 
-  <div *ngIf="dataLoading()" class="flex flex-col items-center justify-center py-20">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p class="mt-4 text-gray-500 font-medium animate-pulse">Carregando dados da loja...</p>
-  </div>
-
-  <div *ngIf="!dataLoading()" class="flex flex-col lg:flex-row gap-8">
-    <!-- Esquerda: Formulário -->
-    <div class="flex-1 space-y-6">
-      <form [formGroup]="form" class="space-y-6">
-        
-        <!-- Configurações Básicas -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <mat-icon class="text-green-500">settings</mat-icon>
-            Configurações Básicas
-          </h2>
+  @if (dataLoading()) {
+    <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="mt-4 text-gray-500 font-bold tracking-wide animate-pulse">Carregando dados da loja...</p>
+    </div>
+  } @else {
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Esquerda: Formulário -->
+      <div class="flex-1 space-y-6">
+        <form [formGroup]="form" class="space-y-6">
           
-          <div class="space-y-5">
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-1">Título do Encarte</label>
-              <input type="text" formControlName="titulo" placeholder="Ex: Ofertas de Natal" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
-            </div>
-
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-1">Tema Sazonal</label>
-              <select formControlName="temaId" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
-                <option [value]="null">Nenhum Tema (Padrão)</option>
-                <option *ngFor="let tema of temas()" [value]="tema.id">{{ tema.nome }}</option>
-              </select>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Data de Início</label>
-                <input type="date" formControlName="dataInicio" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
-              </div>
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Data de Fim</label>
-                <input type="date" formControlName="dataFim" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-gray-50/50">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Seleção de Ofertas -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <mat-icon class="text-green-500">local_offer</mat-icon>
-              Selecionar Ofertas
+          <!-- Configurações Básicas -->
+          <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+            <h2 class="text-lg font-black text-gray-900 mb-6 pb-3 border-b border-gray-100 flex items-center gap-2 uppercase tracking-wide">
+              <mat-icon class="text-primary">settings</mat-icon>
+              Configurações Básicas
             </h2>
-            <div class="flex items-center gap-3">
-              <div class="relative flex-1 md:w-64">
-                <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</mat-icon>
-                <input type="text" (input)="updateSearch($event)" placeholder="Filtrar ofertas..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all">
+            
+            <div class="space-y-5">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Título do Encarte</label>
+                <input type="text" formControlName="titulo" placeholder="Ex: Ofertas de Natal" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-gray-50/50 text-sm font-semibold text-gray-900">
               </div>
-              <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0">
-                {{ ofertasSelecionadas().length }} selecionadas
-              </span>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Tema Sazonal</label>
+                <select formControlName="temaId" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-gray-50/50 text-sm font-semibold text-gray-900 cursor-pointer">
+                  <option [value]="null">Nenhum Tema (Padrão)</option>
+                  @for (tema of temas(); track tema.id) {
+                    <option [value]="tema.id">{{ tema.nome }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Data de Início</label>
+                  <input type="date" formControlName="dataInicio" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-gray-50/50 text-sm font-semibold text-slate-800">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Data de Fim</label>
+                  <input type="date" formControlName="dataFim" class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all bg-gray-50/50 text-sm font-semibold text-slate-800">
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-            <div *ngIf="ofertasFiltradas().length === 0" class="text-center py-10 border-2 border-dashed border-gray-100 rounded-2xl">
-              <mat-icon class="text-gray-300 text-5xl mb-2">inventory_2</mat-icon>
-              <p class="text-gray-400 font-medium">Nenhuma oferta encontrada.</p>
+          <!-- Seleção de Ofertas -->
+          <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-3 border-b border-gray-100">
+              <h2 class="text-lg font-black text-gray-900 flex items-center gap-2 uppercase tracking-wide">
+                <mat-icon class="text-primary">local_offer</mat-icon>
+                Selecionar Ofertas
+              </h2>
+              <div class="flex items-center gap-3">
+                <div class="relative flex-1 md:w-64">
+                  <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</mat-icon>
+                  <input type="text" (input)="updateSearch($event)" placeholder="Filtrar ofertas..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-full text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary transition-all">
+                </div>
+                <span class="bg-emerald-50 text-emerald-700 text-xs font-black px-3 py-1.5 rounded-full border border-emerald-100 shrink-0">
+                  {{ ofertasSelecionadas().length }} selecionadas
+                </span>
+              </div>
             </div>
 
-            <label *ngFor="let oferta of ofertasFiltradas()" 
-                   class="flex items-center p-4 border rounded-2xl cursor-pointer hover:shadow-md transition-all group relative overflow-hidden" 
-                   [class.border-green-500]="ofertasSelecionadas().includes(oferta)" 
-                   [class.bg-green-50/30]="ofertasSelecionadas().includes(oferta)"
-                   [class.border-gray-100]="!ofertasSelecionadas().includes(oferta)">
-              
-              <div class="absolute left-0 top-0 w-1 h-full bg-green-500 transition-transform origin-left" [class.scale-x-0]="!ofertasSelecionadas().includes(oferta)"></div>
-
-              <input type="checkbox" (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="w-5 h-5 text-green-600 rounded-lg border-gray-300 focus:ring-green-500 z-10">
-              
-              <div class="ml-4 flex items-center gap-4 flex-1 z-10">
-                <div class="w-14 h-14 rounded-xl overflow-hidden bg-white border border-gray-100 flex-shrink-0">
-                  <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" alt="Produto" class="w-full h-full object-cover">
-                  <div *ngIf="!oferta.urlImagem" class="w-full h-full flex items-center justify-center bg-gray-50">
-                    <mat-icon class="text-gray-300">image</mat-icon>
-                  </div>
+            <div class="max-h-[500px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+              @if (ofertasFiltradas().length === 0) {
+                <div class="text-center py-10 border-2 border-dashed border-gray-100 rounded-2xl">
+                  <mat-icon class="text-gray-300 text-5xl mb-2">inventory_2</mat-icon>
+                  <p class="text-gray-400 font-bold uppercase tracking-wider text-xs">Nenhuma oferta encontrada.</p>
                 </div>
-                <div class="flex-1">
-                  <h4 class="font-bold text-gray-900 leading-tight group-hover:text-green-700 transition-colors">{{ oferta.nomeProduto }}</h4>
-                  <div class="flex items-center gap-3 mt-1">
-                    <span class="text-lg font-black text-gray-900">{{ oferta.preco | currency:'BRL' }}</span>
-                    <span class="text-xs text-gray-400 uppercase font-bold tracking-wider">/ {{ oferta.unidadeMedida }}</span>
-                  </div>
-                </div>
-                <mat-icon *ngIf="ofertasSelecionadas().includes(oferta)" class="text-green-500">check_circle</mat-icon>
-              </div>
-            </label>
-          </div>
-        </div>
+              }
 
-        <!-- Botão Salvar -->
-        <div class="flex justify-end pt-4 gap-4">
-          <button *ngIf="encarteId()" type="button" (click)="visualizarPublico()"
-                  class="border-2 border-gray-200 hover:border-green-500 hover:text-green-600 text-gray-600 font-bold py-4 px-8 rounded-2xl transition-all text-lg flex items-center gap-2 bg-white shadow-sm">
-            <mat-icon>open_in_new</mat-icon>
-            Ver Online
-          </button>
-
-          <button type="button" (click)="salvar()" [disabled]="form.invalid || loading() || ofertasSelecionadas().length === 0" 
-                  class="bg-green-600 hover:bg-green-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-green-200 transition-all text-lg flex items-center gap-3 transform hover:-translate-y-1 active:translate-y-0">
-            <mat-icon *ngIf="loading()" class="animate-spin">loop</mat-icon>
-            <mat-icon *ngIf="!loading()">publish</mat-icon>
-            {{ loading() ? 'Processando...' : (encarteId() ? 'Atualizar Encarte' : 'Publicar Encarte Digital') }}
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Direita: Preview Live (Smartphone Mockup) -->
-    <div class="lg:w-[420px] flex-shrink-0">
-      <div class="sticky top-6">
-        <div class="relative mx-auto">
-          <!-- Smartphone Outer Shell -->
-          <div class="bg-gray-900 rounded-[3rem] p-4 shadow-2xl border-[12px] border-gray-800 relative h-[780px] w-full flex flex-col overflow-hidden">
-            
-            <!-- Speaker/Notch -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-50"></div>
-            
-            <!-- Screen Content -->
-            <div class="w-full h-full rounded-[2rem] overflow-hidden flex flex-col bg-white shadow-inner relative" [ngStyle]="previewStyle">
-              
-              <!-- Content Overlay (for themes) -->
-              <div class="absolute inset-0 pointer-events-none opacity-20" *ngIf="currentTheme()?.urlBackgroundDecorativo"></div>
-
-              <!-- Header do Encarte Preview -->
-              <div class="p-8 pt-12 text-center relative z-10"
-                   [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
-                <div class="w-20 h-20 bg-white rounded-2xl p-2 mx-auto mb-4 shadow-lg transform -rotate-3 border-2 border-white">
-                  <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
-                  <mat-icon *ngIf="!supermarket()?.urlLogomarca" class="text-green-500 w-full h-full flex items-center justify-center text-4xl">store</mat-icon>
-                </div>
-                <h2 class="text-white text-2xl font-black uppercase tracking-tighter leading-none drop-shadow-md">
-                  {{ form.get('titulo')?.value || 'Nossas Ofertas' }}
-                </h2>
-                <div class="w-12 h-1 bg-white/40 mx-auto mt-3 rounded-full"></div>
-              </div>
-
-              <!-- Faixa de Validade -->
-              <div class="bg-gray-900 text-white text-[10px] uppercase font-black tracking-widest text-center py-2 z-20 relative">
-                <span class="opacity-60">Válido:</span> 
-                {{ (form.get('dataInicio')?.value | date:'dd/MM') || '00/00' }} 
-                <span class="mx-1 opacity-40">→</span> 
-                {{ (form.get('dataFim')?.value | date:'dd/MM') || '00/00' }}
-              </div>
-
-              <!-- Área de Produtos -->
-              <div class="flex-1 overflow-y-auto p-4 space-y-4 z-10 relative custom-scrollbar">
-                
-                <div *ngIf="ofertasSelecionadas().length === 0" class="text-center mt-20 p-6">
-                  <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-gray-200">
-                    <mat-icon class="text-gray-300 text-3xl">touch_app</mat-icon>
-                  </div>
-                  <p class="text-gray-400 text-sm font-bold uppercase tracking-tight">Selecione ofertas ao lado</p>
-                  <p class="text-gray-300 text-xs mt-1">O seu encarte aparecerá aqui instantaneamente</p>
-                </div>
-
-                <!-- Produto Card Preview -->
-                <div *ngFor="let oferta of ofertasSelecionadas()" 
-                     class="bg-white p-4 rounded-2xl shadow-md border-2 relative overflow-hidden group transform transition-all hover:scale-[1.02]"
-                     [style.border-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+              @for (oferta of ofertasFiltradas(); track oferta.id) {
+                <label class="flex items-center p-4 border rounded-2xl cursor-pointer hover:shadow-md transition-all group relative overflow-hidden" 
+                       [class.border-primary]="ofertasSelecionadas().includes(oferta)" 
+                       [class.bg-emerald-50/20]="ofertasSelecionadas().includes(oferta)"
+                       [class.border-gray-100]="!ofertasSelecionadas().includes(oferta)">
                   
-                  <div class="absolute -right-2 -top-2 w-16 h-16 bg-red-600 rounded-full flex items-center justify-center transform rotate-12 z-20 shadow-lg">
-                    <span class="text-white font-black text-xs">OFERTA</span>
-                  </div>
+                  <div class="absolute left-0 top-0 w-1.5 h-full bg-primary transition-transform origin-left" [class.scale-x-0]="!ofertasSelecionadas().includes(oferta)"></div>
 
-                  <div class="flex gap-4 relative z-10">
-                    <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
-                      <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" class="w-full h-full object-cover">
+                  <input type="checkbox" (change)="toggleOferta(oferta)" [checked]="ofertasSelecionadas().includes(oferta)" class="w-5 h-5 text-primary rounded-lg border-gray-300 focus:ring-primary z-10 cursor-pointer">
+                  
+                  <div class="ml-4 flex items-center gap-4 flex-1 z-10">
+                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-white border border-gray-100 flex-shrink-0 flex items-center justify-center shadow-sm">
+                      @if (oferta.urlImagem) {
+                        <img [src]="oferta.urlImagem" alt="Produto" class="w-full h-full object-cover">
+                      } @else {
+                        <mat-icon class="text-gray-300">image</mat-icon>
+                      }
                     </div>
-                    <div class="flex-1 flex flex-col justify-between">
-                      <h4 class="text-sm font-black text-gray-800 leading-tight line-clamp-2">{{ oferta.nomeProduto }}</h4>
-                      <div class="flex items-end gap-1 mt-2">
-                        <div class="flex flex-col">
-                          <span class="text-[10px] font-bold text-gray-400 uppercase leading-none">Apenas</span>
-                          <div class="flex items-baseline gap-0.5">
-                            <span class="text-xs font-black text-red-600">R$</span>
-                            <span class="text-2xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
-                          </div>
-                        </div>
-                        <span class="text-[10px] text-gray-400 uppercase font-black mb-1">/ {{ oferta.unidadeMedida }}</span>
+                    <div class="flex-1">
+                      <h4 class="font-bold text-gray-900 text-sm leading-tight group-hover:text-primary transition-colors">{{ oferta.nomeProduto }}</h4>
+                      <div class="flex items-center gap-3 mt-1">
+                        <span class="text-base font-black text-gray-900">{{ oferta.preco | currency:'BRL' }}</span>
+                        <span class="text-[10px] text-gray-400 uppercase font-black tracking-wider">/ {{ oferta.unidadeMedida }}</span>
                       </div>
                     </div>
+                    @if (ofertasSelecionadas().includes(oferta)) {
+                      <mat-icon class="text-primary">check_circle</mat-icon>
+                    }
                   </div>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Botões de Ação -->
+          <div class="flex justify-end pt-4 gap-4">
+            @if (encarteId()) {
+              <button type="button" (click)="visualizarPublico()"
+                      class="border-2 border-gray-200 hover:border-primary hover:text-primary text-slate-600 font-bold py-4 px-8 rounded-2xl transition-all text-sm flex items-center gap-2 bg-white shadow-sm cursor-pointer">
+                <mat-icon>open_in_new</mat-icon>
+                Ver Online
+              </button>
+            }
+
+            <button type="button" (click)="salvar()" [disabled]="form.invalid || loading() || ofertasSelecionadas().length === 0" 
+                    class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] disabled:bg-slate-200 disabled:cursor-not-allowed text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-primary/20 transition-all text-sm flex items-center gap-2 cursor-pointer border-0 transform hover:-translate-y-0.5 active:translate-y-0">
+              @if (loading()) {
+                <mat-icon class="animate-spin">loop</mat-icon>
+              } @else {
+                <mat-icon>publish</mat-icon>
+              }
+              {{ loading() ? 'Processando...' : (encarteId() ? 'Atualizar Encarte' : 'Publicar Encarte Digital') }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Direita: Preview Live (Mockup de Smartphone) -->
+      <div class="lg:w-[420px] flex-shrink-0">
+        <div class="sticky top-6">
+          <div class="relative mx-auto">
+            <!-- Smartphone Shell -->
+            <div class="bg-gray-900 rounded-[3rem] p-4 shadow-2xl border-[12px] border-gray-800 relative h-[780px] w-full flex flex-col overflow-hidden">
+              
+              <!-- Notch do Celular -->
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-800 rounded-b-2xl z-50"></div>
+              
+              <!-- Screen Content -->
+              <div class="w-full h-full rounded-[2rem] overflow-hidden flex flex-col bg-white shadow-inner relative" [ngStyle]="previewStyle">
+                
+                <!-- Background decorativo do tema -->
+                @if (currentTheme()?.urlBackgroundDecorativo) {
+                  <div class="absolute inset-0 pointer-events-none opacity-20"></div>
+                }
+
+                <!-- Header do Encarte Preview -->
+                <div class="p-8 pt-12 text-center relative z-10"
+                     [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+                  <div class="w-20 h-20 bg-white rounded-2xl p-2 mx-auto mb-4 shadow-lg transform -rotate-3 border-2 border-white flex items-center justify-center">
+                    @if (supermarket()?.urlLogomarca) {
+                      <img [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
+                    } @else {
+                      <mat-icon class="text-primary w-full h-full flex items-center justify-center text-4xl">store</mat-icon>
+                    }
+                  </div>
+                  <h2 class="text-white text-xl font-black uppercase tracking-tight leading-none drop-shadow-md">
+                    {{ form.get('titulo')?.value || 'Nossas Ofertas' }}
+                  </h2>
+                  <div class="w-12 h-1 bg-white/40 mx-auto mt-3 rounded-full"></div>
                 </div>
 
-                <!-- Footer do Flyer -->
-                <div class="py-10 text-center opacity-30" *ngIf="ofertasSelecionadas().length > 0">
-                  <mat-icon class="text-gray-400">qr_code_2</mat-icon>
-                  <p class="text-[10px] font-bold uppercase mt-1">Escaneie para ver mais</p>
+                <!-- Faixa de Validade -->
+                <div class="bg-gray-900 text-white text-[10px] uppercase font-black tracking-widest text-center py-2.5 z-20 relative">
+                  <span class="opacity-60">Válido:</span> 
+                  {{ (form.get('dataInicio')?.value | date:'dd/MM') || '00/00' }} 
+                  <span class="mx-1 opacity-40">→</span> 
+                  {{ (form.get('dataFim')?.value | date:'dd/MM') || '00/00' }}
                 </div>
-              </div>
 
-              <!-- Barra Inferior Fake -->
-              <div class="h-14 border-t border-gray-100 flex items-center justify-around px-6 bg-white/80 backdrop-blur-md z-20">
-                <div class="w-2 h-2 rounded-full bg-gray-200"></div>
-                <div class="w-12 h-1 bg-gray-200 rounded-full"></div>
-                <div class="w-2 h-2 rounded-full bg-gray-200"></div>
-              </div>
+                <!-- Área de Produtos -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-4 z-10 relative custom-scrollbar">
+                  
+                  @if (ofertasSelecionadas().length === 0) {
+                    <div class="text-center mt-20 p-6">
+                      <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-dashed border-gray-200">
+                        <mat-icon class="text-gray-300 text-3xl">touch_app</mat-icon>
+                      </div>
+                      <p class="text-gray-400 text-xs font-black uppercase tracking-wider">Selecione ofertas ao lado</p>
+                      <p class="text-gray-300 text-[10px] mt-1 font-semibold leading-relaxed">O seu tabloide digital será gerado instantaneamente neste preview.</p>
+                    </div>
+                  }
 
+                  <!-- Cards de Produto -->
+                  @for (oferta of ofertasSelecionadas(); track oferta.id) {
+                    <div class="bg-white p-4 rounded-2xl shadow-md border-2 relative overflow-hidden group transform transition-all hover:scale-[1.02]"
+                         [style.border-color]="supermarket()?.corPrimariaHex || '#16a34a'">
+                      
+                      <div class="absolute -right-2 -top-2 w-16 h-16 bg-rose-600 rounded-full flex items-center justify-center transform rotate-12 z-20 shadow-lg">
+                        <span class="text-white font-black text-[9px] tracking-wider">OFERTA</span>
+                      </div>
+
+                      <div class="flex gap-4 relative z-10">
+                        <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0 flex items-center justify-center shadow-sm">
+                          @if (oferta.urlImagem) {
+                            <img [src]="oferta.urlImagem" class="w-full h-full object-cover">
+                          } @else {
+                            <mat-icon class="text-gray-300">image</mat-icon>
+                          }
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between">
+                          <h4 class="text-xs font-black text-gray-800 leading-tight line-clamp-2">{{ oferta.nomeProduto }}</h4>
+                          <div class="flex items-end gap-1 mt-2">
+                            <div class="flex flex-col">
+                              <span class="text-[9px] font-black text-gray-400 uppercase leading-none">Apenas</span>
+                              <div class="flex items-baseline gap-0.5 mt-0.5">
+                                <span class="text-xs font-black text-rose-600">R$</span>
+                                <span class="text-2xl font-black text-rose-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                              </div>
+                            </div>
+                            <span class="text-[10px] text-gray-400 uppercase font-black mb-1">/ {{ oferta.unidadeMedida }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+
+                  @if (ofertasSelecionadas().length > 0) {
+                    <div class="py-10 text-center opacity-30">
+                      <mat-icon class="text-gray-400 text-3xl">qr_code_2</mat-icon>
+                      <p class="text-[9px] font-black uppercase tracking-wider mt-1">Escaneie para ofertas da loja</p>
+                    </div>
+                  }
+                </div>
+
+                <!-- Fake Bottom Bar -->
+                <div class="h-14 border-t border-gray-100 flex items-center justify-around px-6 bg-white/80 backdrop-blur-md z-20">
+                  <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                  <div class="w-12 h-1.5 bg-gray-200 rounded-full"></div>
+                  <div class="w-2 h-2 rounded-full bg-gray-200"></div>
+                </div>
+
+              </div>
+            </div>
+            
+            <!-- Preview Legenda -->
+            <div class="text-center mt-3">
+              <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Preview Mobile em Tempo Real</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>

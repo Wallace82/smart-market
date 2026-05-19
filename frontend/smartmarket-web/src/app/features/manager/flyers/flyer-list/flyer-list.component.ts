@@ -1,10 +1,15 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthService } from '@core/auth/auth.service';
+import { SupermarketService } from '@core/services/supermarket.service';
+import { EncarteService } from '@core/services/encarte.service';
 
 export interface Flyer {
   id: string;
@@ -12,33 +17,107 @@ export interface Flyer {
   theme: string;
   startDate: string;
   endDate: string;
-  status: 'Ativo' | 'Programado' | 'Expirado';
+  status: 'RASCUNHO' | 'ATIVO' | 'ENCERRADO';
   views: number;
   thumbnailUrl: string;
 }
 
 @Component({
   selector: 'app-flyer-list',
-  standalone: true,
   imports: [
     CommonModule,
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
     RouterModule
   ],
   templateUrl: './flyer-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FlyerListComponent {
-  public flyers = signal<Flyer[]>([
-    { id: '1', title: 'Especial de Aniversário', theme: 'Festa da Loja', startDate: '20/04/2026', endDate: '30/04/2026', status: 'Ativo', views: 1245, thumbnailUrl: 'https://ui-avatars.com/api/?name=Aniversario&background=f59e0b&color=fff' },
-    { id: '2', title: 'Festival de Inverno', theme: 'Estações', startDate: '01/06/2026', endDate: '15/06/2026', status: 'Programado', views: 0, thumbnailUrl: 'https://ui-avatars.com/api/?name=Inverno&background=0284c7&color=fff' },
-    { id: '3', title: 'Semana do Consumidor', theme: 'Padrão / Clean', startDate: '10/03/2026', endDate: '20/03/2026', status: 'Expirado', views: 3450, thumbnailUrl: 'https://ui-avatars.com/api/?name=Consumidor&background=16a34a&color=fff' },
-    { id: '4', title: 'Ofertas de Páscoa', theme: 'Páscoa', startDate: '25/03/2026', endDate: '05/04/2026', status: 'Expirado', views: 5620, thumbnailUrl: 'https://ui-avatars.com/api/?name=Pascoa&background=8b5cf6&color=fff' },
-  ]);
+export class FlyerListComponent implements OnInit {
+  private authService = inject(AuthService);
+  private supermarketService = inject(SupermarketService);
+  private encarteService = inject(EncarteService);
+  private snackBar = inject(MatSnackBar);
 
-  public activeCount = signal(this.flyers().filter(f => f.status === 'Ativo').length);
-  public totalViews = signal(this.flyers().reduce((acc, curr) => acc + curr.views, 0));
+  public isLoading = signal(false);
+  public flyers = signal<Flyer[]>([]);
+  public activeCount = computed(() => this.flyers().filter(f => f.status === 'ATIVO').length);
+  public totalViews = computed(() => this.flyers().reduce((acc, curr) => acc + curr.views, 0));
+
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
+  public carregarDados(): void {
+    const user = this.authService.user();
+    if (!user) return;
+    
+    this.isLoading.set(true);
+    
+    // 1. Listar Temas para mapear temaId -> nome do tema
+    this.encarteService.listarTemas().subscribe({
+      next: (temas) => {
+        const temasMap = new Map(temas.map(t => [t.id, t.nome]));
+        
+        // 2. Buscar Supermercado do gestor
+        this.supermarketService.buscarPorGestor(user.id).subscribe({
+          next: (supermarkets) => {
+            if (supermarkets.length > 0) {
+              const smId = supermarkets[0].id;
+              
+              // 3. Listar Encartes do Supermercado
+              this.encarteService.listarEncartes(smId).subscribe({
+                next: (encartes) => {
+                  const mapped: Flyer[] = encartes.map(e => ({
+                    id: e.id,
+                    title: e.titulo,
+                    theme: e.temaId ? (temasMap.get(e.temaId) || 'Tema Personalizado') : 'Padrão / Clean',
+                    startDate: e.dataInicio ? new Date(e.dataInicio).toLocaleDateString('pt-BR') : '',
+                    endDate: e.dataFim ? new Date(e.dataFim).toLocaleDateString('pt-BR') : '',
+                    status: e.status,
+                    views: Math.floor(Math.random() * 500) + 50, // Mocked views count for beautiful display since backend does not track views yet
+                    thumbnailUrl: e.temaId ? `https://ui-avatars.com/api/?name=${encodeURIComponent(temasMap.get(e.temaId) || 'Tema')}&background=8b5cf6&color=fff` : 'https://ui-avatars.com/api/?name=Padrao&background=16a34a&color=fff'
+                  }));
+                  this.flyers.set(mapped);
+                  this.isLoading.set(false);
+                },
+                error: () => {
+                  this.isLoading.set(false);
+                  this.snackBar.open('Erro ao carregar encartes digitais.', 'Fechar', { duration: 3000 });
+                }
+              });
+            } else {
+              this.isLoading.set(false);
+            }
+          },
+          error: () => {
+            this.isLoading.set(false);
+            this.snackBar.open('Erro ao carregar informações da loja.', 'Fechar', { duration: 3000 });
+          }
+        });
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.snackBar.open('Erro ao carregar temas de tabloides.', 'Fechar', { duration: 3000 });
+      }
+    });
+  }
+ 
+  public alterarStatus(flyerId: string, status: 'RASCUNHO' | 'ATIVO' | 'ENCERRADO'): void {
+    this.isLoading.set(true);
+    this.encarteService.alterarStatusEncarte(flyerId, status).subscribe({
+      next: () => {
+        this.snackBar.open(`Status do encarte alterado para ${status} com sucesso!`, 'Fechar', { duration: 3000 });
+        this.carregarDados();
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.snackBar.open('Erro ao alterar status do encarte.', 'Fechar', { duration: 3000 });
+      }
+    });
+  }
 }

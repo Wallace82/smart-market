@@ -86,27 +86,23 @@ export class FlyerViewerComponent implements OnInit {
       supermarket: this.supermarketService.buscarPorId(encarte.supermercadoId),
       ofertas: this.ofertaService.buscarPorSupermercado(encarte.supermercadoId)
     };
-
-    if (encarte.temaId) {
-      requests.tema = this.encarteService.listarTemas().pipe(
-        catchError(() => of([])),
-        // Simplificação: busca o tema na lista
-        computed(() => requests.tema) // placeholder
-      );
-    }
-
+ 
     forkJoin(requests).subscribe({
       next: (res: any) => {
         this.supermarket.set(res.supermarket);
         
-        // Se houver tema, filtra da lista (mock ou real)
+        // Se houver tema, busca de forma assíncrona na lista de temas
         if (encarte.temaId) {
-          this.encarteService.listarTemas().subscribe(temas => {
+          this.encarteService.listarTemas().pipe(
+            catchError(() => of([]))
+          ).subscribe(temas => {
             const t = temas.find(tema => tema.id === encarte.temaId);
             this.tema.set(t || null);
           });
+        } else {
+          this.tema.set(null);
         }
-
+ 
         // Filtra apenas as ofertas que pertencem ao encarte
         const ofertasDoEncarte = res.ofertas.filter((o: OfertaSupermercado) => 
           encarte.itens?.some(item => item.ofertaId === o.id)
@@ -114,8 +110,10 @@ export class FlyerViewerComponent implements OnInit {
         this.ofertas.set(ofertasDoEncarte);
         this.loading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        console.error('Erro ao carregar dados complementares do encarte:', err);
         this.loading.set(false);
+        this.error.set(true);
       }
     });
   }

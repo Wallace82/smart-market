@@ -17,7 +17,6 @@ export interface Campaign {
 
 @Component({
   selector: 'app-campaign-list',
-  standalone: true,
   imports: [
     CommonModule,
     MatIconModule,

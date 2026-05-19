@@ -13,7 +13,6 @@ interface ChartData { day: string; pushes: number; visits: number; heightPush: s
 
 @Component({
   selector: 'app-manager-dashboard',
-  standalone: true,
   imports: [CommonModule, MatIconModule, MatProgressSpinnerModule, MatButtonModule],
   templateUrl: './manager-dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

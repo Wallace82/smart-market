@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, effect } from '@angular/core';
+import { Component, OnInit, signal, effect, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +14,6 @@ import { WhitelabelThemeDirective } from '../../../../shared/directives/whitelab
 
 @Component({
   selector: 'app-identity-settings',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -30,18 +29,18 @@ import { WhitelabelThemeDirective } from '../../../../shared/directives/whitelab
   styleUrl: './identity-settings.component.scss'
 })
 export class IdentitySettingsComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private supermarketService = inject(SupermarketService);
+  private authService = inject(AuthService);
+  private snackBar = inject(MatSnackBar);
+
   form: FormGroup;
   supermarket = signal<SupermarketResponse | null>(null);
   logoPreview = signal<string | null>(null);
   selectedFile: File | null = null;
   loading = signal(false);
 
-  constructor(
-    private fb: FormBuilder,
-    private supermarketService: SupermarketService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar
-  ) {
+  constructor() {
     this.form = this.fb.group({
       corPrimariaHex: ['#000000', [Validators.required, Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]],
       corSecundariaHex: ['#ffffff', [Validators.required, Validators.pattern(/^#[0-9A-Fa-f]{6}$/)]]

@@ -59,7 +59,9 @@ public class JwtAuthenticationFilter implements WebFilter {
                 return chain.filter(mutatedExchange)
                         .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
             } else {
-                return this.onError(exchange, "Token inválido ou expirado", HttpStatus.UNAUTHORIZED);
+                // Se o token for inválido ou expirado, não populamos a autenticação e deixamos seguir.
+                // O SecurityWebFilterChain bloqueará as rotas protegidas automaticamente.
+                return chain.filter(exchange);
             }
         }
 

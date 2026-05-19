@@ -40,7 +40,7 @@ export interface EncarteDigital {
   titulo: string;
   dataInicio: string;
   dataFim: string;
-  status: 'RASCUNHO' | 'PUBLICADO' | 'ARQUIVADO' | 'EXPIRADO';
+  status: 'RASCUNHO' | 'ATIVO' | 'ENCERRADO';
   criadoEm: string;
   atualizadoEm?: string;
   itens?: EncarteItem[];
@@ -62,7 +62,7 @@ export interface EncarteDigitalResponse {
   titulo: string;
   dataInicio: string;
   dataFim: string;
-  status: 'RASCUNHO' | 'PUBLICADO' | 'ARQUIVADO' | 'EXPIRADO';
+  status: 'RASCUNHO' | 'ATIVO' | 'ENCERRADO';
   criadoEm: string;
   atualizadoEm?: string;
   itens?: EncarteItem[];

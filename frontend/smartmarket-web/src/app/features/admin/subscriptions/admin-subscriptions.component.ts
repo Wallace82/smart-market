@@ -8,10 +8,11 @@ import { SubscriptionResponse } from '@core/models/billing.model';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-admin-subscriptions',
-  imports: [CommonModule, RouterModule, MatProgressSpinnerModule, MatSnackBarModule],
+  imports: [CommonModule, RouterModule, MatProgressSpinnerModule, MatSnackBarModule, MatIconModule],
   templateUrl: './admin-subscriptions.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

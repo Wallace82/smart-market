@@ -45,8 +45,8 @@ public interface SupermercadoRepository extends JpaRepository<SupermercadoEntity
     @Query("""
         SELECT s FROM SupermercadoEntity s
         WHERE s.status = 'ATIVO'
-          AND (:cep IS NULL OR s.endereco LIKE %:cep%)
-          AND (:bairro IS NULL OR LOWER(s.endereco) LIKE LOWER(CONCAT('%', :bairro, '%')))
+          AND (CAST(:cep AS string) IS NULL OR s.cep = :cep OR s.endereco LIKE CONCAT('%', CAST(:cep AS string), '%'))
+          AND (CAST(:bairro AS string) IS NULL OR LOWER(s.endereco) LIKE LOWER(CONCAT('%', CAST(:bairro AS string), '%')))
     """)
     List<SupermercadoEntity> findByAddressContaining(
             @Param("cep") String cep,

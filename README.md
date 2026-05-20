@@ -1,79 +1,152 @@
-# SmartMarket
+# 🛒 SmartMarket — Plataforma SaaS B2B2C
 
-Plataforma SaaS B2B2C que conecta supermercados a clientes via encartes digitais, promoções personalizadas e notificações por geolocalização.
+[![Java Version](https://img.shields.io/badge/Java-21-orange.svg?style=flat-square&logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.4.x-brightgreen.svg?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
+[![Angular](https://img.shields.io/badge/Angular-18+-red.svg?style=flat-square&logo=angular)](https://angular.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3+-blue.svg?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+[![Database](https://img.shields.io/badge/PostgreSQL-16-blue.svg?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 
-## Estrutura do Workspace
+O **SmartMarket** é uma plataforma SaaS B2B2C inovadora e mobile-first, desenhada com foco em **Product-Led Growth (PLG)**. O sistema conecta supermercados locais diretamente a seus clientes através de encartes digitais dinâmicos, ofertas geolocalizadas e personalização de identidade visual da marca (whitelabel) sem nenhuma barreira de entrada ou fricção de login para o usuário final.
 
+---
+
+## 🏛️ Arquitetura de Software e Tecnologias
+
+### 1. Backend (Java 21 LTS & Spring Boot 3.4.x)
+*   **Padrão de Código:** Clean Architecture / Arquitetura Hexagonal (Domain, Application, Infrastructure).
+    *   *Domínio Puro:* A camada `domain` é 100% isolada e livre de anotações do Spring, Hibernate ou JPA.
+    *   *Mapeamento:* Utilização estrita de **MapStruct** para conversão bidirecional entre `Domain Model ↔ DTO ↔ JPA Entity`.
+    *   *Injeção:* Apenas injeção via construtores, facilitada por Lombok `@RequiredArgsConstructor` (sem `@Autowired` em campos).
+*   **Bancos de Dados & Armazenamento:**
+    *   *PostgreSQL 16:* Banco único compartilhado logicamente via schemas isolados para cada domínio (`auth`, `supermarket`, `catalog`, `offer`, `flyer`, `analytics`, `concierge`), garantindo independência futura para migração para microserviços puros (*Database-per-Service*).
+    *   *Flyway:* Migrações versionadas e controladas por código.
+    *   *Redis:* Caching em duas camadas de rotas públicas, com agrupamento regional em cache para otimização de buscas locais.
+    *   *MinIO:* Armazenamento de arquivos e assets de imagens de produtos, marcas e uploads de concierge.
+
+### 2. Frontend (Angular 18+ & Tailwind CSS)
+*   **Gerenciamento de Estado:** Abordagem altamente reativa usando **Signals** e **RxJS** de forma combinada.
+*   **Design System & UI:** Customização visual whitelabel em tempo de execução via diretivas do Angular que injetam variáveis CSS da marca da loja (`--color-primary`, `--color-secondary`), além de skeletons customizados e layout otimizado mobile-first.
+
+---
+
+## 📂 Estrutura do Workspace
+
+```text
+smart-market/
+├── .gemini/              # Regras de arquitetura, compliance, design system e qualidade
+│   ├── _quality/         # Quality Gates e regras para PRs
+│   ├── testing/          # Diretrizes para cobertura e qualidade de testes
+│   ├── ARCHITECTURE.md   # Definição técnica detalhada da infraestrutura e microsserviços
+│   └── REQUIREMENTS.md   # Requisitos funcionais, não funcionais e regras de negócio
+├── backend/              # Microsserviços Spring Boot (Java 21)
+│   ├── api-gateway/      # Ponto de entrada unificado da plataforma
+│   └── services/         # Módulos de regras de negócio (auth, supermarket, product, billing, concierge)
+├── frontend/             # Aplicação SPA Angular 18+
+│   └── smartmarket-web/  # Workspace do frontend com Tailwind, Signals e Material
+├── infra/                # Docker, Compose e Scripts de Operação
+│   ├── compose/          # Arquivos yaml do Docker Compose (local e overrides)
+│   └── scripts/          # Scripts PowerShell utilitários de gerência de ambiente
+└── docs/                 # Documentações complementares e relatórios de cobertura
 ```
-smartmarket/
-├── backend/              # Microserviços Spring Boot (Java 21)
-├── frontend/             # Aplicação Angular 18+ (Signals, Tailwind, Material)
-├── infra/                # Docker, Docker Compose, CI/CD
-└── docs/
-    ├── REQUIREMENTS.md   # Requisitos funcionais e não funcionais
-    ├── architecture/     # Diagramas e decisões arquiteturais
-    └── prompts/          # Prompts de geração de código por módulo
-```
 
-## Status do Projeto (MVP)
+---
 
-### ✅ Backend (Implementado)
-- **auth-service**: Segurança JWT e Autenticação.
-- **supermarket-service**: Gestão Whitelabel (Logos/Cores) e Integração MinIO.
-- **product-service**: Catálogo Global, Ofertas e Encartes Digitais Temáticos.
+## 🚀 Como Executar o Projeto Localmente
 
-### ✅ Frontend (Implementado)
-- **Core**: AuthService, SupermarketService, EncarteService, OfertaService (todos usando Signals).
-- **Manager Features**: 
-    - Gestão de Identidade Visual (Upload de Logo, Seleção de Cores Hex).
-    - Criação de Encartes com **Smartphone Preview** (Visualização em tempo real).
-    - Busca inteligente e seleção de ofertas.
-- **Client Features**:
-    - Visualizador de Encarte Imersivo em **Estilo Tabloide de Varejo**.
-    - Layout responsivo (1 a 4 colunas) com selos de preço dinâmicos.
-    - Rodapé informativo com dados de contato e validade.
+Siga o passo a passo abaixo para instanciar o backend, bancos de dados, buckets de imagens e rodar o frontend Angular.
 
-## Como Executar
+### Passo 1: Compilar o Backend
+Os containers do Docker esperam que os arquivos `.jar` de cada serviço tenham sido gerados na fase de compilação local do Maven.
 
-### 1. Preparar o Backend (Compilação)
-O Dockerfile espera que os pacotes `.jar` já tenham sido gerados. Antes de subir o ambiente, você deve compilar todos os microserviços.
-
-Na raiz do diretório `backend/`:
+Na raiz do diretório `backend/`, execute:
 ```bash
-./mvnw clean package -DskipTests
+mvn clean package -DskipTests
 ```
 
-### 2. Subir Infraestrutura e Microserviços
-Use os scripts em `infra/scripts`:
+### Passo 2: Subir a Infraestrutura e Microsserviços
+O SmartMarket fornece scripts robustos de PowerShell para configurar o ecossistema. 
+
+Na raiz do projeto, execute o script para subir todos os containers:
 ```powershell
 .\infra\scripts\up-local.ps1
 ```
-Isso subirá o PostgreSQL, MinIO, RabbitMQ e todos os microserviços.
+*Este comando iniciará o PostgreSQL, Redis, MinIO com buckets prontos (`smartmarket-products`, `smartmarket-brands` etc.) e todos os microsserviços por trás do API Gateway.*
 
-### 3. Popular o Banco de Dados (Seed Data)
-Para que as telas funcionem com dados de teste (usuário gestor, supermercado modelo, temas e ofertas), rode o script SQL no container do Postgres:
+### Passo 3: Popular Massa de Testes (Seed Data)
+Para testar a plataforma imediatamente com usuários, marcas de supermercado, temas sazonais e ofertas ativas:
 ```powershell
 Get-Content .\infra\scripts\seed_data.sql | docker exec -i smartmarket-postgres psql -U smartmarket -d smartmarket
 ```
 
-### 4. Executar o Frontend
-1. Vá para `frontend/smartmarket-web`
-2. Instale as dependências: `npm install`
-3. Inicie com a configuração de proxy:
+### Passo 4: Executar o Frontend Angular
+1. Entre na pasta correspondente:
+   ```bash
+   cd frontend/smartmarket-web
+   ```
+2. Instale as dependências com npm:
+   ```bash
+   npm install
+   ```
+3. Execute o servidor de desenvolvimento apontando para as rotas do proxy:
+   ```bash
+   ng serve --proxy-config proxy.conf.json
+   ```
+4. Abra o navegador em [http://localhost:4200/login](http://localhost:4200/login)
+   * **Credenciais de Teste (Gestor de Supermercado):**
+     * **Login:** `gestor@smartmarket.com`
+     * **Senha:** `password`
+   * **Credenciais de Teste (Administrador Global):**
+     * **Login:** `admin@smartmarket.com`
+     * **Senha:** `password`
+
+---
+
+## ⚠️ Padrões de Qualidade & Quality Gates
+
+Todas as contribuições de código (PRs) no repositório do SmartMarket devem cumprir rigorosamente as métricas especificadas em `.gemini/_quality/QUALITY-GATES.md`:
+
+### 🎯 Quality Gates do Frontend (Angular & Vitest)
+*   **Sem DI Antiga:** Proibido injetar dependências no construtor via `constructor(private ...)`. Use obrigatoriamente a função **`inject()`**.
+*   **Novos Fluxos de Controle:** Proibido diretivas estruturais antigas (`*ngIf`, `*ngFor`). Use exclusivamente a nova sintaxe nativa **`@if`**, **`@for`** e **`@switch`**.
+*   **Templates Separados:** Nada de templates inline nas classes TS. Todo HTML de componente deve ficar em seu respectivo arquivo `.html`.
+*   **Signals em Estado Local:** Use **`signal()`** em vez de `BehaviorSubject` para gerenciar estados internos reativos.
+*   **Uso de Design System:** Proibido declarar cores hex/rgb no código CSS. Use sempre as variáveis do design system ou classes de cor semânticas do Tailwind.
+
+### 🎯 Quality Gates do Backend (Java, JUnit & JaCoCo)
+*   **Limpeza do Domínio:** Nenhuma classe do pacote `domain/` pode importar annotations ou pacotes do Spring Framework, JPA ou Hibernate.
+*   **Mapeamento com MapStruct:** Conversões de entidades e DTOs devem ser geradas em tempo de compilação via interfaces `@Mapper`.
+*   **Health Check & APIs:** Todo controller deve ter documentação Swagger/OpenAPI ativa e mapeamento explícito de nomes em `@PathVariable` e `@RequestParam`.
+
+---
+
+## 📈 Cobertura de Testes e Relatórios
+
+### Executando Testes de Backend e JaCoCo:
+Para validar a lógica dos microsserviços e gerar o status de cobertura de código do backend:
 ```bash
-ng serve --proxy-config proxy.conf.json
+cd backend
+mvn clean test
 ```
-4. Acesse `http://localhost:4200/login`
-   - **Login:** `gestor@smartmarket.com`
-   - **Senha:** `password`
+*   **Relatório Geral Agregado:** Para gerar um relatório consolidado em markdown, execute:
+    ```powershell
+    .\backend\generate_coverage_report.ps1
+    ```
+    *O relatório final será gerado em [docs/test_coverage_report.md](./docs/test_coverage_report.md).*
 
-## 🎨 Design System & 🧱 Arquitetura Frontend
+### Executando Testes de Frontend:
+Para validar as páginas e componentes Angular utilizando Vitest:
+```bash
+cd frontend/smartmarket-web
+npm run test
+```
 
-O projeto segue diretrizes visuais e uma arquitetura modular robusta no frontend (Angular):
-* **Design System:** Focado em conversão e experiência de varejo, utilizando Tailwind CSS e Angular Material. [Veja mais detalhes aqui](./docs/design-system.md).
-* **Arquitetura Frontend:** Orientada a domínios (`features/`) e reatividade com Signals. [Veja mais detalhes aqui](./docs/frontend-architecture.md).
+---
 
-## Documentação Técnica
-* 📄 [Requisitos Funcionais](./docs/REQUIREMENTS.md)
-* 🎨 [Design System](./docs/design-system.md)
-* 🧱 [Arquitetura do Frontend](./docs/frontend-architecture.md)
+## 🔗 Links Úteis e Documentação Complementar
+
+*   🛠️ [Guia Detalhado de Infraestrutura Local e MinIO](./infra/README.md)
+*   📋 [Requisitos de Negócio & Escopo do MVP](./.gemini/REQUIREMENTS.md)
+*   🏛️ [Especificação de Arquitetura Técnica](./.gemini/ARCHITECTURE.md)
+*   🎨 [Manual do Design System](./.gemini/design-system.md)
+*   🧱 [Manual da Arquitetura Angular](./.gemini/frontend-architecture.md)
+*   🔏 [Diretrizes de Compliance LGPD](./.gemini/lgpd/)

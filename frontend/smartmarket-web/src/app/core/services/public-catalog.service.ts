@@ -69,11 +69,51 @@ export class PublicCatalogService {
       const viaCepData = await viaCepRes.json();
       if (viaCepData.erro) return loc;
 
-      const query = `${viaCepData.logradouro || ''} ${viaCepData.localidade} ${viaCepData.uf} Brasil`;
-      const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
-      if (!nomRes.ok) return loc;
-      const nomData = await nomRes.json();
-      if (!nomData?.length) return loc;
+      let nomData: any = null;
+
+      // 1ª Tentativa: Logradouro + Cidade + Estado
+      if (viaCepData.logradouro) {
+        const query1 = `${viaCepData.logradouro} ${viaCepData.localidade} ${viaCepData.uf} Brasil`;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query1)}&limit=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) nomData = data;
+          }
+        } catch (e) {
+          console.warn('Nominatim tentativa 1 falhou:', e);
+        }
+      }
+
+      // 2ª Tentativa (fallback): Bairro + Cidade + Estado
+      if (!nomData && viaCepData.bairro) {
+        const query2 = `${viaCepData.bairro} ${viaCepData.localidade} ${viaCepData.uf} Brasil`;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query2)}&limit=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) nomData = data;
+          }
+        } catch (e) {
+          console.warn('Nominatim tentativa 2 falhou:', e);
+        }
+      }
+
+      // 3ª Tentativa (fallback): Cidade + Estado
+      if (!nomData) {
+        const query3 = `${viaCepData.localidade} ${viaCepData.uf} Brasil`;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query3)}&limit=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) nomData = data;
+          }
+        } catch (e) {
+          console.warn('Nominatim tentativa 3 falhou:', e);
+        }
+      }
+
+      if (!nomData || !nomData.length) return loc;
 
       return {
         ...loc,
@@ -123,7 +163,11 @@ export class PublicCatalogService {
               catchError(() => this.getAllActiveStores())
             );
           }
-          return this.getAllActiveStores();
+          // Se falhar na resolução de coordenadas, filtra por CEP/Bairro no backend
+          return this.supermarketService.buscarPorLocalizacao(loc.cep, loc.bairro).pipe(
+            map((res: any) => this.mapStores(res.content || res)),
+            catchError(() => this.getAllActiveStores())
+          );
         })
       );
     }
@@ -201,13 +245,39 @@ export class PublicCatalogService {
   }
 
   private mapStores(stores: any[]): any[] {
-    return (stores || []).map(s => ({
-      id: s.id,
-      name: s.nomeFantasia,
-      logoUrl: s.urlLogomarca || `https://ui-avatars.com/api/?name=${s.nomeFantasia}&background=16a34a&color=fff&size=128`,
-      primaryColor: s.corPrimariaHex || '#16a34a',
-      distanceKm: s.distance_meters ? (s.distance_meters / 1000).toFixed(1) : '< 1'
-    }));
+    const loc = this.currentLocation();
+    return (stores || []).map(s => {
+      let distanceKm: string | null = null;
+      
+      if (loc && loc.lat && loc.lng && s.latitude && s.longitude) {
+        const dist = this.calculateDistance(loc.lat, loc.lng, s.latitude, s.longitude);
+        distanceKm = dist.toFixed(1);
+      } else if (s.distance_meters) {
+        distanceKm = (s.distance_meters / 1000).toFixed(1);
+      }
+
+      return {
+        id: s.id,
+        name: s.nomeFantasia,
+        logoUrl: s.urlLogomarca || `https://ui-avatars.com/api/?name=${s.nomeFantasia}&background=16a34a&color=fff&size=128`,
+        primaryColor: s.corPrimariaHex || '#16a34a',
+        distanceKm: distanceKm,
+        cidade: s.cidade || 'Brasília',
+        estado: s.estado || 'DF'
+      };
+    });
+  }
+
+  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Raio da Terra em km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   }
 
   async requestUserLocation(): Promise<{lat: number, lng: number}> {

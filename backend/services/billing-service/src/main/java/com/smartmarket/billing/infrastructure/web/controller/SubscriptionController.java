@@ -16,14 +16,14 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @GetMapping("/supermarket/{supermarketId}")
-    public ResponseEntity<SubscriptionDTO> getActiveSubscription(@PathVariable UUID supermarketId) {
+    public ResponseEntity<SubscriptionDTO> getActiveSubscription(@PathVariable("supermarketId") UUID supermarketId) {
         return ResponseEntity.ok(subscriptionService.getActiveSubscriptionForSupermarket(supermarketId));
     }
 
     @PostMapping("/supermarket/{supermarketId}/subscribe")
     public ResponseEntity<SubscriptionDTO> subscribe(
-            @PathVariable UUID supermarketId,
-            @RequestParam UUID planId) {
+            @PathVariable("supermarketId") UUID supermarketId,
+            @RequestParam("planId") UUID planId) {
         return ResponseEntity.ok(subscriptionService.subscribe(supermarketId, planId));
     }
 }

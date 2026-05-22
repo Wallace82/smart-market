@@ -52,7 +52,7 @@ public class PlanoController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Consultar Plano por ID", description = "Retorna os detalhes de um plano específico")
-    public ResponseEntity<PlanoResponse> getById(@PathVariable UUID id) {
+    public ResponseEntity<PlanoResponse> getById(@PathVariable("id") UUID id) {
         return consultarPlanoPorIdUseCase.execute(id)
                 .map(this::toResponse)
                 .map(ResponseEntity::ok)
@@ -61,7 +61,7 @@ public class PlanoController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar Plano", description = "Atualiza as configurações, limites e preços de um plano existente")
-    public ResponseEntity<PlanoResponse> update(@PathVariable UUID id, @RequestBody AtualizarPlanoRequest request) {
+    public ResponseEntity<PlanoResponse> update(@PathVariable("id") UUID id, @RequestBody AtualizarPlanoRequest request) {
         try {
             Plano atualizado = atualizarPlanoUseCase.execute(id, request);
             return ResponseEntity.ok(toResponse(atualizado));

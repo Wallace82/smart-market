@@ -33,7 +33,7 @@ public class AssinaturaController {
 
     @GetMapping("/supermercado/{supermercadoId}")
     @Operation(summary = "Consultar Assinatura do Supermercado", description = "Retorna os detalhes da assinatura ativa de um supermercado específico")
-    public ResponseEntity<AssinaturaResponse> consultar(@PathVariable UUID supermercadoId) {
+    public ResponseEntity<AssinaturaResponse> consultar(@PathVariable("supermercadoId") UUID supermercadoId) {
         return consultarAssinaturaUseCase.execute(supermercadoId)
                 .map(this::toResponse)
                 .map(ResponseEntity::ok)

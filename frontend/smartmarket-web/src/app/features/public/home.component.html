@@ -98,10 +98,17 @@
               <img [src]="loja.logoUrl" alt="Logo" class="w-16 h-16 rounded-xl object-cover shadow-sm group-hover:scale-105 transition-transform">
               <div>
                 <h3 class="font-bold text-gray-900 text-lg">{{ loja.name }}</h3>
-                <p class="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                  <mat-icon class="!text-[14px] !w-3.5 !h-3.5 !text-orange-500">directions_walk</mat-icon>
-                  Apenas {{ loja.distanceKm }} km daqui
-                </p>
+                @if (loja.distanceKm) {
+                  <p class="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <mat-icon class="!text-[14px] !w-3.5 !h-3.5 !text-orange-500">directions_walk</mat-icon>
+                    Apenas {{ loja.distanceKm }} km daqui
+                  </p>
+                } @else {
+                  <p class="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <mat-icon class="!text-[14px] !w-3.5 !h-3.5 !text-gray-400">location_on</mat-icon>
+                    {{ loja.cidade }} - {{ loja.estado }}
+                  </p>
+                }
               </div>
             </div>
           }

@@ -9,168 +9,411 @@
       <div>
         <div class="flex items-center gap-2 mb-2">
           <span class="bg-primary/25 text-primary text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest border border-primary/30">Supermercado</span>
-          <span class="bg-slate-700/50 text-slate-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Tabloides</span>
+          <span class="bg-slate-700/50 text-slate-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Tabloides & Encartes</span>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">Encartes Digitais</h1>
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          {{ currentTab() === 'flyers' ? 'Encartes Digitais' : 'Assistente Concierge' }}
+        </h1>
         <p class="text-slate-400 mt-2 max-w-xl text-sm sm:text-base leading-relaxed">
-          Gerencie os tabloides promocionais da sua loja e engaje seus clientes com temas sazonais dinâmicos.
+          {{ currentTab() === 'flyers' 
+            ? 'Gerencie os tabloides promocionais da sua loja e engaje seus clientes com temas sazonais dinâmicos.' 
+            : 'Envie listagens de ofertas em PDF ou fotos para que nossos atendentes façam a digitalização inteligente para você.' }}
         </p>
       </div>
       
-      <button routerLink="/manager/flyers/new" class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] text-white rounded-2xl px-6 py-4 font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer border-0 shrink-0 no-underline">
-        <mat-icon class="mr-1">add_photo_alternate</mat-icon> Novo Encarte
-      </button>
+      <div class="flex gap-3 shrink-0 flex-wrap">
+        @if (currentTab() === 'flyers') {
+          <button routerLink="/manager/flyers/new" class="bg-[color:var(--color-primary)] hover:bg-[color:var(--color-primary-dark)] text-white rounded-2xl px-6 py-4 font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer border-0 shrink-0 no-underline">
+            <mat-icon class="mr-1">add_photo_alternate</mat-icon> Novo Encarte
+          </button>
+        } @else {
+          <button (click)="currentTab.set('flyers')" class="bg-slate-750 hover:bg-slate-700 text-white rounded-2xl px-6 py-4 font-bold hover:scale-105 active:scale-95 transition-all border border-slate-600 shrink-0 cursor-pointer flex items-center justify-center gap-2">
+            <mat-icon class="mr-1">arrow_back</mat-icon> Meus Encartes
+          </button>
+        }
+      </div>
     </div>
   </div>
 
-  @if (isLoading()) {
-    <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p class="mt-4 text-gray-500 font-bold tracking-wide animate-pulse">Carregando encartes...</p>
-    </div>
-  } @else {
-    <!-- Métricas Rápidas -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="p-4 bg-slate-50 text-slate-500 rounded-2xl shadow-inner border border-gray-100">
-          <mat-icon class="!text-3xl !w-8 !h-8 flex items-center justify-center">auto_awesome_mosaic</mat-icon>
+  <!-- Premium Tabs Navigator -->
+  <div class="flex border-b border-gray-200 mb-8 gap-6">
+    <button (click)="currentTab.set('flyers')"
+            [class.border-primary]="currentTab() === 'flyers'"
+            [class.text-primary]="currentTab() === 'flyers'"
+            [class.border-transparent]="currentTab() !== 'flyers'"
+            [class.text-slate-400]="currentTab() !== 'flyers'"
+            class="pb-4 px-2 font-black text-sm uppercase tracking-wider border-b-4 transition-all cursor-pointer bg-transparent border-0 flex items-center gap-2">
+      <mat-icon [class.text-primary]="currentTab() === 'flyers'">auto_awesome_mosaic</mat-icon>
+      Meus Encartes ({{ flyers().length }})
+    </button>
+    <button (click)="currentTab.set('concierge')"
+            [class.border-purple-600]="currentTab() === 'concierge'"
+            [class.text-purple-600]="currentTab() === 'concierge'"
+            [class.border-transparent]="currentTab() !== 'concierge'"
+            [class.text-slate-400]="currentTab() !== 'concierge'"
+            class="pb-4 px-2 font-black text-sm uppercase tracking-wider border-b-4 transition-all cursor-pointer bg-transparent border-0 flex items-center gap-2">
+      <mat-icon [class.text-purple-600]="currentTab() === 'concierge'">support_agent</mat-icon>
+      Serviço Concierge ({{ conciergeRequests().length }})
+      @if (conciergeRequests().length > 0) {
+        <span class="bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 border border-purple-200">PRO</span>
+      }
+    </button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- ABA 1: MEUS ENCARTES                      -->
+  <!-- ========================================== -->
+  @if (currentTab() === 'flyers') {
+    @if (isLoading()) {
+      <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p class="mt-4 text-gray-500 font-bold tracking-wide animate-pulse">Carregando encartes...</p>
+      </div>
+    } @else {
+      <!-- Métricas Rápidas -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div class="p-4 bg-slate-50 text-slate-500 rounded-2xl shadow-inner border border-gray-100">
+            <mat-icon class="!text-3xl !w-8 !h-8 flex items-center justify-center">auto_awesome_mosaic</mat-icon>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Encartes</p>
+            <h3 class="text-2xl font-black text-gray-900 mt-1">{{ flyers().length }}</h3>
+          </div>
         </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Encartes</p>
-          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ flyers().length }}</h3>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl shadow-inner border border-emerald-100">
+            <mat-icon class="!text-3xl !w-8 !h-8 flex items-center justify-center">campaign</mat-icon>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Encartes Ativos</p>
+            <h3 class="text-2xl font-black text-gray-900 mt-1">{{ activeCount() }}</h3>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div class="p-4 bg-blue-50 text-blue-600 rounded-2xl shadow-inner border border-blue-100">
+            <mat-icon class="!text-3xl !w-8 !h-8 flex items-center justify-center">visibility</mat-icon>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Visualizações Totais</p>
+            <h3 class="text-2xl font-black text-gray-900 mt-1">{{ totalViews() }}</h3>
+          </div>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="p-4 bg-emerald-50 text-emerald-600 rounded-2xl shadow-inner border border-emerald-100">
-          <mat-icon class="!text-3xl !w-8 !h-8 flex items-center justify-center">campaign</mat-icon>
+      <!-- Tabela de Encartes -->
+      <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/50 border-b border-gray-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <th class="px-6 py-4">Encarte</th>
+                <th class="px-6 py-4">Tema Aplicado</th>
+                <th class="px-6 py-4">Período de Validade</th>
+                <th class="px-6 py-4">Desempenho</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (flyer of flyers(); track flyer.id) {
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-3">
+                      <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-50 border border-gray-100 shrink-0 flex items-center justify-center shadow-sm">
+                        @if (flyer.thumbnailUrl) {
+                          <img [src]="flyer.thumbnailUrl" [alt]="flyer.title" class="w-full h-full object-cover">
+                        } @else {
+                          <mat-icon class="text-gray-300">image</mat-icon>
+                        }
+                      </div>
+                      <span class="font-bold text-gray-900 text-sm">{{ flyer.title }}</span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                      <mat-icon class="!text-[14px] !w-[14px] !h-[14px] text-slate-500">palette</mat-icon>
+                      {{ flyer.theme }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-semibold">
+                    <div class="flex flex-col gap-0.5">
+                      <span>Início: <strong class="text-slate-800">{{ flyer.startDate }}</strong></span>
+                      <span>Fim: <strong class="text-slate-800">{{ flyer.endDate }}</strong></span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2 text-xs text-slate-500 font-bold" matTooltip="Total de acessos e visualizações">
+                      <mat-icon class="!text-[18px] !w-[18px] !h-[18px] text-blue-500">bar_chart</mat-icon>
+                      <strong class="text-slate-900 text-sm">{{ flyer.views }}</strong> views
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm border"
+                          [ngClass]="{
+                            'bg-emerald-50 text-emerald-700 border-emerald-100': flyer.status === 'ATIVO',
+                            'bg-blue-50 text-blue-700 border-blue-100': flyer.status === 'RASCUNHO',
+                            'bg-slate-50 text-slate-500 border-slate-100': flyer.status === 'ENCERRADO'
+                          }">
+                      <span class="w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse"
+                            [ngClass]="{
+                              'bg-emerald-500': flyer.status === 'ATIVO',
+                              'bg-blue-500': flyer.status === 'RASCUNHO',
+                              'bg-slate-400': flyer.status === 'ENCERRADO'
+                            }"></span>
+                      {{ flyer.status === 'ATIVO' ? 'Ativo' : flyer.status === 'RASCUNHO' ? 'Rascunho' : 'Encerrado' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
+                    <button [routerLink]="['/manager/flyers/edit', flyer.id]" mat-flat-button class="!bg-slate-50 hover:!bg-slate-100 !text-slate-700 !rounded-xl !font-bold !py-3 border border-slate-200 cursor-pointer">
+                      Editar
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="menu" class="!text-slate-500 hover:!bg-slate-100">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #menu="matMenu" xPosition="before" class="!rounded-2xl">
+                      @if (flyer.status === 'RASCUNHO') {
+                        <button mat-menu-item (click)="alterarStatus(flyer.id, 'ATIVO')" class="!text-emerald-600 font-semibold">
+                          <mat-icon class="!text-emerald-600">publish</mat-icon>
+                          <span>Publicar Tabloide</span>
+                        </button>
+                      }
+                      @if (flyer.status === 'ATIVO') {
+                        <button mat-menu-item (click)="alterarStatus(flyer.id, 'RASCUNHO')" class="!text-blue-600 font-semibold">
+                          <mat-icon class="!text-blue-600">history</mat-icon>
+                          <span>Voltar para Rascunho</span>
+                        </button>
+                      }
+                      @if (flyer.status !== 'ENCERRADO') {
+                        <button mat-menu-item (click)="alterarStatus(flyer.id, 'ENCERRADO')" class="!text-slate-500">
+                          <mat-icon>archive</mat-icon>
+                          <span>Encerrar / Arquivar</span>
+                        </button>
+                      }
+                      <a mat-menu-item [routerLink]="['/flyer', flyer.id]" target="_blank" class="no-underline">
+                        <mat-icon>visibility</mat-icon>
+                        <span>Visualizar Vitrine</span>
+                      </a>
+                    </mat-menu>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="px-6 py-12 text-center text-slate-400 font-semibold">
+                    <mat-icon class="text-slate-350 text-4xl mb-2">auto_awesome_mosaic</mat-icon>
+                    <p>Nenhum encarte digital publicado ainda.</p>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Encartes Ativos</p>
-          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ activeCount() }}</h3>
+      </div>
+    }
+  }
+
+  <!-- ========================================== -->
+  <!-- ABA 2: SERVIÇO CONCIERGE                   -->
+  <!-- ========================================== -->
+  @if (currentTab() === 'concierge') {
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      
+      <!-- Lado Esquerdo: Formulário de Envio -->
+      <div class="xl:col-span-1 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-sm h-max">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+          <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <mat-icon>drive_folder_upload</mat-icon>
+          </div>
+          <div>
+            <h2 class="text-lg font-black text-gray-900 leading-tight">Digitalização</h2>
+            <p class="text-xs font-semibold text-gray-400">Envie suas ofertas e nós digitamos!</p>
+          </div>
+        </div>
+
+        <div class="space-y-5">
+          <!-- Campo 1: Título -->
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Título da Campanha</label>
+            <input type="text" 
+                   [value]="newRequestTitle()"
+                   (input)="newRequestTitle.set($any($event.target).value)"
+                   placeholder="Ex: Ofertas de Fim de Ano 2026"
+                   class="px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all">
+          </div>
+
+          <!-- Campo 2: Complexidade -->
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Tamanho do Tabloide</label>
+            <select [value]="newRequestComplexity()"
+                    (change)="newRequestComplexity.set(+$any($event.target).value)"
+                    class="px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600 transition-all cursor-pointer">
+              <option [value]="1">Pequeno (Até 10 itens)</option>
+              <option [value]="2">Médio (11 a 30 itens)</option>
+              <option [value]="3">Grande (Mais de 30 itens)</option>
+            </select>
+          </div>
+
+          <!-- Campo 3: Observações -->
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Instruções Importantes</label>
+            <textarea rows="3"
+                      [value]="newRequestObs()"
+                      (input)="newRequestObs.set($any($event.target).value)"
+                      placeholder="Ex: Cadastrar cervejas com validade até domingo. Enfatizar carnes nobres no topo."
+                      class="px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-purple-600 transition-all resize-none"></textarea>
+          </div>
+
+          <!-- Campo 4: Upload do Arquivo -->
+          <div class="flex flex-col">
+            <label class="text-xs font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Listagem / Imagem do Encarte</label>
+            
+            <div (click)="fileInput.click()" 
+                 class="border-2 border-dashed border-gray-200 hover:border-purple-500 rounded-2xl p-6 text-center cursor-pointer bg-gray-50/30 hover:bg-purple-50/10 transition-all flex flex-col items-center justify-center gap-2 group">
+              <mat-icon class="text-gray-400 group-hover:text-purple-600 !text-3xl !w-8 !h-8 transition-colors">cloud_upload</mat-icon>
+              
+              @if (selectedFileName()) {
+                <span class="text-sm font-bold text-purple-600 line-clamp-1 px-2">{{ selectedFileName() }}</span>
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Clique para alterar arquivo</span>
+              } @else {
+                <span class="text-sm font-bold text-slate-500">Arraste ou clique para enviar</span>
+                <span class="text-[10px] text-slate-400 font-semibold italic">PDF ou Imagem (Máx 15MB)</span>
+              }
+              
+              <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*,application/pdf" class="hidden">
+            </div>
+          </div>
+
+          <!-- Botão Enviar -->
+          <button (click)="criarSolicitacao()" 
+                  [disabled]="isSubmittingConcierge() || !newRequestTitle() || !selectedFile()"
+                  class="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-2xl py-4 font-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2 cursor-pointer border-0 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed">
+            @if (isSubmittingConcierge()) {
+              <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+              Enviando...
+            } @else {
+              <mat-icon>send</mat-icon>
+              Enviar ao Concierge
+            }
+          </button>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-        <div class="p-4 bg-blue-50 text-blue-600 rounded-2xl shadow-inner border border-blue-100">
-          <mat-icon class="!text-3xl !w-8 !h-8 flex items-center justify-center">visibility</mat-icon>
-        </div>
-        <div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Visualizações Totais</p>
-          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ totalViews() }}</h3>
-        </div>
-      </div>
-    </div>
+      <!-- Lado Direito: Listagem das Solicitações -->
+      <div class="xl:col-span-2 space-y-6">
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 sm:p-8">
+          <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <mat-icon class="text-purple-600">assignment</mat-icon>
+              <h2 class="text-lg font-black text-gray-900 uppercase tracking-wide">Fila de Digitalização</h2>
+            </div>
+            <button (click)="carregarConcierge()" [disabled]="isLoadingConcierge()"
+                    class="text-xs font-black text-purple-600 hover:text-purple-700 border-0 bg-transparent flex items-center gap-1 cursor-pointer disabled:opacity-50">
+              <mat-icon class="!text-[16px] !w-4 !h-4">refresh</mat-icon> Atualizar Fila
+            </button>
+          </div>
 
-    <!-- Tabela de Encartes -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-50/50 border-b border-gray-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
-              <th class="px-6 py-4">Encarte</th>
-              <th class="px-6 py-4">Tema Aplicado</th>
-              <th class="px-6 py-4">Período de Validade</th>
-              <th class="px-6 py-4">Desempenho</th>
-              <th class="px-6 py-4">Status</th>
-              <th class="px-6 py-4 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            @for (flyer of flyers(); track flyer.id) {
-              <tr class="hover:bg-slate-50/50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl overflow-hidden bg-slate-50 border border-gray-100 shrink-0 flex items-center justify-center shadow-sm">
-                      @if (flyer.thumbnailUrl) {
-                        <img [src]="flyer.thumbnailUrl" [alt]="flyer.title" class="w-full h-full object-cover">
-                      } @else {
-                        <mat-icon class="text-gray-300">image</mat-icon>
+          @if (isLoadingConcierge()) {
+            <div class="flex flex-col items-center justify-center py-20">
+              <mat-spinner diameter="36" color="accent"></mat-spinner>
+              <p class="mt-4 text-gray-400 font-bold tracking-wide animate-pulse">Carregando solicitações...</p>
+            </div>
+          } @else {
+            @if (conciergeRequests().length === 0) {
+              <div class="text-center py-16 border-2 border-dashed border-gray-100 rounded-3xl bg-slate-50/50">
+                <mat-icon class="text-gray-300 !text-[48px] !w-12 !h-12 mb-2">support_agent</mat-icon>
+                <h3 class="text-base font-black text-slate-700">Tudo limpo por aqui!</h3>
+                <p class="text-sm text-slate-400 max-w-xs mx-auto mt-1">Você não possui solicitações de digitalização. Use o formulário ao lado para enviar sua primeira listagem de ofertas!</p>
+              </div>
+            } @else {
+              <div class="space-y-4">
+                @for (req of conciergeRequests(); track req.id) {
+                  <div class="relative bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-5 overflow-hidden">
+                    <!-- Status Color Strip Indicator -->
+                    <div class="absolute left-0 top-0 bottom-0 w-1.5"
+                         [ngClass]="{
+                           'bg-amber-400': req.status === 'PENDENTE',
+                           'bg-blue-400': req.status === 'EM_PROCESSAMENTO',
+                           'bg-purple-500': req.status === 'AGUARDANDO_APROVACAO',
+                           'bg-emerald-500': req.status === 'APROVADO' || req.status === 'PUBLICADO',
+                           'bg-red-400': req.status === 'REJEITADO'
+                         }"></div>
+
+                    <!-- Informações da Solicitação -->
+                    <div class="space-y-1.5 pl-2 flex-1">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <!-- Status Badge -->
+                        <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border"
+                              [ngClass]="{
+                                'bg-amber-50 text-amber-700 border-amber-200': req.status === 'PENDENTE',
+                                'bg-blue-50 text-blue-700 border-blue-200': req.status === 'EM_PROCESSAMENTO',
+                                'bg-purple-50 text-purple-700 border-purple-200': req.status === 'AGUARDANDO_APROVACAO',
+                                'bg-emerald-55 text-emerald-700 border-emerald-200': req.status === 'APROVADO' || req.status === 'PUBLICADO',
+                                'bg-red-50 text-red-700 border-red-200': req.status === 'REJEITADO'
+                              }">
+                          {{ getStatusText(req.status) }}
+                        </span>
+
+                        <!-- Complexity Star -->
+                        <span class="text-[10px] font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-md">
+                          ⚡ Tamanho: {{ getComplexityText(req.complexidade) }}
+                        </span>
+                      </div>
+
+                      <h4 class="text-base font-bold text-gray-900 mt-1 leading-snug">{{ req.titulo }}</h4>
+                      
+                      <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-slate-400 pt-0.5">
+                        <span>🕒 Enviado em: {{ formatDateTime(req.dataCriacao) }}</span>
+                        @if (req.atendenteNome) {
+                          <span class="text-slate-500">👤 Digitador: <strong class="text-slate-700">{{ req.atendenteNome }}</strong></span>
+                        }
+                      </div>
+
+                      @if (req.observacoes) {
+                        <p class="text-xs text-slate-400 italic bg-slate-50 p-2 rounded-xl mt-2 max-w-xl">
+                          "{{ req.observacoes }}"
+                        </p>
                       }
                     </div>
-                    <span class="font-bold text-gray-900 text-sm">{{ flyer.title }}</span>
+
+                    <!-- Ações da Solicitação -->
+                    <div class="shrink-0 flex items-center gap-3 w-full sm:w-auto justify-end sm:justify-start pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-50">
+                      <!-- Baixar arquivo original enviado -->
+                      @if (req.urlArquivoOriginal) {
+                        <a [href]="req.urlArquivoOriginal" target="_blank"
+                           matTooltip="Visualizar arquivo enviado"
+                           class="w-10 h-10 rounded-xl border border-gray-200 text-gray-500 hover:bg-slate-50 transition-colors flex items-center justify-center shrink-0">
+                          <mat-icon>insert_drive_file</mat-icon>
+                        </a>
+                      }
+
+                      <!-- Se estiver Aguardando Aprovação -->
+                      @if (req.status === 'AGUARDANDO_APROVACAO') {
+                        <button (click)="aprovarSolicitacao(req.id)"
+                                class="bg-purple-600 hover:bg-purple-700 text-white rounded-xl px-4 py-2.5 text-xs font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-600/10 cursor-pointer flex items-center gap-1 border-0">
+                          <mat-icon class="!text-[16px] !w-4 !h-4 mr-0.5">done_all</mat-icon>
+                          Aprovar Digitalização
+                        </button>
+                      }
+                      
+                      @if (req.status === 'APROVADO' || req.status === 'PUBLICADO') {
+                        <div class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1 border border-emerald-100">
+                          <mat-icon class="!text-[16px] !w-4 !h-4">check_circle</mat-icon>
+                          Publicado
+                        </div>
+                      }
+                    </div>
                   </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                    <mat-icon class="!text-[14px] !w-[14px] !h-[14px] text-slate-500">palette</mat-icon>
-                    {{ flyer.theme }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-semibold">
-                  <div class="flex flex-col gap-0.5">
-                    <span>Início: <strong class="text-slate-800">{{ flyer.startDate }}</strong></span>
-                    <span>Fim: <strong class="text-slate-800">{{ flyer.endDate }}</strong></span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center gap-2 text-xs text-slate-500 font-bold" matTooltip="Total de acessos e visualizações">
-                    <mat-icon class="!text-[18px] !w-[18px] !h-[18px] text-blue-500">bar_chart</mat-icon>
-                    <strong class="text-slate-900 text-sm">{{ flyer.views }}</strong> views
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm border"
-                        [ngClass]="{
-                          'bg-emerald-50 text-emerald-700 border-emerald-100': flyer.status === 'ATIVO',
-                          'bg-blue-50 text-blue-700 border-blue-100': flyer.status === 'RASCUNHO',
-                          'bg-slate-50 text-slate-500 border-slate-100': flyer.status === 'ENCERRADO'
-                        }">
-                    <span class="w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse"
-                          [ngClass]="{
-                            'bg-emerald-500': flyer.status === 'ATIVO',
-                            'bg-blue-500': flyer.status === 'RASCUNHO',
-                            'bg-slate-400': flyer.status === 'ENCERRADO'
-                          }"></span>
-                    {{ flyer.status === 'ATIVO' ? 'Ativo' : flyer.status === 'RASCUNHO' ? 'Rascunho' : 'Encerrado' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex items-center justify-end gap-2">
-                  <button [routerLink]="['/manager/flyers/edit', flyer.id]" mat-flat-button class="!bg-slate-50 hover:!bg-slate-100 !text-slate-700 !rounded-xl !font-bold !py-3 border border-slate-200 cursor-pointer">
-                    Editar
-                  </button>
- 
-                  <button mat-icon-button [matMenuTriggerFor]="menu" class="!text-slate-500 hover:!bg-slate-100">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
- 
-                  <mat-menu #menu="matMenu" xPosition="before" class="!rounded-2xl">
-                    @if (flyer.status === 'RASCUNHO') {
-                      <button mat-menu-item (click)="alterarStatus(flyer.id, 'ATIVO')" class="!text-emerald-600 font-semibold">
-                        <mat-icon class="!text-emerald-600">publish</mat-icon>
-                        <span>Publicar Tabloide</span>
-                      </button>
-                    }
-                    @if (flyer.status === 'ATIVO') {
-                      <button mat-menu-item (click)="alterarStatus(flyer.id, 'RASCUNHO')" class="!text-blue-600 font-semibold">
-                        <mat-icon class="!text-blue-600">history</mat-icon>
-                        <span>Voltar para Rascunho</span>
-                      </button>
-                    }
-                    @if (flyer.status !== 'ENCERRADO') {
-                      <button mat-menu-item (click)="alterarStatus(flyer.id, 'ENCERRADO')" class="!text-slate-500">
-                        <mat-icon>archive</mat-icon>
-                        <span>Encerrar / Arquivar</span>
-                      </button>
-                    }
-                    <a mat-menu-item [routerLink]="['/flyer', flyer.id]" target="_blank" class="no-underline">
-                      <mat-icon>visibility</mat-icon>
-                      <span>Visualizar Vitrine</span>
-                    </a>
-                  </mat-menu>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="px-6 py-12 text-center text-slate-400 font-semibold">
-                  <mat-icon class="text-slate-350 text-4xl mb-2">auto_awesome_mosaic</mat-icon>
-                  <p>Nenhum encarte digital publicado ainda.</p>
-                </td>
-              </tr>
+                }
+              </div>
             }
-          </tbody>
-        </table>
+          }
+        </div>
       </div>
+
     </div>
   }
 </div>

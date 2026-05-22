@@ -273,19 +273,86 @@ export class ManagerSettingsComponent implements OnInit {
 
     this.isSearchingCep.set(true);
     this.publicApiService.buscarCep(cep).subscribe({
-      next: (res) => {
+      next: async (res) => {
         if (res.erro) {
           this.snackBar.open('CEP não encontrado.', 'Fechar', { duration: 3000 });
+          this.isSearchingCep.set(false);
         } else {
+          const address = `${res.logradouro}${res.bairro ? ', ' + res.bairro : ''}`;
+          const city = res.localidade;
+          const state = res.uf;
+
           this.storeData.update(data => ({
             ...data,
-            address: `${res.logradouro}${res.bairro ? ', ' + res.bairro : ''}`,
-            city: res.localidade,
-            state: res.uf
+            address: address,
+            city: city,
+            state: state
           }));
-          this.snackBar.open('Endereço atualizado via CEP!', 'Fechar', { duration: 2000 });
+
+          try {
+            let nomData: any = null;
+
+            // 1ª Tentativa: Logradouro + Cidade + Estado
+            if (res.logradouro) {
+              const q1 = `${res.logradouro} ${city} ${state} Brasil`;
+              try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q1)}&limit=1`);
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data && data.length > 0) nomData = data;
+                }
+              } catch (e) {
+                console.warn('Erro Nominatim busca CEP tentativa 1:', e);
+              }
+            }
+
+            // 2ª Tentativa: Bairro + Cidade + Estado
+            if (!nomData && res.bairro) {
+              const q2 = `${res.bairro} ${city} ${state} Brasil`;
+              try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q2)}&limit=1`);
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data && data.length > 0) nomData = data;
+                }
+              } catch (e) {
+                console.warn('Erro Nominatim busca CEP tentativa 2:', e);
+              }
+            }
+
+            // 3ª Tentativa: Cidade + Estado
+            if (!nomData) {
+              const q3 = `${city} ${state} Brasil`;
+              try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q3)}&limit=1`);
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data && data.length > 0) nomData = data;
+                }
+              } catch (e) {
+                console.warn('Erro Nominatim busca CEP tentativa 3:', e);
+              }
+            }
+
+            if (nomData && nomData.length > 0) {
+              const lat = parseFloat(nomData[0].lat);
+              const lng = parseFloat(nomData[0].lon);
+              this.storeData.update(data => ({
+                ...data,
+                latitude: lat,
+                longitude: lng
+              }));
+              this.snackBar.open('Endereço e coordenadas (Lat/Lng) atualizados via CEP!', 'Fechar', { duration: 3000 });
+            } else {
+              this.snackBar.open('Endereço atualizado via CEP! Coordenadas não localizadas.', 'Fechar', { duration: 3000 });
+            }
+          } catch (err) {
+            console.error('Erro ao geocodificar CEP:', err);
+            this.snackBar.open('Endereço atualizado via CEP (Coordenadas indisponíveis).', 'Fechar', { duration: 3000 });
+          } finally {
+            this.isSearchingCep.set(false);
+          }
         }
-        this.isSearchingCep.set(false);
       },
       error: () => {
         this.snackBar.open('Erro ao buscar CEP.', 'Fechar', { duration: 3000 });

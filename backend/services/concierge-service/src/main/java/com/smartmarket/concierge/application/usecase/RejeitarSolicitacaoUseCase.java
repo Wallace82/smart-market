@@ -10,40 +10,36 @@ import com.smartmarket.concierge.infrastructure.adapter.out.persistence.mapper.C
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-public class ConcluirProcessamentoUseCase {
+public class RejeitarSolicitacaoUseCase {
 
     private final SolicitacaoConciergeRepository repository;
     private final AuditoriaConciergeRepository auditoriaRepository;
     private final ConciergeMapper mapper;
 
-    public ConcluirProcessamentoUseCase(SolicitacaoConciergeRepository repository, 
-                                        AuditoriaConciergeRepository auditoriaRepository, 
-                                        ConciergeMapper mapper) {
+    public RejeitarSolicitacaoUseCase(SolicitacaoConciergeRepository repository,
+                                      AuditoriaConciergeRepository auditoriaRepository,
+                                      ConciergeMapper mapper) {
         this.repository = repository;
         this.auditoriaRepository = auditoriaRepository;
         this.mapper = mapper;
     }
 
     @Transactional
-    public SolicitacaoConcierge execute(UUID solicitacaoId, UUID atendenteId, String observacoesAtendente, UUID encarteId) {
+    public SolicitacaoConcierge execute(UUID solicitacaoId, UUID gestorId, String observacoesGestor) {
         SolicitacaoConciergeEntity entity = repository.findById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada: " + solicitacaoId));
 
-        if (entity.getStatus() != ConciergeStatus.EM_PROCESSAMENTO) {
-            throw new IllegalStateException("Apenas solicitações em processamento podem ser concluídas.");
+        if (entity.getStatus() != ConciergeStatus.AGUARDANDO_APROVACAO) {
+            throw new IllegalStateException("Apenas solicitações aguardando aprovação podem ser rejeitadas.");
         }
 
-        if (!entity.getAtendenteId().equals(atendenteId)) {
-            throw new IllegalStateException("Esta solicitação está atribuída a outro atendente.");
-        }
-
-        entity.setStatus(ConciergeStatus.AGUARDANDO_APROVACAO);
-        entity.setObservacoes(entity.getObservacoes() + "\n[Atendente]: " + observacoesAtendente);
-        entity.setEncarteId(encarteId);
+        entity.setStatus(ConciergeStatus.REJEITADO);
+        entity.setAtendenteId(null);
+        entity.setLockAt(null);
+        entity.setObservacoes(entity.getObservacoes() + "\n[Gestor - Rejeitado]: " + observacoesGestor);
 
         SolicitacaoConciergeEntity saved = repository.save(entity);
 
@@ -51,11 +47,11 @@ public class ConcluirProcessamentoUseCase {
         auditoriaRepository.save(AuditoriaConciergeEntity.builder()
                 .id(UUID.randomUUID())
                 .solicitacaoId(solicitacaoId)
-                .usuarioId(atendenteId)
-                .acao("CONCLUSAO_PROCESSAMENTO")
-                .statusDe("EM_PROCESSAMENTO")
-                .statusPara("AGUARDANDO_APROVACAO")
-                .detalhes("Atendente concluiu o cadastro e enviou para aprovação do gestor.")
+                .usuarioId(gestorId)
+                .acao("REJEICAO_GESTOR")
+                .statusDe("AGUARDANDO_APROVACAO")
+                .statusPara("REJEITADO")
+                .detalhes("Gestor rejeitou o cadastro e solicitou correções. Feedback: " + observacoesGestor)
                 .build());
 
         return mapper.toDomain(saved);

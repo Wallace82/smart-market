@@ -35,8 +35,8 @@ public class AssumirSolicitacaoUseCase {
         SolicitacaoConciergeEntity entity = repository.findById(solicitacaoId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada: " + solicitacaoId));
 
-        if (entity.getStatus() != ConciergeStatus.PENDENTE) {
-            throw new IllegalStateException("Esta solicitação já está em processamento ou foi concluída.");
+        if (entity.getStatus() != ConciergeStatus.PENDENTE && entity.getStatus() != ConciergeStatus.REJEITADO) {
+            throw new IllegalStateException("Esta solicitação não está disponível para atendimento.");
         }
 
         if (entity.getAtendenteId() != null) {

@@ -48,6 +48,10 @@ public class ConsultarFilaAtendimentoUseCase {
                 .tempoRestanteSlaMinutos(tempoRestante)
                 .complexidade(entity.getComplexidade())
                 .plano(entity.getPlanoCliente())
+                .atendenteId(entity.getAtendenteId())
+                .urlArquivoOriginal(entity.getUrlArquivoOriginal())
+                .observacoes(entity.getObservacoes())
+                .encarteId(entity.getEncarteId())
                 .build();
     }
 

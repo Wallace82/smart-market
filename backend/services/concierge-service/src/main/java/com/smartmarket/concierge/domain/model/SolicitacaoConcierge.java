@@ -29,4 +29,5 @@ public class SolicitacaoConcierge {
     private LocalDateTime lockAt;
     private String urlArquivoOriginal;
     private String observacoes;
+    private UUID encarteId;
 }

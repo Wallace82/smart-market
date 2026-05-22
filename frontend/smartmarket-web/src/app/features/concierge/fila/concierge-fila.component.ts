@@ -117,6 +117,7 @@ import { ProductBaseResponse } from '@core/models/product.model';
                   class="w-full appearance-none pl-4 pr-10 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all font-bold text-gray-700">
             <option value="TODOS">Todos os Status</option>
             <option value="PENDENTE">Pendente</option>
+            <option value="REJEITADO">Rejeitado / Pendente de Correção</option>
             <option value="EM_PROCESSAMENTO">Em Processamento</option>
             <option value="AGUARDANDO_APROVACAO">Aguardando Aprovação</option>
             <option value="APROVADO">Aprovado</option>
@@ -149,7 +150,8 @@ import { ProductBaseResponse } from '@core/models/product.model';
               <div class="flex flex-col gap-3">
                 
                 <!-- Solicitação Card -->
-                <div class="relative bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 hover:shadow-xl transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6 group overflow-hidden">
+                <div class="relative bg-white rounded-3xl border p-6 sm:p-8 hover:shadow-xl transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6 group overflow-hidden"
+                     [ngClass]="solic.status === 'REJEITADO' ? 'border-rose-300 bg-rose-50/10' : 'border-gray-100'">
                   
                   <!-- Plan Glow Indicator Border -->
                   <div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b"
@@ -191,7 +193,8 @@ import { ProductBaseResponse } from '@core/models/product.model';
                                 'bg-amber-50 text-amber-700': solic.status === 'PENDENTE',
                                 'bg-blue-50 text-blue-700': solic.status === 'EM_PROCESSAMENTO',
                                 'bg-indigo-50 text-indigo-700': solic.status === 'AGUARDANDO_APROVACAO',
-                                'bg-emerald-50 text-emerald-700': solic.status === 'APROVADO' || solic.status === 'PUBLICADO'
+                                'bg-emerald-50 text-emerald-700': solic.status === 'APROVADO' || solic.status === 'PUBLICADO',
+                                'bg-rose-100 text-rose-800 border border-rose-200': solic.status === 'REJEITADO'
                               }">
                           {{ getStatusText(solic.status) }}
                         </span>
@@ -249,7 +252,7 @@ import { ProductBaseResponse } from '@core/models/product.model';
                     </a>
 
                     <!-- Lock Attendant Information if locked -->
-                    @if (solic.status === 'EM_PROCESSAMENTO' && solic.atendenteId !== currentUserId()) {
+                    @if (solic.status === 'EM_PROCESSAMENTO' && !isAssignedToMe(solic)) {
                       <div class="bg-gray-50 border border-gray-100 rounded-2xl px-5 py-3 text-xs font-bold text-gray-400 flex items-center justify-center gap-2">
                         <mat-icon class="text-gray-400 !w-4 !h-4 text-[16px]">lock</mat-icon>
                         <span>Por: {{ solic.atendenteNome || 'Outro atendente' }}</span>
@@ -257,14 +260,14 @@ import { ProductBaseResponse } from '@core/models/product.model';
                     }
 
                     <!-- Actions trigger depending on status -->
-                    @if (solic.status === 'PENDENTE') {
+                    @if (solic.status === 'PENDENTE' || solic.status === 'REJEITADO') {
                       <button (click)="assumirSolicitacao(solic)"
                               class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl px-6 py-4 text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-600/20 cursor-pointer flex items-center justify-center gap-1">
                         <mat-icon class="mr-1">pan_tool</mat-icon> Assumir
                       </button>
                     }
 
-                    @if (solic.status === 'EM_PROCESSAMENTO' && solic.atendenteId === currentUserId()) {
+                    @if (solic.status === 'EM_PROCESSAMENTO' && isAssignedToMe(solic)) {
                       <button (click)="toggleWorkspace(solic)"
                               class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl px-6 py-4 text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-600/20 cursor-pointer flex items-center justify-center gap-1">
                         <mat-icon class="mr-1">design_services</mat-icon>
@@ -290,7 +293,7 @@ import { ProductBaseResponse } from '@core/models/product.model';
                 </div>
 
                 <!-- Expanded Workspace Panel -->
-                @if (workspaceAberto()[solic.id] && solic.status === 'EM_PROCESSAMENTO' && solic.atendenteId === currentUserId()) {
+                @if (workspaceAberto()[solic.id] && solic.status === 'EM_PROCESSAMENTO' && isAssignedToMe(solic)) {
                   <div class="bg-slate-50 border border-purple-500/10 rounded-3xl p-6 sm:p-8 shadow-xl shadow-purple-500/5 transition-all duration-300 animate-fadeIn mb-4">
                     
                     <!-- Tabs Header -->
@@ -729,6 +732,7 @@ export class ConciergeFilaComponent implements OnInit {
   // Workspace layout signals
   workspaceAberto = signal<{ [key: string]: boolean }>({});
   abaAtiva = signal<{ [key: string]: 'ofertas' | 'encarte' | 'conclusao' }>({});
+  encarteCriadoParaSolicitacao = signal<{ [solicId: string]: string }>({});
 
   // Offer Creation State
   termoBuscaProduto = signal<{ [key: string]: string }>({});
@@ -761,6 +765,13 @@ export class ConciergeFilaComponent implements OnInit {
   // Current attendant ID
   currentUserId = computed(() => this.authService.user()?.id || '');
 
+  isAssignedToMe(solic: any): boolean {
+    const uId = this.currentUserId();
+    const aId = solic?.atendenteId;
+    if (!uId || !aId) return false;
+    return uId.toLowerCase() === aId.toLowerCase();
+  }
+
   // Computed metrics for cards
   totalFila = computed(() => this.solicitacoes().length);
   
@@ -769,7 +780,11 @@ export class ConciergeFilaComponent implements OnInit {
   );
   
   meusAtendimentos = computed(() => 
-    this.solicitacoes().filter(s => s.status === 'EM_PROCESSAMENTO' && s.atendenteId === this.currentUserId()).length
+    this.solicitacoes().filter(s => {
+      const uId = this.currentUserId();
+      const aId = s.atendenteId;
+      return s.status === 'EM_PROCESSAMENTO' && uId && aId && uId.toLowerCase() === aId.toLowerCase();
+    }).length
   );
   
   totalSlaCritico = computed(() => 
@@ -845,6 +860,7 @@ export class ConciergeFilaComponent implements OnInit {
   getStatusText(status: string): string {
     switch (status) {
       case 'PENDENTE': return '⏳ Pendente';
+      case 'REJEITADO': return '❌ Rejeitado / Correção';
       case 'EM_PROCESSAMENTO': return '⚙️ Em Processamento';
       case 'AGUARDANDO_APROVACAO': return '👁️ Aguardando Aprovação';
       case 'APROVADO':
@@ -907,8 +923,9 @@ export class ConciergeFilaComponent implements OnInit {
   concluirSolicitacao(solic: ConciergeRequest) {
     const atendenteId = this.currentUserId();
     const observacoes = this.observacoesAtendimento[solic.id] || 'Atendimento concluído e despachado!';
+    const encarteId = this.encarteCriadoParaSolicitacao()[solic.id];
 
-    this.conciergeService.concluir(solic.id, atendenteId, observacoes).subscribe({
+    this.conciergeService.concluir(solic.id, atendenteId, observacoes, encarteId).subscribe({
       next: () => {
         this.notificationService.success('Processamento concluído! O encarte foi enviado para aprovação do supermercado.');
         
@@ -1237,8 +1254,14 @@ export class ConciergeFilaComponent implements OnInit {
     };
 
     this.encarteService.criarEncarte(request).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.notificationService.success(`Encarte "${titulo}" criado com sucesso!`);
+        if (res && res.id) {
+          this.encarteCriadoParaSolicitacao.set({
+            ...this.encarteCriadoParaSolicitacao(),
+            [id]: res.id
+          });
+        }
         this.ofertasSelecionadasParaEncarte.set({ ...this.ofertasSelecionadasParaEncarte(), [id]: {} });
         this.carregarEncartesDoSupermercado(solic);
       },
@@ -1250,8 +1273,9 @@ export class ConciergeFilaComponent implements OnInit {
 
   simularEncarteCriado(solic: ConciergeRequest, req: EncarteDigitalRequest) {
     const id = solic.id;
+    const mockId = 'e-mock-' + Math.random().toString(36).substr(2, 9);
     const mockEncarte = {
-      id: 'e-mock-' + Math.random().toString(36).substr(2, 9),
+      id: mockId,
       supermercadoId: req.supermercadoId,
       temaId: req.temaId,
       titulo: req.titulo,
@@ -1266,6 +1290,10 @@ export class ConciergeFilaComponent implements OnInit {
     this.encartesSupermercado.set({
       ...this.encartesSupermercado(),
       [id]: [mockEncarte, ...listaAtual]
+    });
+    this.encarteCriadoParaSolicitacao.set({
+      ...this.encarteCriadoParaSolicitacao(),
+      [id]: mockId
     });
     this.notificationService.success(`(Simulação) Encarte "${req.titulo}" criado com sucesso.`);
     this.ofertasSelecionadasParaEncarte.set({ ...this.ofertasSelecionadasParaEncarte(), [id]: {} });

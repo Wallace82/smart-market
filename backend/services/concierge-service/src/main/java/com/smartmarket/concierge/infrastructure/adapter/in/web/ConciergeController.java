@@ -23,17 +23,20 @@ public class ConciergeController {
     private final com.smartmarket.concierge.application.usecase.AssumirSolicitacaoUseCase assumirSolicitacaoUseCase;
     private final com.smartmarket.concierge.application.usecase.ConcluirProcessamentoUseCase concluirProcessamentoUseCase;
     private final com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase;
+    private final com.smartmarket.concierge.application.usecase.RejeitarSolicitacaoUseCase rejeitarSolicitacaoUseCase;
 
     public ConciergeController(CriarSolicitacaoUseCase criarSolicitacaoUseCase,
                                com.smartmarket.concierge.application.usecase.ConsultarFilaAtendimentoUseCase consultarFilaAtendimentoUseCase,
                                com.smartmarket.concierge.application.usecase.AssumirSolicitacaoUseCase assumirSolicitacaoUseCase,
                                com.smartmarket.concierge.application.usecase.ConcluirProcessamentoUseCase concluirProcessamentoUseCase,
-                               com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase) {
+                               com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase,
+                               com.smartmarket.concierge.application.usecase.RejeitarSolicitacaoUseCase rejeitarSolicitacaoUseCase) {
         this.criarSolicitacaoUseCase = criarSolicitacaoUseCase;
         this.consultarFilaAtendimentoUseCase = consultarFilaAtendimentoUseCase;
         this.assumirSolicitacaoUseCase = assumirSolicitacaoUseCase;
         this.concluirProcessamentoUseCase = concluirProcessamentoUseCase;
         this.aprovarSolicitacaoUseCase = aprovarSolicitacaoUseCase;
+        this.rejeitarSolicitacaoUseCase = rejeitarSolicitacaoUseCase;
     }
 
     @GetMapping("/fila")
@@ -61,8 +64,9 @@ public class ConciergeController {
     public ResponseEntity<SolicitacaoConcierge> concluir(
             @PathVariable(name = "id") UUID solicitacaoId,
             @RequestParam(name = "atendenteId") UUID atendenteId,
-            @RequestParam(name = "observacoes", required = false) String observacoes) {
-        return ResponseEntity.ok(concluirProcessamentoUseCase.execute(solicitacaoId, atendenteId, observacoes));
+            @RequestParam(name = "observacoes", required = false) String observacoes,
+            @RequestParam(name = "encarteId", required = false) UUID encarteId) {
+        return ResponseEntity.ok(concluirProcessamentoUseCase.execute(solicitacaoId, atendenteId, observacoes, encarteId));
     }
 
     @PatchMapping("/{id}/aprovar")
@@ -71,6 +75,15 @@ public class ConciergeController {
             @PathVariable(name = "id") UUID solicitacaoId,
             @RequestParam(name = "gestorId") UUID gestorId) {
         return ResponseEntity.ok(aprovarSolicitacaoUseCase.execute(solicitacaoId, gestorId));
+    }
+
+    @PatchMapping("/{id}/rejeitar")
+    @Operation(summary = "Gestor do supermercado rejeita o cadastro realizado e solicita correcoes")
+    public ResponseEntity<SolicitacaoConcierge> rejeitar(
+            @PathVariable(name = "id") UUID solicitacaoId,
+            @RequestParam(name = "gestorId") UUID gestorId,
+            @RequestParam(name = "observacoes") String observacoes) {
+        return ResponseEntity.ok(rejeitarSolicitacaoUseCase.execute(solicitacaoId, gestorId, observacoes));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

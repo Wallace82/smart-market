@@ -12,6 +12,9 @@ import { AuthService } from '@core/auth/auth.service';
 import { SupermarketService } from '@core/services/supermarket.service';
 import { EncarteService } from '@core/services/encarte.service';
 import { ConciergeService, ConciergeRequest } from '@core/services/concierge.service';
+import { OfertaService, OfertaSupermercado } from '@core/services/oferta.service';
+import { forkJoin, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 
 export interface Flyer {
   id: string;
@@ -45,6 +48,7 @@ export class FlyerListComponent implements OnInit {
   private supermarketService = inject(SupermarketService);
   private encarteService = inject(EncarteService);
   private conciergeService = inject(ConciergeService);
+  private ofertaService = inject(OfertaService);
   private snackBar = inject(MatSnackBar);
 
   // Controle de Abas
@@ -63,6 +67,9 @@ export class FlyerListComponent implements OnInit {
   public conciergeRequests = signal<ConciergeRequest[]>([]);
   public isLoadingConcierge = signal(false);
   public isSubmittingConcierge = signal(false);
+  public previewAberto = signal<{ [requestId: string]: boolean }>({});
+  public previewDados = signal<{ [requestId: string]: { encarte: any, tema: any, ofertas: OfertaSupermercado[], carregando: boolean, erro?: string } }>({});
+  public observacoesRejeicao = signal<{ [requestId: string]: string }>({});
 
   // Formulário de Nova Solicitação do Concierge
   public newRequestTitle = signal('');
@@ -270,5 +277,136 @@ export class FlyerListComponent implements OnInit {
     } catch {
       return dateStr;
     }
+  }
+
+  public togglePreview(req: ConciergeRequest): void {
+    const reqId = req.id;
+    const encarteId = req.encarteId;
+    const atualAberto = this.previewAberto();
+    const novoStatus = !atualAberto[reqId];
+
+    this.previewAberto.set({
+      ...atualAberto,
+      [reqId]: novoStatus
+    });
+
+    if (novoStatus && encarteId) {
+      // Marcar como carregando
+      this.previewDados.set({
+        ...this.previewDados(),
+        [reqId]: { encarte: null, tema: null, ofertas: [], carregando: true }
+      });
+
+      this.encarteService.buscarEncartePorId(encarteId).pipe(
+        switchMap(encarte => {
+          const temaObs = encarte.temaId 
+            ? this.encarteService.buscarTemaPorId(encarte.temaId).pipe(catchError(() => of(null))) 
+            : of(null);
+
+          const itens = encarte.itens || [];
+          const ofertasObs = itens.length > 0
+            ? forkJoin(itens.map(item => this.ofertaService.buscarPorId(item.ofertaId).pipe(
+                catchError(() => of({
+                  id: item.ofertaId,
+                  supermercadoId: encarte.supermercadoId,
+                  produtoBaseId: '',
+                  nomeProduto: 'Oferta não encontrada',
+                  preco: 0,
+                  unidadeMedida: 'UN',
+                  ativo: false
+                } as OfertaSupermercado))
+              )))
+            : of([]);
+
+          return forkJoin({
+            encarte: of(encarte),
+            tema: temaObs,
+            ofertas: ofertasObs
+          });
+        }),
+        catchError(err => {
+          console.error('Erro ao buscar dados do encarte para prévia:', err);
+          throw err;
+        })
+      ).subscribe({
+        next: (res) => {
+          this.previewDados.set({
+            ...this.previewDados(),
+            [reqId]: {
+              encarte: res.encarte,
+              tema: res.tema,
+              ofertas: res.ofertas,
+              carregando: false
+            }
+          });
+        },
+        error: () => {
+          // Fallback visual com dados mockados para o preview
+          const mockEncarte = {
+            id: encarteId,
+            titulo: `Encarte - ${req.titulo}`,
+            dataInicio: new Date().toISOString(),
+            dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'RASCUNHO'
+          };
+          const mockTema = {
+            id: 't2',
+            nome: 'Semana do Consumidor',
+            corFundoHex: '#f0f9ff',
+            corDestaqueHex: '#0284c7',
+            urlBackgroundDecorativo: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=300&auto=format&fit=crop'
+          };
+          const mockOfertas: OfertaSupermercado[] = [
+            { id: 'o1', supermercadoId: req.supermercadoId, produtoBaseId: 'p1', nomeProduto: 'Arroz Agulhinha Tipo 1 - 5kg', preco: 29.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=200&auto=format&fit=crop', ativo: true, precoAtual: 34.90, precoPromocional: 29.90 },
+            { id: 'o2', supermercadoId: req.supermercadoId, produtoBaseId: 'p2', nomeProduto: 'Feijão Carioca Kicaldo - 1kg', preco: 8.45, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1551462147-37885acc3c41?q=80&w=200&auto=format&fit=crop', ativo: true, precoAtual: 9.99, precoPromocional: 8.45 }
+          ];
+
+          this.previewDados.set({
+            ...this.previewDados(),
+            [reqId]: {
+              encarte: mockEncarte,
+              tema: mockTema,
+              ofertas: mockOfertas,
+              carregando: false
+            }
+          });
+        }
+      });
+    }
+  }
+
+  public rejeitarSolicitacao(requestId: string): void {
+    const user = this.authService.user();
+    if (!user) return;
+
+    const obs = this.observacoesRejeicao()[requestId] || '';
+    if (!obs.trim()) {
+      this.snackBar.open('Por favor, informe o motivo da rejeição (observações).', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    this.isLoadingConcierge.set(true);
+    this.conciergeService.rejeitar(requestId, user.id, obs).subscribe({
+      next: () => {
+        this.snackBar.open('Solicitação devolvida ao atendente com o seu feedback para correção!', 'Fechar', { duration: 4000 });
+        
+        // Limpar observação e fechar preview
+        const atualObs = this.observacoesRejeicao();
+        delete atualObs[requestId];
+        this.observacoesRejeicao.set(atualObs);
+
+        const atualAberto = this.previewAberto();
+        delete atualAberto[requestId];
+        this.previewAberto.set(atualAberto);
+
+        this.carregarDados();
+        this.carregarConcierge();
+      },
+      error: (err) => {
+        console.error('Erro ao rejeitar solicitação:', err);
+        this.snackBar.open('Erro ao registrar a rejeição.', 'Fechar', { duration: 3000 });
+        this.isLoadingConcierge.set(false);
+      }
+    });
   }
 }

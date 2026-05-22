@@ -69,6 +69,9 @@ public class SolicitacaoConciergeEntity {
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 
+    @Column(name = "encarte_id")
+    private UUID encarteId;
+
     @OneToMany(mappedBy = "solicitacao", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnexoConciergeEntity> anexos = new ArrayList<>();
 }

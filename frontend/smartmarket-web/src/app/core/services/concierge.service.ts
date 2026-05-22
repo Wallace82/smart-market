@@ -23,6 +23,7 @@ export interface ConciergeRequest {
   tempoEmFilaMinutos?: number;
   tempoRestanteSlaMinutos?: number;
   faixaPrioridade?: string;
+  encarteId?: string | null;
 }
 
 @Injectable({
@@ -41,10 +42,13 @@ export class ConciergeService {
     return this.http.patch<ConciergeRequest>(`${this.apiUrl}/${id}/assumir`, null, { params });
   }
 
-  concluir(id: string, atendenteId: string, observacoes?: string): Observable<ConciergeRequest> {
+  concluir(id: string, atendenteId: string, observacoes?: string, encarteId?: string): Observable<ConciergeRequest> {
     let params = new HttpParams().set('atendenteId', atendenteId);
     if (observacoes) {
       params = params.set('observacoes', observacoes);
+    }
+    if (encarteId) {
+      params = params.set('encarteId', encarteId);
     }
     return this.http.patch<ConciergeRequest>(`${this.apiUrl}/${id}/concluir`, null, { params });
   }
@@ -52,6 +56,13 @@ export class ConciergeService {
   aprovar(id: string, gestorId: string): Observable<ConciergeRequest> {
     const params = new HttpParams().set('gestorId', gestorId);
     return this.http.patch<ConciergeRequest>(`${this.apiUrl}/${id}/aprovar`, null, { params });
+  }
+
+  rejeitar(id: string, gestorId: string, observacoes: string): Observable<ConciergeRequest> {
+    const params = new HttpParams()
+      .set('gestorId', gestorId)
+      .set('observacoes', observacoes);
+    return this.http.patch<ConciergeRequest>(`${this.apiUrl}/${id}/rejeitar`, null, { params });
   }
 
   criar(

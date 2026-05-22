@@ -12,7 +12,7 @@ public interface SolicitacaoConciergeRepository extends JpaRepository<Solicitaca
     
     List<SolicitacaoConciergeEntity> findBySupermercadoId(UUID supermercadoId);
     
-    @Query("SELECT s FROM SolicitacaoConciergeEntity s WHERE s.status = 'PENDENTE' ORDER BY s.prioridadeScore DESC, s.dataCriacao ASC")
+    @Query("SELECT s FROM SolicitacaoConciergeEntity s ORDER BY s.prioridadeScore DESC, s.dataCriacao ASC")
     List<SolicitacaoConciergeEntity> findTopPriorities();
 
     long countBySupermercadoIdAndDataCriacaoAfter(UUID supermercadoId, java.time.LocalDateTime dataInicio);

@@ -22,4 +22,8 @@ public class ConciergeQueueResponse {
     private Long tempoRestanteSlaMinutos;
     private Integer complexidade;
     private String plano;
+    private UUID atendenteId;
+    private String urlArquivoOriginal;
+    private String observacoes;
+    private UUID encarteId;
 }

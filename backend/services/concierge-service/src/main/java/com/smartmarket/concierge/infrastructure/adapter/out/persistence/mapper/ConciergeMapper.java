@@ -22,9 +22,10 @@ public class ConciergeMapper {
                 .dataCriacao(domain.getDataCriacao())
                 .dataInicioProcessamento(domain.getDataInicioProcessamento())
                 .dataConclusao(domain.getDataConclusao())
-                .lockAt(domain.getLockAt())
+                 .lockAt(domain.getLockAt())
                 .urlArquivoOriginal(domain.getUrlArquivoOriginal())
                 .observacoes(domain.getObservacoes())
+                .encarteId(domain.getEncarteId())
                 .build();
     }
 
@@ -46,6 +47,7 @@ public class ConciergeMapper {
                 .lockAt(entity.getLockAt())
                 .urlArquivoOriginal(entity.getUrlArquivoOriginal())
                 .observacoes(entity.getObservacoes())
+                .encarteId(entity.getEncarteId())
                 .build();
     }
 }

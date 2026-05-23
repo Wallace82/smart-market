@@ -25,7 +25,7 @@ public class RegistrarUsuarioUseCase {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void execute(RegistroUsuarioRequestDTO registroRequest) {
+    public Usuario execute(RegistroUsuarioRequestDTO registroRequest) {
         if (usuarioRepository.findByEmail(registroRequest.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Erro: E-mail já está em uso!");
         }
@@ -54,7 +54,7 @@ public class RegistrarUsuarioUseCase {
 
         usuario.adicionarPapel(papel);
 
-        usuarioRepository.save(usuario);
+        return usuarioRepository.save(usuario);
     }
 }
 

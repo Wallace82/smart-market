@@ -44,6 +44,12 @@ spring:
           predicates:
             - Path=/api/v1/concierge/**
 
+        # Rota para o client-service (preferências e locais do cliente)
+        - id: client-service
+          uri: ${CLIENT_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/clientes/**
+
       globalcors:
         cors-configurations:
           '[/**]':

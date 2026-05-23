@@ -14,110 +14,143 @@
   <!-- Coluna do Formulário -->
   <div class="form-panel">
     <mat-card class="login-card !max-w-md">
-      <mat-card-header class="flex flex-col items-center text-center">
-        <mat-icon class="!w-16 !h-16 mb-4 !text-6xl text-[color:var(--color-primary)]">person_add</mat-icon>
-        <mat-card-title class="!text-3xl !font-bold !mb-2 text-[color:var(--color-text-title)]">
-          Crie sua conta
-        </mat-card-title>
-        <mat-card-subtitle class="!text-base text-[color:var(--color-text-body)]">
-          Escolha o tipo de conta que deseja criar
-        </mat-card-subtitle>
-      </mat-card-header>
+      
+      @if (successMessage()) {
+        <!-- Tela de Sucesso -->
+        <mat-card-content class="!p-0">
+          <div class="flex flex-col items-center text-center py-6 px-4 animate-fade-in">
+            <!-- Animated success circle -->
+            <div class="relative flex items-center justify-center w-24 h-24 rounded-full bg-green-50 text-green-600 mb-6 shadow-lg shadow-green-100 border border-green-200/50 animate-scale-up">
+              <mat-icon class="!w-16 !h-16 !text-6xl text-green-500">check_circle</mat-icon>
+            </div>
 
-      <mat-card-content>
-        <div class="flex justify-center mt-6 mb-6">
-          <mat-button-toggle-group [value]="accountType()" (change)="setAccountType($event.value)" aria-label="Tipo de Conta">
-            <mat-button-toggle value="client" class="!px-4">Para Você (Cliente)</mat-button-toggle>
-            <mat-button-toggle value="supermarket" class="!px-4">Para Supermercado</mat-button-toggle>
-          </mat-button-toggle-group>
-        </div>
+            <h2 class="text-2xl font-black text-[color:var(--color-text-title)] mb-3">
+              {{ accountType() === 'client' ? 'Conta Criada!' : 'Supermercado Registrado!' }}
+            </h2>
+            
+            <p class="text-base text-[color:var(--color-text-body)] leading-relaxed max-w-sm mb-6">
+              {{ successMessage() }}
+            </p>
 
-        <!-- Sucesso -->
-        <div *ngIf="successMessage()" class="bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 text-sm flex items-center gap-2 mb-4">
-          <mat-icon>check_circle</mat-icon>
-          <span class="font-bold">{{ successMessage() }}</span>
-        </div>
+            <!-- Loading indicator / redirecting message -->
+            <p class="text-xs text-[color:var(--color-text-muted)] mb-2">Redirecionando você para o login...</p>
+            <div class="w-full max-w-xs bg-slate-100 rounded-full h-1.5 mb-8 overflow-hidden">
+              <div class="bg-[color:var(--color-primary)] h-1.5 rounded-full animate-loading-bar"></div>
+            </div>
 
-        <form *ngIf="!successMessage()" [formGroup]="registerForm" (ngSubmit)="register()" class="flex flex-col gap-3">
-          
-          <!-- Nome / Nome da Loja -->
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>{{ accountType() === 'client' ? 'Nome Completo' : 'Nome do Supermercado' }}</mat-label>
-            <input matInput formControlName="name" required>
-            <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">{{ accountType() === 'client' ? 'person' : 'storefront' }}</mat-icon>
-            <mat-error *ngIf="registerForm.get('name')?.hasError('required')">
-              O nome é obrigatório.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- CNPJ (Só para Supermercado) -->
-          <mat-form-field appearance="outline" class="w-full" *ngIf="accountType() === 'supermarket'">
-            <mat-label>CNPJ</mat-label>
-            <input matInput formControlName="cnpj" required placeholder="00.000.000/0000-00">
-            <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">domain</mat-icon>
-            <mat-error *ngIf="registerForm.get('cnpj')?.hasError('required')">
-              O CNPJ é obrigatório para contas de supermercado.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- E-mail -->
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>E-mail</mat-label>
-            <input matInput formControlName="email" type="email" required>
-            <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">alternate_email</mat-icon>
-            <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
-              O e-mail é obrigatório.
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
-              E-mail inválido.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Senha -->
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Senha</mat-label>
-            <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required>
-            <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">lock_outline</mat-icon>
-            <button mat-icon-button matSuffix (click)="togglePasswordVisibility($event)" type="button">
-              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            <button mat-flat-button color="primary" routerLink="/login" class="w-full !h-12 !text-base !rounded-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
+              Fazer Login Agora
             </button>
-            <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-              A senha é obrigatória.
-            </mat-error>
-            <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
-              A senha deve ter no mínimo 6 caracteres.
-            </mat-error>
-          </mat-form-field>
+          </div>
+        </mat-card-content>
+      } @else {
+        <!-- Formulário de Cadastro -->
+        <mat-card-header class="flex flex-col items-center text-center">
+          <mat-icon class="!w-16 !h-16 mb-4 !text-6xl text-[color:var(--color-primary)]">person_add</mat-icon>
+          <mat-card-title class="!text-3xl !font-bold !mb-2 text-[color:var(--color-text-title)]">
+            Crie sua conta
+          </mat-card-title>
+          <mat-card-subtitle class="!text-base text-[color:var(--color-text-body)]">
+            Escolha o tipo de conta que deseja criar
+          </mat-card-subtitle>
+        </mat-card-header>
 
-          <!-- Erro -->
-          <div *ngIf="errorMessage()" class="bg-red-50 text-red-700 p-3 rounded-md border border-red-200 text-sm flex items-center gap-2">
-            <mat-icon>error_outline</mat-icon>
-            <span>{{ errorMessage() }}</span>
+        <mat-card-content>
+          <div class="flex justify-center mt-6 mb-6">
+            <mat-button-toggle-group [value]="accountType()" (change)="setAccountType($event.value)" aria-label="Tipo de Conta">
+              <mat-button-toggle value="client" class="!px-4">Para Você (Cliente)</mat-button-toggle>
+              <mat-button-toggle value="supermarket" class="!px-4">Para Supermercado</mat-button-toggle>
+            </mat-button-toggle-group>
           </div>
 
-          <!-- Botão Submit -->
-          <button mat-flat-button color="primary" type="submit" [disabled]="loading()" class="w-full !h-14 !text-lg !rounded-lg mt-2">
-            <div *ngIf="!loading(); else showSpinner" class="flex items-center justify-center">
-              Criar Conta Grátis
-            </div>
-            <ng-template #showSpinner>
-              <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
-            </ng-template>
-          </button>
+          <form [formGroup]="registerForm" (ngSubmit)="register()" class="flex flex-col gap-3">
+            
+            <!-- Nome / Nome da Loja -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>{{ accountType() === 'client' ? 'Nome Completo' : 'Nome do Supermercado' }}</mat-label>
+              <input matInput formControlName="name" required>
+              <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">{{ accountType() === 'client' ? 'person' : 'storefront' }}</mat-icon>
+              <mat-error *ngIf="registerForm.get('name')?.hasError('required')">
+                O nome é obrigatório.
+              </mat-error>
+            </mat-form-field>
 
-          <div class="text-center mt-4 flex flex-col gap-2 text-[color:var(--color-text-body)]">
-            <div>
-              Já possui uma conta? 
-              <a routerLink="/login" class="font-bold text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)] hover:underline transition-colors">
-                Fazer Login
-              </a>
+            <!-- CNPJ (Só para Supermercado) -->
+            <mat-form-field appearance="outline" class="w-full" *ngIf="accountType() === 'supermarket'">
+              <mat-label>CNPJ</mat-label>
+              <input matInput formControlName="cnpj" required placeholder="00.000.000/0000-00">
+              <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">domain</mat-icon>
+              <mat-error *ngIf="registerForm.get('cnpj')?.hasError('required')">
+                O CNPJ é obrigatório para contas de supermercado.
+              </mat-error>
+            </mat-form-field>
+
+            <!-- E-mail -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>E-mail</mat-label>
+              <input matInput formControlName="email" type="email" required>
+              <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">alternate_email</mat-icon>
+              <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
+                O e-mail é obrigatório.
+              </mat-error>
+              <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
+                E-mail inválido.
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Senha -->
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Senha</mat-label>
+              <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" required>
+              <mat-icon matPrefix class="mr-2 text-[color:var(--color-text-muted)]">lock_outline</mat-icon>
+              <button mat-icon-button matSuffix (click)="togglePasswordVisibility($event)" type="button">
+                <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
+                A senha é obrigatória.
+              </mat-error>
+              <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
+                A senha deve ter no mínimo 6 caracteres.
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Erro -->
+            @if (errorMessage()) {
+              <div class="bg-red-50 text-red-700 p-3 rounded-md border border-red-200 text-sm flex items-center gap-2">
+                <mat-icon>error_outline</mat-icon>
+                <span>{{ errorMessage() }}</span>
+              </div>
+            }
+
+            <!-- Botão Submit -->
+            <button mat-flat-button color="primary" type="submit" [disabled]="loading()" class="w-full !h-14 !text-lg !rounded-lg mt-2">
+              @if (!loading()) {
+                <div class="flex items-center justify-center">
+                  Criar Conta Grátis
+                </div>
+              } @else {
+                <div class="flex items-center justify-center">
+                  <mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner>
+                </div>
+              }
+            </button>
+
+            <div class="text-center mt-4 flex flex-col gap-2 text-[color:var(--color-text-body)]">
+              <div>
+                Já possui uma conta? 
+                <a routerLink="/login" class="font-bold text-[color:var(--color-primary)] hover:text-[color:var(--color-primary-dark)] hover:underline transition-colors">
+                  Fazer Login
+                </a>
+              </div>
+              @if (accountType() === 'supermarket') {
+                <a routerLink="/planos" class="text-sm font-bold text-[color:var(--color-accent)] hover:underline transition-colors">
+                  Descubra os planos disponíveis para sua loja
+                </a>
+              }
             </div>
-            <a routerLink="/planos" *ngIf="accountType() === 'supermarket'" class="text-sm font-bold text-[color:var(--color-accent)] hover:underline transition-colors">
-              Descubra os planos disponíveis para sua loja
-            </a>
-          </div>
-        </form>
-      </mat-card-content>
+          </form>
+        </mat-card-content>
+      }
     </mat-card>
   </div>
 </div>

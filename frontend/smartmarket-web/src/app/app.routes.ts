@@ -42,6 +42,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/public/offers/offers-list.component').then(m => m.OffersListComponent)
   },
   {
+    path: 'meu-perfil',
+    title: 'SmartMarket - Meu Perfil',
+    loadComponent: () => import('./features/public/cliente-perfil/cliente-perfil.component').then(m => m.ClientePerfilComponent)
+  },
+  {
     path: 'login',
     title: 'SmartMarket - Login',
     // Assumindo que o componente de login existe em 'features/auth'

@@ -4,6 +4,7 @@ import { map, catchError, switchMap } from 'rxjs/operators';
 import { SupermarketService } from './supermarket.service';
 import { EncarteService } from './encarte.service';
 import { OfertaService } from './oferta.service';
+import { CategoriaService } from './categoria.service';
 
 export interface UserLocation {
   lat?: number;
@@ -12,6 +13,7 @@ export interface UserLocation {
   cep?: string;
   bairro?: string;
   isGps: boolean;
+  isExplicit?: boolean;
 }
 
 @Injectable({
@@ -21,6 +23,7 @@ export class PublicCatalogService {
   private supermarketService = inject(SupermarketService);
   private encarteService = inject(EncarteService);
   private ofertaService = inject(OfertaService);
+  private categoriaService = inject(CategoriaService);
 
   // Estados Reativos de Localização
   public currentLocation = signal<UserLocation | null>(null);
@@ -31,28 +34,48 @@ export class PublicCatalogService {
    * Tenta GPS primeiro. Se falhar, usa localização salva ou tenta enriquecer com coords via CEP.
    */
   async initializeLocation(): Promise<void> {
-    const saved = localStorage.getItem('user_location');
-    if (saved) {
-      const loc: UserLocation = JSON.parse(saved);
-      // Se a localização salva não tem coordenadas, tenta enriquecer via CEP
-      if (!loc.lat && loc.cep) {
-        const enriched = await this.enrichLocationWithCoords(loc);
-        this.currentLocation.set(enriched);
-      } else {
-        this.currentLocation.set(loc);
-      }
+    // Se a localização em memória já estiver definida, permanece durante a navegação
+    if (this.currentLocation()) {
       return;
     }
 
+    const saved = localStorage.getItem('user_location');
+    let savedLoc: UserLocation | null = null;
+    
+    if (saved) {
+      savedLoc = JSON.parse(saved);
+      // Se a localização salva foi explicitamente definida pelo usuário, mantemos e retornamos
+      if (savedLoc && savedLoc.isExplicit) {
+        if (!savedLoc.lat && savedLoc.cep) {
+          const enriched = await this.enrichLocationWithCoords(savedLoc);
+          this.currentLocation.set(enriched);
+        } else {
+          this.currentLocation.set(savedLoc);
+        }
+        return;
+      }
+    }
+
+    // Se não há localização salva ou ela foi automática (GPS/fallback), tenta obter a localização atualizada via GPS
     try {
       const coords = await this.requestUserLocation();
       const address = await this.getAddressFromCoordinates(coords.lat, coords.lng);
-      const loc: UserLocation = { ...coords, address, isGps: true };
+      const loc: UserLocation = { ...coords, address, isGps: true, isExplicit: false };
       this.setLocation(loc);
     } catch (e) {
-      // GPS falhou: usa Brasília como coordenada de fallback genérica
-      const loc: UserLocation = { lat: -15.7801, lng: -47.9292, address: 'Brasília, DF', isGps: false };
-      this.setLocation(loc);
+      // Se o GPS falhar e houver uma localização anteriormente salva, usamos ela como fallback secundário
+      if (savedLoc) {
+        if (!savedLoc.lat && savedLoc.cep) {
+          const enriched = await this.enrichLocationWithCoords(savedLoc);
+          this.currentLocation.set(enriched);
+        } else {
+          this.currentLocation.set(savedLoc);
+        }
+      } else {
+        // Fallback final genérico: Brasília
+        const loc: UserLocation = { lat: -15.7801, lng: -47.9292, address: 'Brasília, DF', isGps: false, isExplicit: false };
+        this.setLocation(loc);
+      }
     }
   }
 
@@ -132,7 +155,7 @@ export class PublicCatalogService {
   }
 
   setManualLocation(cep: string, address: string) {
-    this.setLocation({ address, cep, isGps: false });
+    this.setLocation({ address, cep, isGps: false, isExplicit: true });
   }
 
   /**
@@ -214,15 +237,20 @@ export class PublicCatalogService {
   }
 
   getTrendingOffersNearby(): Observable<any[]> {
-    return this.getNearbySupermarkets().pipe(
-      switchMap(stores => {
+    return forkJoin({
+      stores: this.getNearbySupermarkets(),
+      categorias: this.categoriaService.listar().pipe(catchError(() => of([])))
+    }).pipe(
+      switchMap(({ stores, categorias }) => {
         if (stores.length === 0) return of([]);
+        const categoriasMap = new Map(categorias.map(c => [c.id, c.nome]));
 
         const requests = stores.map(s =>
           this.ofertaService.buscarPorSupermercado(s.id).pipe(
             map(ofertas => ofertas.filter((o: any) => o.ativo).map((o: any) => ({
               ...o,
-              supermarketName: s.name
+              supermarketName: s.name,
+              categoryName: o.produtoBase?.categoriaId ? (categoriasMap.get(o.produtoBase.categoriaId) || 'Mercearia') : 'Mercearia'
             }))),
             catchError(() => of([]))
           )
@@ -237,9 +265,87 @@ export class PublicCatalogService {
             promotionalPrice: o.preco,
             supermarketId: o.supermercadoId,
             supermarketName: o.supermarketName,
-            category: 'Geral'
+            category: o.categoryName
           })))
         );
+      })
+    );
+  }
+
+  getSupermarketById(id: string): Observable<any> {
+    return this.supermarketService.buscarPorId(id).pipe(
+      map(s => {
+        const loc = this.currentLocation();
+        let distanceKm: string | null = null;
+        if (loc && loc.lat && loc.lng && s.latitude && s.longitude) {
+          const dist = this.calculateDistance(loc.lat, loc.lng, s.latitude, s.longitude);
+          distanceKm = dist.toFixed(1);
+        }
+        const cleanPrimary = (s.corPrimariaHex || '#16a34a').replace('#', '');
+        return {
+          id: s.id,
+          name: s.nomeFantasia,
+          logoUrl: s.urlLogomarca || `https://ui-avatars.com/api/?name=${s.nomeFantasia}&background=${cleanPrimary}&color=fff&size=128`,
+          primaryColor: s.corPrimariaHex || '#16a34a',
+          secondaryColor: s.corSecundariaHex || '#0284c7',
+          distanceKm: distanceKm,
+          cidade: s.cidade || 'Brasília',
+          estado: s.estado || 'DF'
+        };
+      })
+    );
+  }
+
+  getFlyersBySupermarket(supermercadoId: string): Observable<any[]> {
+    return this.encarteService.listarEncartes(supermercadoId).pipe(
+      map(encartes => encartes.filter(e => e.status === 'ATIVO').map(e => ({
+        id: e.id,
+        supermarketId: e.supermercadoId,
+        title: e.titulo,
+        imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80',
+        expiresInDays: 3
+      })))
+    );
+  }
+
+  getOffersBySupermarket(supermercadoId: string): Observable<any[]> {
+    return forkJoin({
+      categorias: this.categoriaService.listar().pipe(catchError(() => of([]))),
+      ofertas: this.ofertaService.buscarPorSupermercado(supermercadoId).pipe(catchError(() => of([])))
+    }).pipe(
+      map(({ categorias, ofertas }) => {
+        const categoriasMap = new Map(categorias.map(c => [c.id, c.nome]));
+        return ofertas.filter(o => o.ativo).map(o => ({
+          id: o.id,
+          productName: o.nomeProduto,
+          imageUrl: o.urlImagem || 'https://images.unsplash.com/photo-1586201375761-83865001e8ac?auto=format&fit=crop&w=400&q=80',
+          originalPrice: o.preco * 1.2,
+          promotionalPrice: o.preco,
+          supermarketId: o.supermercadoId,
+          category: o.produtoBase?.categoriaId ? (categoriasMap.get(o.produtoBase.categoriaId) || 'Mercearia') : 'Mercearia'
+        }));
+      })
+    );
+  }
+
+  getFilteredOffersNearby(filters?: { search?: string, category?: string, supermarketId?: string }): Observable<any[]> {
+    return this.getTrendingOffersNearby().pipe(
+      map(offers => {
+        let filtered = [...offers];
+        if (filters) {
+          if (filters.search) {
+            const term = filters.search.toLowerCase();
+            filtered = filtered.filter(o => o.productName.toLowerCase().includes(term));
+          }
+          if (filters.category) {
+            const cat = filters.category.toLowerCase();
+            filtered = filtered.filter(o => o.category && o.category.toLowerCase() === cat);
+          }
+          if (filters.supermarketId) {
+            filtered = filtered.filter(o => o.supermarketId === filters.supermarketId);
+          }
+        }
+        return filtered;
       })
     );
   }
@@ -256,10 +362,11 @@ export class PublicCatalogService {
         distanceKm = (s.distance_meters / 1000).toFixed(1);
       }
 
+      const cleanPrimary = (s.corPrimariaHex || '#16a34a').replace('#', '');
       return {
         id: s.id,
         name: s.nomeFantasia,
-        logoUrl: s.urlLogomarca || `https://ui-avatars.com/api/?name=${s.nomeFantasia}&background=16a34a&color=fff&size=128`,
+        logoUrl: s.urlLogomarca || `https://ui-avatars.com/api/?name=${s.nomeFantasia}&background=${cleanPrimary}&color=fff&size=128`,
         primaryColor: s.corPrimariaHex || '#16a34a',
         distanceKm: distanceKm,
         cidade: s.cidade || 'Brasília',

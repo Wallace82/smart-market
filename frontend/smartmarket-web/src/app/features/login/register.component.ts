@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '@core/auth/auth.service';
+import { SupermarketService } from '@core/services/supermarket.service';
 
 export type AccountType = 'client' | 'supermarket';
 
@@ -32,6 +34,11 @@ export type AccountType = 'client' | 'supermarket';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private supermarketService = inject(SupermarketService);
+
   registerForm: FormGroup;
   accountType = signal<AccountType>('client');
   hidePassword = signal<boolean>(true);
@@ -39,7 +46,7 @@ export class RegisterComponent {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor() {
     this.registerForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -80,16 +87,62 @@ export class RegisterComponent {
     this.errorMessage.set('');
     this.loading.set(true);
 
-    // Simulando chamada de API
-    setTimeout(() => {
-      this.loading.set(false);
-      this.successMessage.set('Conta criada com sucesso! Redirecionando...');
-      
-      // Simular redirecionamento
-      setTimeout(() => {
-        this.router.navigate(['/login']);
-      }, 1500);
-      
-    }, 1500);
+    const formValues = this.registerForm.value;
+    const type = this.accountType();
+
+    if (type === 'client') {
+      this.authService.register({
+        nome: formValues.name,
+        email: formValues.email,
+        senha: formValues.password,
+        papel: 'ROLE_CLIENTE'
+      }).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.successMessage.set('Conta criada com sucesso! Redirecionando...');
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 1500);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.errorMessage.set(err.error || 'Erro ao criar conta. Tente novamente.');
+        }
+      });
+    } else {
+      this.authService.register({
+        nome: formValues.name,
+        email: formValues.email,
+        senha: formValues.password,
+        papel: 'ROLE_GESTOR'
+      }).subscribe({
+        next: (userRes) => {
+          const gestorId = userRes.id;
+          
+          this.supermarketService.cadastrar({
+            nomeFantasia: formValues.name,
+            cnpj: formValues.cnpj,
+            email: formValues.email,
+            gestorId: gestorId
+          } as any).subscribe({
+            next: () => {
+              this.loading.set(false);
+              this.successMessage.set('Supermercado registrado com sucesso! Aguardando aprovação do administrador. Redirecionando...');
+              setTimeout(() => {
+                this.router.navigate(['/login']);
+              }, 2500);
+            },
+            error: (err) => {
+              this.loading.set(false);
+              this.errorMessage.set(err.error || 'Conta de gestor criada, mas houve um erro ao registrar o supermercado.');
+            }
+          });
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.errorMessage.set(err.error || 'Erro ao registrar gestor. Tente novamente.');
+        }
+      });
+    }
   }
 }

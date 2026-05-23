@@ -2,37 +2,71 @@
   <!-- Loading State -->
   @if (isLoading()) {
     <div class="flex flex-col items-center justify-center min-h-[60vh]">
-      <mat-spinner diameter="40" class="!text-green-600"></mat-spinner>
-      <p class="mt-4 text-gray-500 font-medium animate-pulse">Carregando informações da loja...</p>
+      <mat-spinner diameter="48" class="!text-green-600 mb-4"></mat-spinner>
+      <p class="text-gray-500 font-bold animate-pulse">Carregando informações da loja...</p>
     </div>
   }
 
   <!-- Content State -->
   @if (!isLoading() && supermarket()) {
-    <!-- Hero Section with Dynamic Background -->
-    <div class="relative pt-16 pb-24 overflow-hidden" [ngStyle]="bgStyle()">
-      <div class="absolute inset-0 bg-black/20"></div>
+    <!-- Hero Section with Dynamic Background (Sleek Obsidian/Aurora Theme) -->
+    <div class="relative pt-16 pb-24 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 transition-all duration-500 border-b border-slate-800">
       
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-        <button mat-button class="!text-white mb-6" routerLink="/">
-          <mat-icon>arrow_back</mat-icon>
-          Voltar
+      <!-- Glowing Aurora Blobs in Background using brand colors -->
+      <div class="absolute -right-20 -top-20 w-96 h-96 rounded-full blur-[100px] pointer-events-none opacity-25 transition-all duration-500"
+           [style.background-color]="brandPrimary()"></div>
+      <div class="absolute -left-20 -bottom-20 w-96 h-96 rounded-full blur-[100px] pointer-events-none opacity-20 transition-all duration-500"
+           [style.background-color]="brandSecondary()"></div>
+
+      <!-- Premium grid texture overlay -->
+      <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+
+      <div class="relative max-w-7xl mx-auto px-6 lg:px-8 z-10">
+        
+        <!-- Glassmorphic back button -->
+        <button mat-button class="!text-white mb-8 !bg-white/5 hover:!bg-white/10 !border !border-white/10 !rounded-full !px-5 transition-all" routerLink="/">
+          <mat-icon class="mr-1">arrow_back</mat-icon>
+          Voltar para Início
         </button>
 
-        <div class="flex flex-col md:flex-row items-center gap-6">
-          <img [src]="supermarket()?.logoUrl" alt="Logo" class="w-32 h-32 rounded-2xl shadow-lg border-4 border-white object-cover">
-          <div class="text-center md:text-left text-white">
-            <h1 class="text-4xl font-black tracking-tight drop-shadow-md">{{ supermarket()?.name }}</h1>
-            <p class="mt-2 text-white/90 font-medium flex items-center justify-center md:justify-start gap-2">
-              <mat-icon class="!text-[18px] !w-4 !h-4">location_on</mat-icon>
-              A apenas {{ supermarket()?.distanceKm }} km de você
+        <div class="flex flex-col md:flex-row items-center md:items-start lg:items-center gap-8">
+          
+          <!-- Super prominent logo card with glow backlight -->
+          <div class="w-36 h-36 md:w-40 md:h-40 bg-white rounded-3xl p-4 flex items-center justify-center relative shadow-2xl transition-transform hover:scale-105 border-4"
+               [style.border-color]="brandPrimary()"
+               [style.box-shadow]="'0 15px 40px -5px ' + hexToRgba(brandPrimary(), 0.5)">
+            <img [src]="supermarket()?.logoUrl" alt="Logo" class="w-full h-full object-contain rounded-xl">
+            
+            <!-- Verified gold badge -->
+            <div class="absolute -bottom-2 -right-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 rounded-full p-1.5 shadow-xl border-2 border-white flex items-center justify-center scale-110">
+              <mat-icon class="!text-[12px] !w-3.5 !h-3.5 flex items-center justify-center font-black">verified</mat-icon>
+            </div>
+          </div>
+
+          <div class="text-center md:text-left text-white flex-grow">
+            <!-- Glassmorphic category capsule -->
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border text-gray-300 text-[10px] font-black uppercase tracking-widest mb-3 shadow-inner"
+                  [style.border-color]="hexToRgba(brandPrimary(), 0.2)">
+              <div class="w-1.5 h-1.5 rounded-full" [style.background-color]="brandPrimary()"></div>
+              Supermercado Parceiro
+            </span>
+
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight uppercase leading-none drop-shadow-md">{{ supermarket()?.name }}</h1>
+            
+            <!-- Perfect Localization String (Fixing empty placeholders!) -->
+            <p class="mt-4 text-gray-300 font-bold flex items-center justify-center md:justify-start gap-2 text-sm sm:text-base opacity-90">
+              <mat-icon class="!text-[18px] !w-4.5 !h-4.5 flex items-center justify-center" [style.color]="brandPrimary()">location_on</mat-icon>
+              @if (supermarket()?.distanceKm) {
+                A apenas {{ supermarket()?.distanceKm }} km de você <span class="text-gray-500">•</span>
+              }
+              {{ supermarket()?.cidade }} - {{ supermarket()?.estado }}
             </p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 -mt-8 relative z-20">
       
       <!-- Encartes Section -->
       @if (flyers().length > 0) {
@@ -43,17 +77,21 @@
           
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (flyer of flyers(); track flyer.id) {
-              <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group cursor-pointer border border-gray-100" [routerLink]="['/flyer', flyer.id]">
-                <div class="relative h-48 overflow-hidden">
-                  <img [src]="flyer.imageUrl" alt="Encarte" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                  <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+              <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer border border-gray-100" [routerLink]="['/flyer', flyer.id]">
+                <div class="relative h-56 overflow-hidden">
+                  <img [src]="flyer.imageUrl" alt="Encarte" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                  <div class="absolute top-4 right-4 bg-red-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider">
                     Expira em {{ flyer.expiresInDays }} dias
                   </div>
                 </div>
-                <div class="p-5">
-                  <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-green-600 transition-colors">{{ flyer.title }}</h3>
-                  <button mat-button class="!text-green-600 w-full mt-2 bg-green-50">
-                    <mat-icon>visibility</mat-icon>
+                <div class="p-6">
+                  <h3 class="font-extrabold text-gray-900 text-lg mb-2 group-hover:text-green-600 transition-colors uppercase tracking-tight leading-tight line-clamp-1">{{ flyer.title }}</h3>
+                  
+                  <button mat-button class="w-full mt-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-300 shadow-sm border"
+                          [style.background-color]="hexToRgba(brandPrimary(), 0.06)"
+                          [style.color]="brandPrimary()"
+                          [style.border-color]="hexToRgba(brandPrimary(), 0.15)">
+                    <mat-icon class="text-sm mr-1 h-auto w-auto">visibility</mat-icon>
                     Ver Encarte
                   </button>
                 </div>
@@ -72,27 +110,30 @@
           
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             @for (offer of offers(); track offer.id) {
-              <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group flex flex-col h-full">
-                <!-- Badge de Desconto -->
-                <div class="absolute -top-3 -right-3 bg-orange-500 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform z-10 text-sm">
+              <div class="bg-white rounded-[2rem] p-4 sm:p-5 border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 relative group flex flex-col h-full overflow-hidden">
+                
+                <!-- Badge de Desconto (Styled with Brand Color) -->
+                <div class="absolute -top-3 -right-3 text-white font-black rounded-full w-12 h-12 flex items-center justify-center shadow-md transform group-hover:scale-110 transition-all duration-300 z-10 text-xs tracking-tighter"
+                     [style.background-color]="brandPrimary()"
+                     [style.box-shadow]="'0 8px 20px -4px ' + hexToRgba(brandPrimary(), 0.4)">
                   -{{ ((offer.originalPrice - offer.promotionalPrice) / offer.originalPrice * 100).toFixed(0) }}%
                 </div>
 
-                <div class="relative h-40 sm:h-48 mb-4 overflow-hidden rounded-xl bg-gray-50 flex items-center justify-center p-4">
-                  <img [src]="offer.imageUrl" [alt]="offer.productName" class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500">
+                <div class="relative h-40 sm:h-48 mb-4 overflow-hidden rounded-2xl bg-gray-50 flex items-center justify-center p-4">
+                  <img [src]="offer.imageUrl" [alt]="offer.productName" class="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500">
                 </div>
 
                 <div class="flex-grow flex flex-col justify-between">
                   <div>
-                    <span class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1 block">{{ offer.category }}</span>
-                    <h3 class="font-bold text-gray-800 text-sm sm:text-base leading-tight mb-2 line-clamp-2" [title]="offer.productName">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">{{ offer.category }}</span>
+                    <h3 class="font-extrabold text-gray-800 text-sm sm:text-base leading-tight mb-3 uppercase line-clamp-2" [title]="offer.productName">
                       {{ offer.productName }}
                     </h3>
                   </div>
 
-                  <div class="mt-2">
-                    <p class="text-xs sm:text-sm text-gray-400 line-through mb-0.5">R$ {{ offer.originalPrice.toFixed(2) }}</p>
-                    <p class="text-lg sm:text-2xl font-black text-green-600 leading-none">
+                  <div class="mt-auto">
+                    <p class="text-xs text-gray-400 line-through mb-0.5">R$ {{ offer.originalPrice.toFixed(2) }}</p>
+                    <p class="text-xl sm:text-2xl font-black leading-none" [style.color]="brandPrimary()">
                       <span class="text-sm font-bold mr-0.5">R$</span>{{ offer.promotionalPrice.toFixed(2) }}
                     </p>
                   </div>
@@ -104,7 +145,7 @@
       }
 
       @if (flyers().length === 0 && offers().length === 0) {
-        <div class="bg-white rounded-2xl p-12 text-center border border-gray-200">
+        <div class="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-gray-200">
           <mat-icon class="!w-16 !h-16 !text-[64px] text-gray-300 mx-auto mb-4">storefront</mat-icon>
           <h3 class="text-xl font-bold text-gray-900 mb-2">Nenhuma oferta no momento</h3>
           <p class="text-gray-500">Este supermercado não possui encartes ou promoções ativas hoje.</p>

@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PublicCatalogService } from '@core/services/public-catalog.service';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '@core/auth/auth.service';
 
 @Component({
   selector: 'app-public-home',
@@ -20,6 +21,7 @@ import { RouterModule } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
   private catalogService = inject(PublicCatalogService);
+  public authService = inject(AuthService);
 
   // Sinais de Estado
   isLoading = signal<boolean>(true);

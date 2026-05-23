@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PublicCatalogMockService, MockOffer, MockSupermarket } from '../public-catalog-mock.service';
+import { PublicCatalogService } from '@core/services/public-catalog.service';
 
 @Component({
   selector: 'app-offers-list',
@@ -14,11 +14,11 @@ import { PublicCatalogMockService, MockOffer, MockSupermarket } from '../public-
   templateUrl: './offers-list.component.html'
 })
 export class OffersListComponent implements OnInit {
-  private catalogService = inject(PublicCatalogMockService);
+  private catalogService = inject(PublicCatalogService);
 
   isLoading = signal<boolean>(true);
-  offers = signal<MockOffer[]>([]);
-  supermarkets = signal<MockSupermarket[]>([]);
+  offers = signal<any[]>([]);
+  supermarkets = signal<any[]>([]);
 
   // Filtros
   searchTerm = signal<string>('');
@@ -29,8 +29,13 @@ export class OffersListComponent implements OnInit {
 
   ngOnInit(): void {
     // Carregar supermercados para o filtro
-    this.catalogService.getNearbySupermarkets(0, 0).subscribe(data => {
-      this.supermarkets.set(data);
+    this.catalogService.getNearbySupermarkets().subscribe({
+      next: (data) => {
+        this.supermarkets.set(data);
+      },
+      error: () => {
+        this.supermarkets.set([]);
+      }
     });
     this.loadOffers();
   }
@@ -43,9 +48,15 @@ export class OffersListComponent implements OnInit {
       supermarketId: this.selectedSupermarket()
     };
     
-    this.catalogService.getAllOffers(filters).subscribe(data => {
-      this.offers.set(data);
-      this.isLoading.set(false);
+    this.catalogService.getFilteredOffersNearby(filters).subscribe({
+      next: (data) => {
+        this.offers.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.offers.set([]);
+        this.isLoading.set(false);
+      }
     });
   }
 

@@ -1,123 +1,212 @@
-<div class="min-h-screen bg-gray-50 pb-16">
-  <!-- Hero / Header -->
-  <div class="bg-white border-b border-gray-200 pt-10 pb-8 px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div>
-        <h1 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight flex items-center gap-3">
-          <mat-icon class="!text-orange-500 !w-10 !h-10 !text-[40px]">local_fire_department</mat-icon>
-          Todas as Promoções
-        </h1>
-        <p class="text-gray-500 mt-2 font-medium">Explore as melhores ofertas de todos os supermercados parceiros.</p>
+<div class="min-h-screen bg-slate-50/50 pb-20 selection:bg-emerald-500 selection:text-white">
+  
+  <!-- Premium Immersive Hero Header -->
+  <div class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 pt-16 pb-20 px-6 lg:px-8 shadow-2xl border-b border-emerald-500/10">
+    
+    <!-- Atmospheric Ambient Auroras (Glow Effects) -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/15 rounded-full filter blur-[100px] animate-pulse"></div>
+    <div class="absolute -bottom-20 right-10 w-80 h-80 bg-rose-500/10 rounded-full filter blur-[120px] animate-pulse delay-700"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <!-- Top Navigation / Back Button -->
+      <div class="flex items-center justify-between mb-10">
+        <button routerLink="/" 
+                class="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-black tracking-wider uppercase transition-all duration-300 cursor-pointer">
+          <mat-icon class="!text-[16px] !w-4 !h-4 flex items-center justify-center">arrow_back</mat-icon>
+          Voltar para Home
+        </button>
+        <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+          Public Showcase
+        </span>
       </div>
-      <button mat-button class="!text-gray-600 bg-gray-100 hidden md:block" routerLink="/">
-        Voltar para Home
-      </button>
+
+      <!-- Hero Typography -->
+      <div class="text-center max-w-3xl mx-auto space-y-4">
+        <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-black uppercase tracking-widest animate-bounce">
+          <mat-icon class="!text-[12px] !w-3 !h-3 flex items-center justify-center">local_fire_department</mat-icon>
+          Super Ofertas Imperdíveis
+        </div>
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-none drop-shadow-md">
+          Todas as <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-rose-400 bg-clip-text text-transparent">Promoções</span>
+        </h1>
+        <p class="text-slate-400 text-sm md:text-base font-medium max-w-xl mx-auto">
+          Economize hoje explorando as melhores ofertas reais e digitalizadas de todos os supermercados parceiros na sua região.
+        </p>
+      </div>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-8 flex flex-col lg:flex-row gap-8">
-    <!-- Sidebar de Filtros -->
-    <aside class="w-full lg:w-72 flex-shrink-0">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-8">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-bold text-gray-900">Filtros</h2>
-          <button (click)="clearFilters()" class="text-sm text-green-600 font-medium hover:text-green-700">Limpar</button>
+  <!-- Search Floating Bar -->
+  <div class="max-w-4xl mx-auto -mt-8 px-6 relative z-20">
+    <div class="bg-white/90 backdrop-blur-xl border border-slate-200/60 rounded-3xl p-3 shadow-[0_15px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.08)] transition-all duration-300 group">
+      <div class="relative flex items-center">
+        <mat-icon class="absolute left-4 text-emerald-500 group-focus-within:scale-110 transition-transform !text-[24px] !w-6 !h-6 flex items-center justify-center">search</mat-icon>
+        <input type="text" 
+               [ngModel]="searchTerm()" 
+               (ngModelChange)="searchTerm.set($event); onSearchChange()"
+               class="w-full pl-12 pr-4 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder-slate-400"
+               placeholder="Buscar ofertas por produto, marca ou palavra-chave (ex: Cerveja, Café, Arroz)...">
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10 flex flex-col lg:flex-row gap-8">
+    
+    <!-- Premium Sidebar Filters -->
+    <aside class="w-full lg:w-80 flex-shrink-0">
+      <div class="bg-white/95 backdrop-blur-md rounded-[2rem] border border-slate-200/50 p-6 shadow-[0_10px_25px_rgba(0,0,0,0.02)] sticky top-8 space-y-6">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <h2 class="text-base font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <mat-icon class="text-slate-400 !text-[20px] !w-5 !h-5 flex items-center justify-center">tune</mat-icon>
+            Filtrar Resultados
+          </h2>
+          <button (click)="clearFilters()" 
+                  class="text-xs font-black uppercase text-emerald-600 hover:text-emerald-700 tracking-wider bg-emerald-500/5 px-2.5 py-1 rounded-lg border border-emerald-500/10 cursor-pointer transition-all hover:bg-emerald-500/10">
+            Limpar
+          </button>
         </div>
 
-        <!-- Busca -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Buscar Produto</label>
+        <!-- Supermercado Dropdown Filter -->
+        <div class="space-y-2">
+          <label class="text-[10px] font-black uppercase text-slate-450 tracking-widest block">Filtrar por Loja</label>
           <div class="relative">
-            <mat-icon class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 !text-[20px] !w-5 !h-5">search</mat-icon>
-            <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); onSearchChange()"
-              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all"
-              placeholder="Ex: Cerveja, Arroz...">
+            <select [ngModel]="selectedSupermarket()" 
+                    (ngModelChange)="setSupermarket($event)"
+                    class="w-full pl-4 pr-10 py-3 bg-slate-50/70 border border-slate-250 rounded-2xl text-xs font-bold text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none appearance-none transition-all cursor-pointer">
+              <option value="">Todos os Supermercados</option>
+              @for (sup of supermarkets(); track sup.id) {
+                <option [value]="sup.id">{{ sup.name }}</option>
+              }
+            </select>
+            <mat-icon class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none !text-[20px] !w-5 !h-5 flex items-center justify-center">expand_more</mat-icon>
           </div>
         </div>
 
-        <!-- Categorias -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-3">Categorias</label>
+        <!-- Categorias Filter Chips -->
+        <div class="space-y-3">
+          <label class="text-[10px] font-black uppercase text-slate-450 tracking-widest block">Categorias</label>
           <div class="flex flex-wrap gap-2">
             @for (cat of categories; track cat) {
               <button (click)="setCategory(cat)"
-                [class.bg-green-600]="selectedCategory() === cat"
-                [class.text-white]="selectedCategory() === cat"
-                [class.bg-gray-100]="selectedCategory() !== cat"
-                [class.text-gray-700]="selectedCategory() !== cat"
-                class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-green-500 hover:text-white">
+                      [class]="selectedCategory() === cat 
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-600/20' 
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-650 border-slate-150'"
+                      class="px-3.5 py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95">
                 {{ cat }}
               </button>
             }
           </div>
         </div>
 
-        <!-- Supermercados -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Supermercado</label>
-          <select [ngModel]="selectedSupermarket()" (ngModelChange)="setSupermarket($event)"
-            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all">
-            <option value="">Todos os Supermercados</option>
-            @for (sup of supermarkets(); track sup.id) {
-              <option [value]="sup.id">{{ sup.name }}</option>
-            }
-          </select>
-        </div>
       </div>
     </aside>
 
-    <!-- Grid de Resultados -->
+    <!-- Main Results Grid -->
     <main class="flex-grow">
       @if (isLoading()) {
-        <div class="flex flex-col items-center justify-center min-h-[400px]">
-          <mat-spinner diameter="48" class="!text-green-600 mb-4"></mat-spinner>
-          <p class="text-gray-500 font-medium animate-pulse">Buscando ofertas...</p>
+        <div class="flex flex-col items-center justify-center min-h-[450px] bg-white border border-slate-200/50 rounded-[2rem] shadow-sm">
+          <mat-spinner diameter="40" class="!text-emerald-500 mb-4"></mat-spinner>
+          <p class="text-slate-500 text-sm font-bold animate-pulse">Carregando as melhores ofertas...</p>
         </div>
       } @else {
+        
+        <!-- Results Header -->
         <div class="flex items-center justify-between mb-6">
-          <p class="text-gray-500 font-medium">Mostrando <span class="text-gray-900 font-bold">{{ offers().length }}</span> promoções encontradas</p>
+          <p class="text-slate-500 text-sm font-bold">
+            Mostrando <span class="text-slate-800 bg-slate-200/50 px-2.5 py-1 rounded-lg font-black text-xs">{{ offers().length }}</span> promoções encontradas
+          </p>
         </div>
 
         @if (offers().length > 0) {
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             @for (oferta of offers(); track oferta.id) {
-              <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col group hover:border-green-400 hover:shadow-lg transition-all h-full relative">
-                <!-- Badge de Desconto -->
-                <div class="absolute -top-3 -right-3 bg-orange-500 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform z-10 text-sm">
-                  -{{ ((oferta.originalPrice - oferta.promotionalPrice) / oferta.originalPrice * 100).toFixed(0) }}%
-                </div>
+              
+              <!-- Premium Elevated Offer Card -->
+              <div class="bg-white rounded-3xl border border-slate-200/50 shadow-sm overflow-hidden flex flex-col justify-between group hover:border-emerald-400 hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1.5 h-full relative">
                 
-                <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center overflow-hidden p-4">
-                  <img [src]="oferta.imageUrl" alt="Produto" class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500">
-                  <div class="absolute top-3 left-3 bg-gray-900 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm">
+                <!-- Floating Discount Tag in Hot Coral Gradient -->
+                @if (oferta.originalPrice && oferta.promotionalPrice && oferta.originalPrice > oferta.promotionalPrice) {
+                  <div class="absolute top-3 right-3 bg-gradient-to-br from-rose-500 to-orange-500 text-white font-black text-[10px] px-2.5 py-1 rounded-full shadow-md shadow-rose-500/20 transform group-hover:scale-105 transition-transform z-10 uppercase tracking-wider">
+                    -{{ ((oferta.originalPrice - oferta.promotionalPrice) / oferta.originalPrice * 100).toFixed(0) }}% OFF
+                  </div>
+                }
+                
+                <!-- Product Image Area -->
+                <div class="relative aspect-square w-full bg-slate-50/50 flex items-center justify-center overflow-hidden p-6 border-b border-slate-100">
+                  <img [src]="oferta.imageUrl || 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop'" 
+                       [alt]="oferta.productName" 
+                       class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500">
+                  
+                  <!-- Category tag -->
+                  <div class="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-sm text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow-sm uppercase tracking-wider">
                     {{ oferta.category }}
                   </div>
                 </div>
-                <div class="p-5 flex-1 flex flex-col">
-                  <p class="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1"><mat-icon class="!text-[14px] !w-3.5 !h-3.5">store</mat-icon> {{ oferta.supermarketName }}</p>
-                  <h3 class="text-sm md:text-base font-bold text-gray-900 leading-tight mb-3 line-clamp-2" [title]="oferta.productName">{{ oferta.productName }}</h3>
+
+                <!-- Product Info & Pricing Area -->
+                <div class="p-5 flex-grow flex flex-col justify-between gap-4">
+                  <div class="space-y-1.5">
+                    <!-- Supermarket Badge -->
+                    <p class="text-[10px] font-black text-emerald-700 bg-emerald-500/5 border border-emerald-500/10 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 uppercase tracking-wider">
+                      <mat-icon class="!text-[12px] !w-3 !h-3 flex items-center justify-center">store</mat-icon> 
+                      {{ oferta.supermarketName }}
+                    </p>
+                    
+                    <!-- Product Title -->
+                    <h3 class="text-sm font-black text-slate-850 leading-tight line-clamp-2 min-h-[40px] group-hover:text-emerald-950 transition-colors" 
+                        [title]="oferta.productName">
+                      {{ oferta.productName }}
+                    </h3>
+                  </div>
                   
-                  <div class="mt-auto pt-4 border-t border-gray-50 flex items-end justify-between">
+                  <!-- Pricing and Favorite Bar -->
+                  <div class="pt-3 border-t border-slate-50 flex items-end justify-between">
                     <div class="flex flex-col">
-                      <span class="text-xs text-gray-400 line-through">R$ {{ oferta.originalPrice | number:'1.2-2' }}</span>
-                      <span class="text-xl md:text-2xl font-extrabold text-green-600">R$ {{ oferta.promotionalPrice | number:'1.2-2' }}</span>
+                      @if (oferta.originalPrice && oferta.originalPrice > oferta.promotionalPrice) {
+                        <span class="text-[10px] text-slate-400 line-through font-bold mb-0.5">
+                          De: R$ {{ oferta.originalPrice | number:'1.2-2' }}
+                        </span>
+                      }
+                      <span class="text-xs text-slate-400 font-extrabold uppercase tracking-wide leading-none mb-1">Por:</span>
+                      <span class="text-xl md:text-2xl font-black text-rose-600 tracking-tight leading-none">
+                        R$ {{ oferta.promotionalPrice | number:'1.2-2' }}
+                      </span>
                     </div>
-                    <button mat-icon-button class="!bg-gray-100 !text-gray-600 hover:!bg-green-600 hover:!text-white transition-colors"><mat-icon>favorite_border</mat-icon></button>
+
+                    <!-- Favorite Button -->
+                    <button mat-icon-button 
+                            class="!bg-slate-50 hover:!bg-rose-500 !text-slate-400 hover:!text-white border border-slate-100 rounded-xl transition-all duration-200">
+                      <mat-icon class="flex items-center justify-center">favorite_border</mat-icon>
+                    </button>
                   </div>
                 </div>
+
               </div>
             }
           </div>
         } @else {
-          <!-- Empty State -->
-          <div class="bg-white rounded-2xl border border-gray-200 p-12 text-center flex flex-col items-center justify-center">
-            <mat-icon class="!w-16 !h-16 !text-[64px] text-gray-300 mb-4">search_off</mat-icon>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Nenhuma oferta encontrada</h3>
-            <p class="text-gray-500 max-w-sm mb-6">Não encontramos nenhuma promoção que corresponda aos filtros selecionados.</p>
-            <button mat-flat-button class="!bg-green-600 !text-white !rounded-full !px-8 font-bold" (click)="clearFilters()">Limpar Filtros</button>
+          
+          <!-- Premium Empty State -->
+          <div class="bg-white rounded-[2rem] border border-slate-200/50 p-16 text-center flex flex-col items-center justify-center shadow-sm space-y-6">
+            <div class="w-16 h-16 bg-slate-50 text-slate-400 border border-slate-100 rounded-3xl flex items-center justify-center shadow-inner">
+              <mat-icon class="!text-[36px] !w-9 !h-9 flex items-center justify-center">search_off</mat-icon>
+            </div>
+            <div class="space-y-1.5 max-w-sm">
+              <h3 class="text-lg font-black text-slate-800 uppercase tracking-wider">Nenhuma oferta encontrada</h3>
+              <p class="text-slate-500 text-xs font-semibold leading-relaxed">
+                Não encontramos nenhuma promoção que corresponda aos filtros de busca ou categorias selecionadas. Tente limpar os filtros para recomeçar.
+              </p>
+            </div>
+            <button (click)="clearFilters()" 
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-3 text-xs font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-emerald-600/10 cursor-pointer border-none">
+              Limpar Todos os Filtros
+            </button>
           </div>
         }
       }
     </main>
+
   </div>
 </div>

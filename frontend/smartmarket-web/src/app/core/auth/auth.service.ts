@@ -53,6 +53,16 @@ export class AuthService {
     );
   }
 
+  register(data: any): Observable<any> {
+    const payload = {
+      nome: data.nome,
+      email: data.email,
+      senha: data.senha,
+      papel: data.papel
+    };
+    return this.http.post<any>(`${this.apiUrl}/register`, payload);
+  }
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user'); // Limpeza completa

@@ -1,0 +1,388 @@
+<section class="perfil-wrapper">
+
+  <!-- HERO HEADER -->
+  <div class="perfil-hero">
+    <div class="hero-bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+      <a routerLink="/" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+        <span>Voltar</span>
+      </a>
+      <div class="user-identity">
+        <div class="avatar-ring">
+          <div class="avatar-circle">{{ userInitial() }}</div>
+        </div>
+        <div class="user-info">
+          <h1 class="user-name">Olá, {{ userName() }}!</h1>
+          <p class="user-email">{{ authService.user()?.email }}</p>
+          <div class="user-badges">
+            <span class="badge badge-cliente">
+              <mat-icon>verified_user</mat-icon>
+              Cliente SmartMarket
+            </span>
+            @if (locais().length > 0) {
+              <span class="badge badge-locais">
+                <mat-icon>location_on</mat-icon>
+                {{ locais().length }} {{ locais().length === 1 ? 'local' : 'locais' }}
+              </span>
+            }
+            @if (preferencias().length > 0) {
+              <span class="badge badge-prefs">
+                <mat-icon>favorite</mat-icon>
+                {{ preferencias().length }} {{ preferencias().length === 1 ? 'preferência' : 'preferências' }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab() === 'locais'" (click)="setTab('locais')" id="tab-locais">
+      <mat-icon>location_on</mat-icon>
+      <span>Meus Locais</span>
+      @if (locais().length > 0) {
+        <span class="tab-count">{{ locais().length }}</span>
+      }
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'preferencias'" (click)="setTab('preferencias')" id="tab-preferencias">
+      <mat-icon>favorite</mat-icon>
+      <span>Preferências</span>
+      @if (preferencias().length > 0) {
+        <span class="tab-count">{{ preferencias().length }}</span>
+      }
+    </button>
+  </div>
+
+  <!-- CONTEÚDO DAS ABAS -->
+  <div class="tab-content">
+
+    <!-- ABA: MEUS LOCAIS -->
+    @if (activeTab() === 'locais') {
+      <div class="tab-panel locais-panel" id="panel-locais">
+        <div class="panel-header">
+          <div class="panel-title-block">
+            <h2>Meus Locais Favoritos</h2>
+            <p>Salve seus lugares frequentes para ver supermercados e ofertas próximas.</p>
+          </div>
+          <button class="btn-add-primary" (click)="openAddLocalModal()" id="btn-add-local">
+            <mat-icon>add_location_alt</mat-icon>
+            Adicionar Local
+          </button>
+        </div>
+
+        @if (isLoadingLocais()) {
+          <div class="loading-state">
+            <mat-spinner diameter="36"></mat-spinner>
+            <p>Carregando seus locais...</p>
+          </div>
+        } @else if (locais().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon-wrapper">
+              <mat-icon class="empty-icon">add_location_alt</mat-icon>
+            </div>
+            <h3>Nenhum local salvo ainda</h3>
+            <p>Adicione locais como "Casa", "Trabalho" ou "Casa da Sogra" para ver ofertas personalizadas por região.</p>
+            <button class="btn-add-outline" (click)="openAddLocalModal()" id="btn-first-local">
+              <mat-icon>add</mat-icon>
+              Adicionar meu primeiro local
+            </button>
+          </div>
+        } @else {
+          <div class="locais-grid">
+            @for (local of locais(); track local.id) {
+              <div class="local-card" [class.local-ativo]="local.ativo">
+                @if (local.ativo) {
+                  <div class="ativo-ribbon">
+                    <mat-icon>my_location</mat-icon>
+                    ATIVO
+                  </div>
+                }
+                <div class="local-card-header">
+                  <div class="local-icon-wrapper" [class.icon-ativo]="local.ativo">
+                    <mat-icon>{{ getLocalIcon(local.apelido) }}</mat-icon>
+                  </div>
+                  <div class="local-card-title">
+                    <h3>{{ local.apelido }}</h3>
+                    <p class="local-raio">
+                      <mat-icon>radar</mat-icon>
+                      Raio: {{ local.raioKm }} km
+                    </p>
+                  </div>
+                </div>
+                <p class="local-address">
+                  <mat-icon>place</mat-icon>
+                  {{ local.endereco }}
+                </p>
+                @if (local.cidade) {
+                  <p class="local-city">{{ local.cidade }}{{ local.estado ? ' - ' + local.estado : '' }}</p>
+                }
+                <div class="local-card-actions">
+                  @if (!local.ativo) {
+                    <button class="btn-usar-local" (click)="ativarLocal(local)" [id]="'btn-ativar-' + local.id">
+                      <mat-icon>my_location</mat-icon>
+                      Usar este local
+                    </button>
+                  } @else {
+                    <span class="btn-local-em-uso">
+                      <mat-icon>check_circle</mat-icon>
+                      Local em uso
+                    </span>
+                  }
+                  <button class="btn-delete-local" (click)="removerLocal(local)" [id]="'btn-remover-' + local.id" title="Remover local">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Card de Adicionar Novo -->
+            @if (locais().length < 10) {
+              <div class="local-card local-card-add" (click)="openAddLocalModal()" id="btn-add-local-card">
+                <mat-icon class="add-icon">add_location_alt</mat-icon>
+                <p>Adicionar novo local</p>
+                <span class="add-hint">{{ 10 - locais().length }} restante(s)</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ABA: PREFERÊNCIAS DE PRODUTO -->
+    @if (activeTab() === 'preferencias') {
+      <div class="tab-panel preferencias-panel" id="panel-preferencias">
+        <div class="panel-header">
+          <div class="panel-title-block">
+            <h2>Minhas Preferências</h2>
+            <p>Seus produtos favoritos — usados para personalizar as ofertas exibidas para você.</p>
+          </div>
+        </div>
+
+        <!-- Busca de produto -->
+        <div class="search-produto-wrapper">
+          <div class="search-input-group">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              class="search-input"
+              id="input-busca-produto"
+              type="text"
+              placeholder="Buscar produto para adicionar às preferências..."
+              [value]="searchProduto()"
+              (input)="buscarProdutos($any($event.target).value); searchProduto.set($any($event.target).value)"
+            />
+            @if (isSearchingProduto()) {
+              <mat-spinner diameter="20" class="search-spinner"></mat-spinner>
+            }
+          </div>
+
+          <!-- Resultados da busca -->
+          @if (produtosBuscados().length > 0) {
+            <div class="search-results">
+              @for (produto of produtosBuscados(); track produto.id) {
+                <div class="search-result-item" (click)="adicionarPreferencia(produto)" [id]="'result-' + produto.id">
+                  @if (produto.urlImagem) {
+                    <img [src]="produto.urlImagem" [alt]="produto.nome" class="result-img" />
+                  } @else {
+                    <div class="result-img-placeholder">
+                      <mat-icon>inventory_2</mat-icon>
+                    </div>
+                  }
+                  <div class="result-info">
+                    <span class="result-name">{{ produto.nome || produto.descricao }}</span>
+                    <span class="result-cat">{{ produto.categoriaNome || 'Produto' }}</span>
+                  </div>
+                  <button class="btn-add-result">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        @if (isLoadingPreferencias()) {
+          <div class="loading-state">
+            <mat-spinner diameter="36"></mat-spinner>
+            <p>Carregando preferências...</p>
+          </div>
+        } @else if (preferencias().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon-wrapper">
+              <mat-icon class="empty-icon">favorite_border</mat-icon>
+            </div>
+            <h3>Nenhuma preferência salva</h3>
+            <p>Busque produtos acima e adicione aos seus favoritos para receber ofertas personalizadas.</p>
+          </div>
+        } @else {
+          <div class="preferencias-grid">
+            @for (pref of preferencias(); track pref.id) {
+              <div class="pref-card">
+                <div class="pref-img-wrapper">
+                  @if (pref.urlImagem) {
+                    <img [src]="pref.urlImagem" [alt]="pref.nomeProduto" class="pref-img" />
+                  } @else {
+                    <div class="pref-img-placeholder">
+                      <mat-icon>inventory_2</mat-icon>
+                    </div>
+                  }
+                </div>
+                <div class="pref-info">
+                  <h4>{{ pref.nomeProduto }}</h4>
+                  @if (pref.marca) {
+                    <p class="pref-marca">{{ pref.marca }}</p>
+                  }
+                  @if (pref.categoriaNome) {
+                    <span class="pref-categoria">{{ pref.categoriaNome }}</span>
+                  }
+                </div>
+                <button class="btn-remove-pref" (click)="removerPreferencia(pref)" [id]="'btn-remove-pref-' + pref.id" title="Remover preferência">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- MODAL: ADICIONAR LOCAL -->
+@if (showAddLocalModal()) {
+  <div class="modal-overlay" (click)="closeAddLocalModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>
+          <mat-icon>add_location_alt</mat-icon>
+          Novo Local Favorito
+        </h2>
+        <button class="modal-close" (click)="closeAddLocalModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="localForm" (ngSubmit)="salvarLocal()" class="local-form">
+        <!-- Apelido -->
+        <div class="form-field">
+          <label for="f-apelido">
+            <mat-icon>label</mat-icon>
+            Apelido <span class="required">*</span>
+          </label>
+          <input
+            id="f-apelido"
+            type="text"
+            formControlName="apelido"
+            placeholder='Ex: Casa, Trabalho, Casa da Sogra...'
+            class="form-input"
+          />
+        </div>
+
+        <!-- Obter via GPS -->
+        <div class="gps-section">
+          <button type="button" class="btn-gps" (click)="usarGps()" id="btn-usar-gps" [disabled]="isLocatingGps()">
+            @if (isLocatingGps()) {
+              <mat-spinner diameter="16"></mat-spinner>
+            } @else {
+              <mat-icon>gps_fixed</mat-icon>
+            }
+            {{ isLocatingGps() ? 'Localizando...' : 'Usar minha localização atual' }}
+          </button>
+          <span class="divider-text">ou informe o CEP abaixo</span>
+        </div>
+
+        <!-- CEP -->
+        <div class="form-row">
+          <div class="form-field flex-1">
+            <label for="f-cep">
+              <mat-icon>pin_drop</mat-icon>
+              CEP
+            </label>
+            <div class="input-with-action">
+              <input
+                id="f-cep"
+                type="text"
+                formControlName="cep"
+                placeholder="00000-000"
+                class="form-input"
+                (blur)="buscarCep()"
+              />
+            </div>
+          </div>
+          <div class="form-field flex-1">
+            <label for="f-estado">Estado</label>
+            <input id="f-estado" type="text" formControlName="estado" placeholder="UF" class="form-input" maxlength="2" />
+          </div>
+        </div>
+
+        <!-- Cidade -->
+        <div class="form-field">
+          <label for="f-cidade">Cidade</label>
+          <input id="f-cidade" type="text" formControlName="cidade" placeholder="Cidade" class="form-input" />
+        </div>
+
+        <!-- Endereço -->
+        <div class="form-field">
+          <label for="f-endereco">
+            <mat-icon>place</mat-icon>
+            Endereço <span class="required">*</span>
+          </label>
+          <input
+            id="f-endereco"
+            type="text"
+            formControlName="endereco"
+            placeholder="Rua, número, bairro..."
+            class="form-input"
+          />
+        </div>
+
+        <!-- Raio -->
+        <div class="form-field">
+          <label for="f-raio">
+            <mat-icon>radar</mat-icon>
+            Raio de busca: <strong>{{ localForm.get('raioKm')?.value }} km</strong>
+          </label>
+          <div class="slider-wrapper">
+            <input
+              id="f-raio"
+              type="range"
+              formControlName="raioKm"
+              min="1"
+              max="50"
+              step="1"
+              class="raio-slider"
+            />
+            <div class="slider-labels">
+              <span>1 km</span>
+              <span>25 km</span>
+              <span>50 km</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeAddLocalModal()">Cancelar</button>
+          <button
+            type="submit"
+            class="btn-save"
+            id="btn-salvar-local"
+            [disabled]="localForm.invalid || isSavingLocal()"
+          >
+            @if (isSavingLocal()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <mat-icon>save</mat-icon>
+            }
+            {{ isSavingLocal() ? 'Salvando...' : 'Salvar Local' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

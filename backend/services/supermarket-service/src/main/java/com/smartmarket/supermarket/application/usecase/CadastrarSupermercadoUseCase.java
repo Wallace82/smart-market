@@ -22,6 +22,10 @@ public class CadastrarSupermercadoUseCase {
             throw new IllegalArgumentException("Já existe um supermercado cadastrado com este CNPJ.");
         }
 
+        if (supermercado.getEndereco() == null || supermercado.getEndereco().isBlank()) {
+            supermercado.setEndereco("Endereço pendente de preenchimento");
+        }
+
         if (supermercado.getId() == null) {
             supermercado.setId(UUID.randomUUID());
             supermercado.setCriadoEm(LocalDateTime.now());

@@ -603,7 +603,7 @@ import { ProductBaseResponse } from '@core/models/product.model';
                             <button (click)="criarEncarteCompleto(solic)"
                                     class="bg-purple-600 hover:bg-purple-700 text-white rounded-xl px-6 py-2.5 text-xs font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-600/10 cursor-pointer flex items-center gap-1">
                               <mat-icon class="!text-[14px]">save</mat-icon>
-                              Salvar e Criar Encarte Digital
+                              {{ (encarteCriadoParaSolicitacao()[solic.id] || (solic.encarteId && !solic.encarteId.startsWith('mock-') && !solic.encarteId.startsWith('e-mock-'))) ? 'Salvar e Atualizar Encarte Digital' : 'Salvar e Criar Encarte Digital' }}
                             </button>
                           </div>
                         </div>
@@ -1047,6 +1047,44 @@ export class ConciergeFilaComponent implements OnInit {
       this.carregarOfertasDoSupermercado(solic);
       this.carregarEncartesDoSupermercado(solic);
       this.carregarTemasEncarte();
+
+      // Carregar dados do encarte existente para edição caso exista
+      if (solic.encarteId && !solic.encarteId.startsWith('mock-') && !solic.encarteId.startsWith('e-mock-')) {
+        this.encarteService.buscarEncartePorId(solic.encarteId).subscribe({
+          next: (encarte) => {
+            if (encarte) {
+              this.tituloEncarteForm.set({ ...this.tituloEncarteForm(), [id]: encarte.titulo });
+              if (encarte.temaId) {
+                this.temaSelecionadoForm.set({ ...this.temaSelecionadoForm(), [id]: encarte.temaId });
+              }
+              if (encarte.dataInicio) {
+                this.dataInicioEncarteForm.set({ ...this.dataInicioEncarteForm(), [id]: encarte.dataInicio.split('T')[0] });
+              }
+              if (encarte.dataFim) {
+                this.dataFimEncarteForm.set({ ...this.dataFimEncarteForm(), [id]: encarte.dataFim.split('T')[0] });
+              }
+              
+              // Pré-selecionar as ofertas que já fazem parte do encarte
+              const mapaSelecao: { [ofertaId: string]: boolean } = {};
+              if (encarte.itens) {
+                encarte.itens.forEach(item => {
+                  mapaSelecao[item.ofertaId] = true;
+                });
+              }
+              this.ofertasSelecionadasParaEncarte.set({
+                ...this.ofertasSelecionadasParaEncarte(),
+                [id]: mapaSelecao
+              });
+
+              // Mapear também no sinal de encarte criado para a solicitação
+              this.encarteCriadoParaSolicitacao.set({
+                ...this.encarteCriadoParaSolicitacao(),
+                [id]: encarte.id
+              });
+            }
+          }
+        });
+      }
     }
   }
 
@@ -1283,22 +1321,35 @@ export class ConciergeFilaComponent implements OnInit {
       itens: itens
     };
 
-    this.encarteService.criarEncarte(request).subscribe({
-      next: (res: any) => {
-        this.notificationService.success(`Encarte "${titulo}" criado com sucesso!`);
-        if (res && res.id) {
-          this.encarteCriadoParaSolicitacao.set({
-            ...this.encarteCriadoParaSolicitacao(),
-            [id]: res.id
-          });
+    const existingEncarteId = this.encarteCriadoParaSolicitacao()[id] || (solic.encarteId && !solic.encarteId.startsWith('mock-') && !solic.encarteId.startsWith('e-mock-') ? solic.encarteId : null);
+
+    if (existingEncarteId && !existingEncarteId.startsWith('e-mock-') && !existingEncarteId.startsWith('mock-')) {
+      this.encarteService.atualizarEncarte(existingEncarteId, request).subscribe({
+        next: (res: any) => {
+          this.notificationService.success(`Encarte "${titulo}" atualizado com sucesso!`);
+          this.carregarEncartesDoSupermercado(solic);
+        },
+        error: () => {
+          this.notificationService.error('Erro ao atualizar o encarte digital.');
         }
-        this.ofertasSelecionadasParaEncarte.set({ ...this.ofertasSelecionadasParaEncarte(), [id]: {} });
-        this.carregarEncartesDoSupermercado(solic);
-      },
-      error: () => {
-        this.simularEncarteCriado(solic, request);
-      }
-    });
+      });
+    } else {
+      this.encarteService.criarEncarte(request).subscribe({
+        next: (res: any) => {
+          this.notificationService.success(`Encarte "${titulo}" criado com sucesso!`);
+          if (res && res.id) {
+            this.encarteCriadoParaSolicitacao.set({
+              ...this.encarteCriadoParaSolicitacao(),
+              [id]: res.id
+            });
+          }
+          this.carregarEncartesDoSupermercado(solic);
+        },
+        error: () => {
+          this.simularEncarteCriado(solic, request);
+        }
+      });
+    }
   }
 
   simularEncarteCriado(solic: ConciergeRequest, req: EncarteDigitalRequest) {

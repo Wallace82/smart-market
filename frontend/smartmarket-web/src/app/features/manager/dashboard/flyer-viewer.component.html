@@ -224,7 +224,6 @@
     <button mat-flat-button color="primary" class="mt-6 !rounded-full !px-8 !py-3 font-bold uppercase tracking-wider shadow-lg" routerLink="/">Voltar ao Início</button>
   </div>
 
-  <!-- Main Content (Digital Flyer) -->
   <div *ngIf="!loading() && !error()" 
        class="max-w-6xl mx-auto min-h-screen flex flex-col shadow-2xl relative z-10 overflow-hidden border-x border-gray-200/30"
        [ngStyle]="viewerStyle">
@@ -240,9 +239,11 @@
         <!-- Led pulse -->
         <span class="relative flex h-3 w-3">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                [ngClass]="themeType() === 'blackfriday' ? 'bg-amber-400' : 'bg-[var(--color-primary)]'"></span>
+                [ngClass]="themeType() === 'blackfriday' ? 'bg-amber-400' : 'bg-[var(--color-primary)]'"
+                [style.background-color]="themeType() === 'default' ? brandPrimary() : null"></span>
           <span class="relative inline-flex rounded-full h-3 w-3"
-                [ngClass]="themeType() === 'blackfriday' ? 'bg-amber-500' : 'bg-[var(--color-primary)]'"></span>
+                [ngClass]="themeType() === 'blackfriday' ? 'bg-amber-500' : 'bg-[var(--color-primary)]'"
+                [style.background-color]="themeType() === 'default' ? brandPrimary() : null"></span>
         </span>
         <span class="text-xs font-black uppercase tracking-wider"
               [ngClass]="themeType() === 'blackfriday' ? 'text-amber-400' : 'text-gray-800'">
@@ -253,7 +254,8 @@
               [ngClass]="{
                 'bg-[var(--color-primary)] text-white': themeType() !== 'blackfriday',
                 'bg-amber-500 text-black': themeType() === 'blackfriday'
-              }">
+              }"
+              [style.background-color]="themeType() === 'default' ? brandPrimary() : null">
           Verificado
         </span>
       </div>
@@ -274,11 +276,19 @@
               'border-amber-900 text-amber-50': themeType() === 'easter',
               'border-red-950 text-white': themeType() === 'christmas',
               'border-zinc-900 text-white shadow-[inset_0_-2px_15px_rgba(245,158,11,0.1)]': themeType() === 'blackfriday',
-              'border-black/10 text-white': themeType() === 'default'
+              'border-slate-800 text-white': themeType() === 'default'
             }">
       
+      <!-- Glowing Brand Auroras (Nebulas) inside the non-themed Header -->
+      <ng-container *ngIf="!tema()">
+        <div class="absolute -right-24 -top-24 w-80 h-80 rounded-full blur-[100px] pointer-events-none opacity-25 transition-all duration-500"
+             [style.background-color]="brandPrimary()"></div>
+        <div class="absolute -left-24 -bottom-24 w-80 h-80 rounded-full blur-[100px] pointer-events-none opacity-20 transition-all duration-500"
+             [style.background-color]="brandSecondary()"></div>
+      </ng-container>
+
       <!-- Graphic Textures -->
-      <div class="absolute inset-0 opacity-[0.06] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+      <div class="absolute inset-0 opacity-[0.05] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
 
       <!-- Easter Chocolate Drip -->
       <div *ngIf="themeType() === 'easter'" class="chocolate-dripping"></div>
@@ -320,8 +330,10 @@
         
         <!-- Premium Whitelabel Logo Container (Highlighted when NO theme is selected) -->
         <div [class]="!tema() 
-               ? 'relative w-36 h-36 sm:w-44 sm:h-44 bg-white rounded-[2rem] p-4 sm:p-5 mb-4 shadow-[0_0_35px_rgba(255,255,255,0.55)] border-4 border-white ring-8 ring-white/15 transition-all duration-300 hover:scale-105' 
+               ? 'relative w-36 h-36 sm:w-44 sm:h-44 bg-white rounded-[2.5rem] p-5 mb-4 shadow-2xl transition-all duration-300 hover:scale-105 border-4' 
                : 'relative w-28 h-28 sm:w-32 sm:h-32 bg-white rounded-[1.5rem] p-3 sm:p-4 mb-4 shadow-2xl transition-all duration-300 hover:scale-105'"
+             [style.border-color]="!tema() ? brandPrimary() : null"
+             [style.box-shadow]="!tema() ? '0 15px 40px -5px ' + hexToRgba(brandPrimary(), 0.5) : null"
              [ngClass]="tema() ? {
                'border-4 border-rose-300 ring-4 ring-rose-200/30': themeType() === 'mothersday',
                'border-4 border-amber-600 ring-4 ring-amber-500/20': themeType() === 'easter',
@@ -336,7 +348,8 @@
           <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
           <div *ngIf="!supermarket()?.urlLogomarca" class="w-full h-full flex items-center justify-center bg-gray-50 rounded-[1.25rem]">
             <span class="text-4xl sm:text-5xl font-black uppercase tracking-tight text-center"
-                  [ngClass]="themeType() === 'blackfriday' ? 'text-amber-500' : 'text-[var(--color-primary)]'">
+                  [ngClass]="themeType() === 'blackfriday' ? 'text-amber-500' : 'text-[var(--color-primary)]'"
+                  [style.color]="themeType() === 'default' ? brandPrimary() : null">
               {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
             </span>
           </div>
@@ -351,6 +364,7 @@
                  'bg-amber-400 border-zinc-950 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)]': themeType() === 'blackfriday',
                  'bg-amber-400 border-white text-black': themeType() === 'christmas' || themeType() === 'default'
                } : {}"
+               [style.background-color]="themeType() === 'default' && !tema() ? brandPrimary() : null"
                matTooltip="Supermercado Homologado Oficial">
             <mat-icon class="!text-[10px] !w-3.5 !h-3.5 flex items-center justify-center font-black">verified</mat-icon>
           </div>
@@ -358,13 +372,13 @@
 
         <!-- Supermarket Brand Name (Highly Evident & Customizable) -->
         <h2 class="text-xs font-black uppercase tracking-widest mb-2"
-            [ngClass]="{
-              'text-pink-100 font-serif-classic italic text-base normal-case font-bold': themeType() === 'mothersday',
-              'text-amber-200': themeType() === 'easter',
-              'text-red-100': themeType() === 'christmas',
-              'text-amber-400': themeType() === 'blackfriday',
-              'text-white/80': themeType() === 'default'
-            }">
+             [ngClass]="{
+               'text-pink-100 font-serif-classic italic text-base normal-case font-bold': themeType() === 'mothersday',
+               'text-amber-200': themeType() === 'easter',
+               'text-red-100': themeType() === 'christmas',
+               'text-amber-400': themeType() === 'blackfriday',
+               'text-white/80': themeType() === 'default'
+             }">
           {{ supermarket()?.nomeFantasia }}
         </h2>
 
@@ -375,9 +389,10 @@
                'bg-gradient-to-r from-amber-600 to-amber-500 text-white border-amber-400/40 shadow-amber-900/30': themeType() === 'easter',
                'bg-gradient-to-r from-red-600 to-emerald-600 text-white border-yellow-400/40 shadow-emerald-950/30': themeType() === 'christmas',
                'bg-gradient-to-r from-amber-400 to-amber-500 text-black border-amber-300 shadow-amber-500/30': themeType() === 'blackfriday',
-               'bg-white/20 text-white backdrop-blur-md border-white/20': themeType() === 'default'
+               'bg-white/5 text-white backdrop-blur-md border border-white/10 shadow-sm': themeType() === 'default'
              }">
-          <mat-icon class="!text-base !w-4 !h-4 flex items-center justify-center">
+          <div *ngIf="themeType() === 'default'" class="w-1.5 h-1.5 rounded-full" [style.background-color]="brandPrimary()"></div>
+          <mat-icon *ngIf="themeType() !== 'default'" class="!text-base !w-4 !h-4 flex items-center justify-center">
             {{ 
               themeType() === 'mothersday' ? 'favorite' :
               themeType() === 'easter' ? 'spa' :
@@ -419,14 +434,15 @@
           {{ themeSubtitle() }}
         </p>
         
-        <div class="w-20 h-1 mt-6 rounded-full"
+        <div class="w-20 h-1.5 mt-6 rounded-full"
              [ngClass]="{
                'bg-rose-300': themeType() === 'mothersday',
                'bg-amber-500': themeType() === 'easter',
                'bg-yellow-400': themeType() === 'christmas',
                'bg-amber-400': themeType() === 'blackfriday',
                'bg-white/40': themeType() === 'default'
-             }"></div>
+             }"
+             [style.background-color]="themeType() === 'default' ? brandPrimary() : null"></div>
       </div>
     </header>
 
@@ -442,7 +458,7 @@
       
       <div *ngIf="ofertas().length === 0" class="text-center py-24">
         <mat-icon class="text-gray-300 text-7xl mb-3">inventory_2</mat-icon>
-        <p class="text-gray-500 font-extrabold uppercase tracking-wider text-sm">Nenhuma oferta ativa neste encarte</p>
+        <p class="text-gray-500 font-extrabold uppercase tracking-wider text-sm">Nenhuma oferta active neste encarte</p>
       </div>
 
       <!-- Tabloid Grid -->
@@ -457,7 +473,8 @@
                'border-b-emerald-600': themeType() === 'christmas',
                'bf-card border-b-amber-500': themeType() === 'blackfriday',
                'border-b-[var(--color-primary)] border-gray-100': themeType() === 'default'
-             }">
+             }"
+             [style.border-bottom-color]="themeType() === 'default' ? brandPrimary() : null">
           
           <!-- Seasonal Snowy Cap overlay on images for Christmas -->
           <div *ngIf="themeType() === 'christmas'" class="snow-cap"></div>
@@ -499,7 +516,8 @@
 
             <!-- Default Price Splash -->
             <div *ngIf="themeType() === 'default'" 
-                 class="absolute inset-0 bg-yellow-400 rounded-full shadow-md border-2 border-red-600 flex flex-col items-center justify-center rotate-12">
+                 class="absolute inset-0 bg-yellow-400 rounded-full shadow-md border-2 flex flex-col items-center justify-center rotate-12"
+                 [style.border-color]="brandPrimary()">
               <span class="text-[9px] font-black text-red-700 leading-none uppercase">R$</span>
               <span class="text-xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
               <span class="text-[8px] font-bold text-red-800 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
@@ -531,7 +549,8 @@
                    'bg-emerald-600 text-white': themeType() === 'christmas',
                    'bg-amber-500 text-black': themeType() === 'blackfriday',
                    'bg-black/60 text-white': themeType() === 'default'
-                 }">
+                 }"
+                 [style.background-color]="themeType() === 'default' ? brandPrimary() : null">
               {{ themeType() === 'blackfriday' ? 'Super Oferta' : 'Oferta' }}
             </div>
           </div>
@@ -540,11 +559,11 @@
           <div class="p-4 flex-1 flex flex-col justify-between"
                [ngClass]="{'bg-zinc-950 text-white': themeType() === 'blackfriday'}">
             <h3 class="text-xs sm:text-sm font-extrabold leading-snug mb-3 line-clamp-2 h-9"
-                [ngClass]="{
-                  'text-rose-900 font-serif-classic normal-case': themeType() === 'mothersday',
-                  'text-zinc-800': themeType() !== 'blackfriday' && themeType() !== 'mothersday',
-                  'text-gray-100': themeType() === 'blackfriday'
-                }">
+                 [ngClass]="{
+                   'text-rose-900 font-serif-classic normal-case': themeType() === 'mothersday',
+                   'text-zinc-800': themeType() !== 'blackfriday' && themeType() !== 'mothersday',
+                   'text-gray-100': themeType() === 'blackfriday'
+                 }">
               {{ oferta.nomeProduto }}
             </h3>
             
@@ -566,7 +585,10 @@
                       
                       'bg-gray-100 hover:bg-gray-200 text-gray-700': themeType() === 'default' && !isFavorito(oferta.id),
                       'bg-[var(--color-primary)] text-white shadow-md': themeType() === 'default' && isFavorito(oferta.id)
-                    }">
+                    }"
+                    [style.background-color]="themeType() === 'default' && !isFavorito(oferta.id) ? hexToRgba(brandPrimary(), 0.08) : (themeType() === 'default' && isFavorito(oferta.id) ? brandPrimary() : null)"
+                    [style.color]="themeType() === 'default' && !isFavorito(oferta.id) ? brandPrimary() : null"
+                    [style.border-color]="themeType() === 'default' && !isFavorito(oferta.id) ? hexToRgba(brandPrimary(), 0.15) : null">
               <mat-icon class="!text-xs !w-3.5 !h-3.5 flex items-center justify-center">
                 {{ isFavorito(oferta.id) ? 'favorite' : 'favorite_border' }}
               </mat-icon>
@@ -595,7 +617,8 @@
                 <img *ngIf="supermarket()?.urlLogomarca" [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
                 <div *ngIf="!supermarket()?.urlLogomarca" class="w-full h-full flex items-center justify-center bg-gray-50 rounded-2xl">
                   <span class="text-5xl sm:text-6xl font-black uppercase text-center"
-                        [ngClass]="themeType() === 'blackfriday' ? 'text-amber-500' : 'text-[var(--color-primary)]'">
+                        [ngClass]="themeType() === 'blackfriday' ? 'text-amber-500' : 'text-[var(--color-primary)]'"
+                        [style.color]="themeType() === 'default' ? brandPrimary() : null">
                     {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
                   </span>
                 </div>

@@ -13,8 +13,8 @@ import { SupermarketService } from '@core/services/supermarket.service';
 import { EncarteService } from '@core/services/encarte.service';
 import { ConciergeService, ConciergeRequest } from '@core/services/concierge.service';
 import { OfertaService, OfertaSupermercado } from '@core/services/oferta.service';
-import { forkJoin, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { forkJoin, of, Observable } from 'rxjs';
+import { switchMap, catchError, map } from 'rxjs/operators';
 import { SupermarketResponse } from '@core/models/supermarket.model';
 
 export interface Flyer {
@@ -347,35 +347,72 @@ export class FlyerListComponent implements OnInit {
         [reqId]: { encarte: null, tema: null, ofertas: [], carregando: true }
       });
 
-      this.encarteService.buscarEncartePorId(encarteId).pipe(
-        switchMap(encarte => {
-          const temaObs = encarte.temaId 
-            ? this.encarteService.buscarTemaPorId(encarte.temaId).pipe(catchError(() => of(null))) 
-            : of(null);
+      // Tenta resolver o ID real do encarte: se já for um UUID real, usa direto.
+      // Se for nulo ou 'mock-encarte-id' ou um ID mockado ('e-mock-...'), tenta fazer correspondência inteligente pelo título na lista da loja
+      let encarteIdObs$: Observable<string | null>;
+      
+      const isMockId = !encarteId || encarteId === 'mock-encarte-id' || encarteId.startsWith('e-mock-');
+      if (!isMockId) {
+        encarteIdObs$ = of(encarteId);
+      } else {
+        encarteIdObs$ = this.encarteService.listarEncartes(req.supermercadoId).pipe(
+          map(encartes => {
+            const matching = encartes.find(e => 
+              e.titulo === `Encarte - ${req.titulo}` || 
+              e.titulo === req.titulo || 
+              e.titulo.toLowerCase().includes(req.titulo.toLowerCase())
+            );
+            return matching ? matching.id : null;
+          }),
+          catchError(() => of(null))
+        );
+      }
 
-          const itens = encarte.itens || [];
-          const ofertasObs = itens.length > 0
-            ? forkJoin(itens.map(item => this.ofertaService.buscarPorId(item.ofertaId).pipe(
-                catchError(() => of({
-                  id: item.ofertaId,
-                  supermercadoId: encarte.supermercadoId,
-                  produtoBaseId: '',
-                  nomeProduto: 'Oferta não encontrada',
-                  preco: 0,
-                  unidadeMedida: 'UN',
-                  ativo: false
-                } as OfertaSupermercado))
-              )))
-            : of([]);
+      encarteIdObs$.pipe(
+        switchMap(realId => {
+          if (!realId) {
+            throw new Error('Encarte real não encontrado');
+          }
+          return this.encarteService.buscarEncartePorId(realId).pipe(
+            switchMap(encarte => {
+              const temaObs = encarte.temaId 
+                ? this.encarteService.buscarTemaPorId(encarte.temaId).pipe(catchError(() => of(null))) 
+                : of(null);
 
-          return forkJoin({
-            encarte: of(encarte),
-            tema: temaObs,
-            ofertas: ofertasObs
-          });
+              const itens = encarte.itens || [];
+              const ofertasObs = itens.length > 0
+                ? this.ofertaService.buscarPorSupermercado(encarte.supermercadoId).pipe(
+                    map(ofertasLoja => {
+                      return itens.map(item => {
+                        const encontrada = ofertasLoja.find(o => o.id === item.ofertaId);
+                        if (encontrada) {
+                          return encontrada;
+                        }
+                        return {
+                          id: item.ofertaId,
+                          supermercadoId: encarte.supermercadoId,
+                          produtoBaseId: '',
+                          nomeProduto: 'Oferta não encontrada',
+                          preco: 0,
+                          unidadeMedida: 'UN',
+                          ativo: false
+                        } as OfertaSupermercado;
+                      });
+                    }),
+                    catchError(() => of([]))
+                  )
+                : of([]);
+
+              return forkJoin({
+                encarte: of(encarte),
+                tema: temaObs,
+                ofertas: ofertasObs
+              });
+            })
+          );
         }),
         catchError(err => {
-          console.error('Erro ao buscar dados do encarte para prévia:', err);
+          console.error('Erro ao buscar dados do encarte real para prévia:', err);
           throw err;
         })
       ).subscribe({

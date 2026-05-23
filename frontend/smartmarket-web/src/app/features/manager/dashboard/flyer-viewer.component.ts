@@ -105,6 +105,9 @@ export class FlyerViewerComponent implements OnInit {
     return !!s?.urlLogomarca || !!s?.corPrimariaHex || !!s?.corSecundariaHex;
   });
 
+  brandPrimary = computed(() => this.supermarket()?.corPrimariaHex || '#16a34a');
+  brandSecondary = computed(() => this.supermarket()?.corSecundariaHex || '#0284c7');
+
   constructor(
     private route: ActivatedRoute,
     private encarteService: EncarteService,
@@ -300,7 +303,7 @@ export class FlyerViewerComponent implements OnInit {
     } else if (type === 'blackfriday') {
       bg = 'linear-gradient(to right, #09090b, #18181b, #09090b)';
     } else {
-      bg = 'linear-gradient(to right, var(--color-primary), var(--color-secondary))';
+      bg = 'linear-gradient(to bottom right, #0f172a, #020617)';
     }
 
     if (t?.urlBackgroundDecorativo) {

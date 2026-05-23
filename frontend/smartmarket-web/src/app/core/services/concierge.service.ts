@@ -81,4 +81,20 @@ export class ConciergeService {
 
     return this.http.post<ConciergeRequest>(this.apiUrl, formData);
   }
+
+  replicar(
+    id: string,
+    gestorId: string,
+    observacoes: string,
+    file?: File | null
+  ): Observable<ConciergeRequest> {
+    const formData = new FormData();
+    formData.append('gestorId', gestorId);
+    formData.append('observacoes', observacoes);
+    if (file) {
+      formData.append('file', file);
+    }
+
+    return this.http.post<ConciergeRequest>(`${this.apiUrl}/${id}/replicar`, formData);
+  }
 }

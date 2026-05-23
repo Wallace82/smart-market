@@ -15,6 +15,7 @@ import { ConciergeService, ConciergeRequest } from '@core/services/concierge.ser
 import { OfertaService, OfertaSupermercado } from '@core/services/oferta.service';
 import { forkJoin, of } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
+import { SupermarketResponse } from '@core/models/supermarket.model';
 
 export interface Flyer {
   id: string;
@@ -57,6 +58,14 @@ export class FlyerListComponent implements OnInit {
   // Estado Geral
   public isLoading = signal(false);
   public storeId = signal<string | null>(null);
+  public supermarket = signal<SupermarketResponse | null>(null);
+
+  hexToRgba(hex: string, alpha: number): string {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result 
+      ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+      : `rgba(0, 0, 0, ${alpha})`;
+  }
 
   // Estado dos Encartes
   public flyers = signal<Flyer[]>([]);
@@ -70,6 +79,10 @@ export class FlyerListComponent implements OnInit {
   public previewAberto = signal<{ [requestId: string]: boolean }>({});
   public previewDados = signal<{ [requestId: string]: { encarte: any, tema: any, ofertas: OfertaSupermercado[], carregando: boolean, erro?: string } }>({});
   public observacoesRejeicao = signal<{ [requestId: string]: string }>({});
+  public observacoesReplica = signal<{ [requestId: string]: string }>({});
+  public replicaFile = signal<{ [requestId: string]: File | null }>({});
+  public replicaFileName = signal<{ [requestId: string]: string }>({});
+  public isSubmittingReplica = signal<{ [requestId: string]: boolean }>({});
 
   // Formulário de Nova Solicitação do Concierge
   public newRequestTitle = signal('');
@@ -97,7 +110,9 @@ export class FlyerListComponent implements OnInit {
         this.supermarketService.buscarPorGestor(user.id).subscribe({
           next: (supermarkets) => {
             if (supermarkets.length > 0) {
-              const smId = supermarkets[0].id;
+              const market = supermarkets[0];
+              this.supermarket.set(market);
+              const smId = market.id;
               this.storeId.set(smId);
               
               // Carregar solicitações do Concierge vinculadas a esta loja
@@ -168,6 +183,19 @@ export class FlyerListComponent implements OnInit {
       next: (reqs) => {
         // Filtrar solicitações pertencentes a esta loja específica
         const filtrado = reqs.filter(r => r.supermercadoId === smId);
+        
+        // Garante que solicitações concluídas sem encarteId tenham um mock-encarte-id para habilitar a prévia Whitelabel
+        filtrado.forEach(r => {
+          if (!r.encarteId && (
+            r.status === 'AGUARDANDO_APROVACAO' || 
+            r.status === 'REJEITADO' || 
+            r.status === 'APROVADO' || 
+            r.status === 'PUBLICADO'
+          )) {
+            r.encarteId = 'mock-encarte-id';
+          }
+        });
+
         // Ordena por data de criação decrescente
         filtrado.sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime());
         this.conciergeRequests.set(filtrado);
@@ -236,11 +264,33 @@ export class FlyerListComponent implements OnInit {
     if (!user) return;
 
     this.isLoadingConcierge.set(true);
+
+    // Encontra a solicitação na lista para obter o encarteId associado
+    const req = this.conciergeRequests().find(r => r.id === requestId);
+    const encarteId = req?.encarteId;
+
     this.conciergeService.aprovar(requestId, user.id).subscribe({
       next: () => {
-        this.snackBar.open('Tabloide digitalizado aprovado e publicado com sucesso!', 'Fechar', { duration: 4000 });
-        this.carregarDados(); // Recarrega os encartes ativos para mostrar o novo
-        this.carregarConcierge();
+        // Se houver um encarte gerado de verdade (não mockado), publica-o alterando seu status para ATIVO no product-service
+        if (encarteId && encarteId !== 'mock-encarte-id') {
+          this.encarteService.alterarStatusEncarte(encarteId, 'ATIVO').subscribe({
+            next: () => {
+              this.snackBar.open('Tabloide digitalizado aprovado e publicado com sucesso na vitrine!', 'Fechar', { duration: 4000 });
+              this.carregarDados(); // Recarrega os encartes ativos para mostrar o novo
+              this.carregarConcierge();
+            },
+            error: (err) => {
+              console.error('Erro ao ativar status do encarte no backend:', err);
+              this.snackBar.open('Chamado aprovado, mas ocorreu um erro ao publicar o tabloide na vitrine.', 'Fechar', { duration: 4000 });
+              this.carregarDados();
+              this.carregarConcierge();
+            }
+          });
+        } else {
+          this.snackBar.open('Tabloide digitalizado aprovado com sucesso!', 'Fechar', { duration: 4000 });
+          this.carregarDados();
+          this.carregarConcierge();
+        }
       },
       error: (err) => {
         console.error('Erro ao aprovar solicitação:', err);
@@ -349,13 +399,8 @@ export class FlyerListComponent implements OnInit {
             dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             status: 'RASCUNHO'
           };
-          const mockTema = {
-            id: 't2',
-            nome: 'Semana do Consumidor',
-            corFundoHex: '#f0f9ff',
-            corDestaqueHex: '#0284c7',
-            urlBackgroundDecorativo: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=300&auto=format&fit=crop'
-          };
+          // Define mockTema como null para forçar o layout Whitelabel padrão com as cores e logo do supermercado
+          const mockTema = null;
           const mockOfertas: OfertaSupermercado[] = [
             { id: 'o1', supermercadoId: req.supermercadoId, produtoBaseId: 'p1', nomeProduto: 'Arroz Agulhinha Tipo 1 - 5kg', preco: 29.90, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=200&auto=format&fit=crop', ativo: true, precoAtual: 34.90, precoPromocional: 29.90 },
             { id: 'o2', supermercadoId: req.supermercadoId, produtoBaseId: 'p2', nomeProduto: 'Feijão Carioca Kicaldo - 1kg', preco: 8.45, unidadeMedida: 'UN', urlImagem: 'https://images.unsplash.com/photo-1551462147-37885acc3c41?q=80&w=200&auto=format&fit=crop', ativo: true, precoAtual: 9.99, precoPromocional: 8.45 }
@@ -407,6 +452,94 @@ export class FlyerListComponent implements OnInit {
         this.snackBar.open('Erro ao registrar a rejeição.', 'Fechar', { duration: 3000 });
         this.isLoadingConcierge.set(false);
       }
+    });
+  }
+
+  public onReplicaFileSelected(event: any, requestId: string): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.replicaFile.set({
+        ...this.replicaFile(),
+        [requestId]: file
+      });
+      this.replicaFileName.set({
+        ...this.replicaFileName(),
+        [requestId]: file.name
+      });
+    }
+  }
+
+  public enviarReplica(requestId: string): void {
+    const user = this.authService.user();
+    if (!user) return;
+
+    const obs = this.observacoesReplica()[requestId] || '';
+    if (!obs.trim()) {
+      this.snackBar.open('Por favor, informe a mensagem da réplica.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    const file = this.replicaFile()[requestId] || null;
+
+    // Set loading for this request
+    this.isSubmittingReplica.set({
+      ...this.isSubmittingReplica(),
+      [requestId]: true
+    });
+
+    this.conciergeService.replicar(requestId, user.id, obs, file).subscribe({
+      next: () => {
+        this.snackBar.open('Réplica enviada com sucesso! A solicitação retornou para a fila.', 'Fechar', { duration: 4000 });
+        
+        // Clean up state
+        const novaObs = this.observacoesReplica();
+        delete novaObs[requestId];
+        this.observacoesReplica.set(novaObs);
+
+        const novoFile = this.replicaFile();
+        delete novoFile[requestId];
+        this.replicaFile.set(novoFile);
+
+        const novoFileName = this.replicaFileName();
+        delete novoFileName[requestId];
+        this.replicaFileName.set(novoFileName);
+
+        const novosSubmitting = this.isSubmittingReplica();
+        delete novosSubmitting[requestId];
+        this.isSubmittingReplica.set(novosSubmitting);
+
+        // Close preview
+        const atualAberto = this.previewAberto();
+        delete atualAberto[requestId];
+        this.previewAberto.set(atualAberto);
+
+        // Reload data
+        this.carregarDados();
+        this.carregarConcierge();
+      },
+      error: (err) => {
+        console.error('Erro ao enviar réplica:', err);
+        this.snackBar.open('Erro ao enviar réplica ao concierge.', 'Fechar', { duration: 3000 });
+        
+        this.isSubmittingReplica.set({
+          ...this.isSubmittingReplica(),
+          [requestId]: false
+        });
+      }
+    });
+  }
+
+  public setObservacoesRejeicao(requestId: string, val: string): void {
+    this.observacoesRejeicao.set({
+      ...this.observacoesRejeicao(),
+      [requestId]: val
+    });
+  }
+
+  public setObservacoesReplica(requestId: string, val: string): void {
+    this.observacoesReplica.set({
+      ...this.observacoesReplica(),
+      [requestId]: val
     });
   }
 }

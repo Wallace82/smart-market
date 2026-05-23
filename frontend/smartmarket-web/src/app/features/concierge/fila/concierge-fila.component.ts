@@ -151,7 +151,11 @@ import { ProductBaseResponse } from '@core/models/product.model';
                 
                 <!-- Solicitação Card -->
                 <div class="relative bg-white rounded-3xl border p-6 sm:p-8 hover:shadow-xl transition-all duration-300 flex flex-col lg:flex-row lg:items-center justify-between gap-6 group overflow-hidden"
-                     [ngClass]="solic.status === 'REJEITADO' ? 'border-rose-300 bg-rose-50/10' : 'border-gray-100'">
+                     [ngClass]="{
+                       'border-rose-300 bg-rose-50/10': solic.status === 'REJEITADO',
+                       'border-blue-200 bg-blue-50/5': solic.status === 'EM_PROCESSAMENTO',
+                       'border-gray-100': solic.status !== 'REJEITADO' && solic.status !== 'EM_PROCESSAMENTO'
+                     }">
                   
                   <!-- Plan Glow Indicator Border -->
                   <div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b"
@@ -188,13 +192,14 @@ import { ProductBaseResponse } from '@core/models/product.model';
                         </span>
                         
                         <!-- Status Badge -->
-                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full"
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full border"
                               [ngClass]="{
-                                'bg-amber-50 text-amber-700': solic.status === 'PENDENTE',
-                                'bg-blue-50 text-blue-700': solic.status === 'EM_PROCESSAMENTO',
-                                'bg-indigo-50 text-indigo-700': solic.status === 'AGUARDANDO_APROVACAO',
-                                'bg-emerald-50 text-emerald-700': solic.status === 'APROVADO' || solic.status === 'PUBLICADO',
-                                'bg-rose-100 text-rose-800 border border-rose-200': solic.status === 'REJEITADO'
+                                'bg-slate-100 text-slate-700 border-slate-200': solic.status === 'PENDENTE',
+                                'bg-blue-50 text-blue-700 border-blue-200': solic.status === 'EM_PROCESSAMENTO',
+                                'bg-amber-50 text-amber-700 border-amber-200': solic.status === 'AGUARDANDO_APROVACAO',
+                                'bg-rose-50 text-rose-700 border-rose-200': solic.status === 'REJEITADO',
+                                'bg-emerald-50 text-emerald-700 border-emerald-200': solic.status === 'APROVADO',
+                                'bg-teal-50 text-teal-700 border-teal-200': solic.status === 'PUBLICADO'
                               }">
                           {{ getStatusText(solic.status) }}
                         </span>
@@ -262,30 +267,41 @@ import { ProductBaseResponse } from '@core/models/product.model';
                     <!-- Actions trigger depending on status -->
                     @if (solic.status === 'PENDENTE' || solic.status === 'REJEITADO') {
                       <button (click)="assumirSolicitacao(solic)"
-                              class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl px-6 py-4 text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-600/20 cursor-pointer flex items-center justify-center gap-1">
+                              [ngClass]="{
+                                'bg-slate-700 hover:bg-slate-800 text-white shadow-slate-700/20': solic.status === 'PENDENTE',
+                                'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-600/20': solic.status === 'REJEITADO'
+                              }"
+                              class="rounded-2xl px-6 py-4 text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer flex items-center justify-center gap-1">
                         <mat-icon class="mr-1">pan_tool</mat-icon> Assumir
                       </button>
                     }
 
                     @if (solic.status === 'EM_PROCESSAMENTO' && isAssignedToMe(solic)) {
                       <button (click)="toggleWorkspace(solic)"
-                              class="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl px-6 py-4 text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-purple-600/20 cursor-pointer flex items-center justify-center gap-1">
+                              class="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl px-6 py-4 text-sm font-black hover:scale-105 active:scale-95 transition-all shadow-md shadow-blue-600/20 cursor-pointer flex items-center justify-center gap-1">
                         <mat-icon class="mr-1">design_services</mat-icon>
                         {{ workspaceAberto()[solic.id] ? 'Fechar Workspace' : 'Fazer Atendimento' }}
                       </button>
                     }
 
                     @if (solic.status === 'AGUARDANDO_APROVACAO') {
-                      <div class="bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-2xl px-5 py-3 text-xs font-black flex items-center justify-center gap-1">
-                        <mat-icon class="!w-4 !h-4 text-[16px]">hourglass_top</mat-icon>
+                      <div class="bg-amber-50 text-amber-700 border border-amber-200 rounded-2xl px-5 py-3 text-xs font-black flex items-center justify-center gap-1 shadow-sm">
+                        <mat-icon class="!w-4 !h-4 text-[16px] text-amber-600 animate-pulse">hourglass_top</mat-icon>
                         Aguardando Aprovação do Estabelecimento
                       </div>
                     }
 
-                    @if (solic.status === 'APROVADO' || solic.status === 'PUBLICADO') {
-                      <div class="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl px-5 py-3 text-xs font-black flex items-center justify-center gap-1 shadow-sm">
-                        <mat-icon class="!w-4 !h-4 text-[16px]">check_circle</mat-icon>
-                        Publicado
+                    @if (solic.status === 'APROVADO') {
+                      <div class="bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl px-5 py-3 text-xs font-black flex items-center justify-center gap-1 shadow-sm">
+                        <mat-icon class="!w-4 !h-4 text-[16px] text-emerald-600">check_circle</mat-icon>
+                        Aprovado pelo Estabelecimento
+                      </div>
+                    }
+
+                    @if (solic.status === 'PUBLICADO') {
+                      <div class="bg-teal-50 text-teal-700 border border-teal-200 rounded-2xl px-5 py-3 text-xs font-black flex items-center justify-center gap-1 shadow-sm">
+                        <mat-icon class="!w-4 !h-4 text-[16px] text-teal-600">rocket_launch</mat-icon>
+                        Publicado / Concluído
                       </div>
                     }
                   </div>
@@ -923,7 +939,21 @@ export class ConciergeFilaComponent implements OnInit {
   concluirSolicitacao(solic: ConciergeRequest) {
     const atendenteId = this.currentUserId();
     const observacoes = this.observacoesAtendimento[solic.id] || 'Atendimento concluído e despachado!';
-    const encarteId = this.encarteCriadoParaSolicitacao()[solic.id];
+    let encarteId = this.encarteCriadoParaSolicitacao()[solic.id];
+
+    // Se o encarteId não estiver mapeado no sinal, tenta obter o primeiro encarte gerado para a solicitação
+    if (!encarteId) {
+      const listaEncartes = this.obterEncartesList(solic.id);
+      if (listaEncartes && listaEncartes.length > 0) {
+        encarteId = listaEncartes[0].id;
+      }
+    }
+
+    // Se ainda assim não houver nenhum encarte, impede a conclusão do atendimento para evitar prévias indisponíveis
+    if (!encarteId) {
+      this.notificationService.error('Você precisa criar e salvar pelo menos um encarte digital para este supermercado antes de finalizar e despachar!');
+      return;
+    }
 
     this.conciergeService.concluir(solic.id, atendenteId, observacoes, encarteId).subscribe({
       next: () => {

@@ -10,11 +10,12 @@ import { SupermarketService } from '../../../core/services/supermarket.service';
 import { OfertaService, OfertaSupermercado } from '../../../core/services/oferta.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { WhitelabelThemeDirective } from '../../../shared/directives/whitelabel-theme.directive';
 
 @Component({
   selector: 'app-flyer-display',
   standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule, MatIconModule],
+  imports: [CommonModule, MatProgressSpinnerModule, MatIconModule, WhitelabelThemeDirective],
   templateUrl: './flyer-display.component.html',
   styleUrl: './flyer-display.component.scss'
 })
@@ -87,12 +88,34 @@ export class FlyerDisplayComponent implements OnInit {
     });
   }
 
+  hexToRgba(hex: string, alpha: number): string {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result 
+      ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+      : `rgba(0, 0, 0, ${alpha})`;
+  }
+
   // Estilos Dinâmicos
   get pageStyle() {
     const tema = this.tema();
+    const market = this.supermarket();
+    
+    let bgImage = 'none';
+    let bgColor = '#f4f4f4';
+
+    if (tema) {
+      bgImage = tema.urlBackgroundDecorativo ? `url(${tema.urlBackgroundDecorativo})` : 'none';
+      bgColor = tema.corFundoHex || '#f4f4f4';
+    } else if (market) {
+      const primary = market.corPrimariaHex || '#16a34a';
+      const secondary = market.corSecundariaHex || '#0284c7';
+      bgImage = `linear-gradient(135deg, ${this.hexToRgba(primary, 0.08)} 0%, ${this.hexToRgba(secondary, 0.04)} 50%, #ffffff 100%)`;
+      bgColor = '#ffffff';
+    }
+
     return {
-      'background-image': tema?.urlBackgroundDecorativo ? `url(${tema.urlBackgroundDecorativo})` : 'none',
-      'background-color': tema?.corFundoHex || '#f4f4f4',
+      'background-image': bgImage,
+      'background-color': bgColor,
       'background-attachment': 'fixed',
       'background-size': 'cover'
     };

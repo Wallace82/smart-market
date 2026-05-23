@@ -193,7 +193,27 @@ export class FlyerCreateComponent implements OnInit {
 
     if (encarte.itens) {
       const selecionadas = ofertas.filter(o => 
-        encarte.itens.some((item: any) => item.ofertaId === o.id)
+        encarte.itens.some((item: any) => {
+          let itemOfertaId = item.ofertaId;
+          let oId = o.id;
+          
+          const mapMockToUuid = (id: string): string => {
+            if (id === 'o1') return '55555555-5555-5555-5555-555555555551';
+            if (id === 'o2') return '55555555-5555-5555-5555-555555555552';
+            if (id === 'o5') return '55555555-5555-5555-5555-555555555553';
+            if (id && id.startsWith('o')) {
+              const numStr = id.substring(1);
+              const num = parseInt(numStr, 10);
+              if (!isNaN(num)) {
+                const padded = num.toString().padStart(12, '0');
+                return `55555555-5555-5555-5555-${padded}`;
+              }
+            }
+            return id;
+          };
+
+          return itemOfertaId === oId || mapMockToUuid(oId) === itemOfertaId;
+        })
       );
       this.ofertasSelecionadas.set(selecionadas);
     }
@@ -221,6 +241,61 @@ export class FlyerCreateComponent implements OnInit {
     }
   }
 
+  hexToRgba(hex: string, alpha: number): string {
+    if (!hex) return `rgba(0,0,0,${alpha})`;
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex.split('').map(char => char + char).join('');
+    }
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  get headerStyle() {
+    const theme = this.currentTheme();
+    const market = this.supermarket();
+    if (theme) {
+      const isDark = theme.id === 't4' || theme.id === '33333333-3333-3333-3333-333333333332' || theme.nome?.toLowerCase().includes('black friday');
+      let bg = '';
+      if (isDark) {
+        bg = 'linear-gradient(to right, #09090b, #18181b, #09090b)';
+      } else if (theme.id === 't1' || theme.id === '33333333-3333-3333-3333-333333333331' || theme.nome?.toLowerCase().includes('natal')) {
+        bg = 'linear-gradient(to right, #b91c1c, #115e59, #b91c1c)';
+      } else if (theme.id === 't3' || theme.id === '33333333-3333-3333-3333-333333333334' || theme.nome?.toLowerCase().includes('arraia') || theme.nome?.toLowerCase().includes('arraiá')) {
+        bg = 'linear-gradient(to right, #f59e0b, #d97706)';
+      } else {
+        bg = 'linear-gradient(to right, #0284c7, #0369a1)';
+      }
+      return { 'background': bg };
+    } else if (market) {
+      const primary = market.corPrimariaHex || '#16a34a';
+      const secondary = market.corSecundariaHex || '#0284c7';
+      return {
+        'background': `linear-gradient(135deg, ${primary}, ${secondary})`
+      };
+    }
+    return { 'background': '#16a34a' };
+  }
+
+  get previewStyle() {
+    const theme = this.currentTheme();
+    const market = this.supermarket();
+    const isDark = theme?.id === 't4' || theme?.id === '33333333-3333-3333-3333-333333333332' || theme?.nome?.toLowerCase().includes('black friday');
+    
+    return {
+      'background-image': theme?.urlBackgroundDecorativo 
+        ? `linear-gradient(${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}, ${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}), url(${theme.urlBackgroundDecorativo})` 
+        : 'none',
+      'background-size': 'cover',
+      'background-position': 'center',
+      'background-color': theme?.corFundoHex || '#ffffff',
+      'border-top': `12px solid ${market?.corPrimariaHex || '#16a34a'}`,
+      'color': isDark ? '#ffffff' : '#1f2937'
+    };
+  }
+
   salvar(): void {
     if (this.form.invalid) {
       this.snackBar.open('Preencha todos os campos obrigatórios.', 'Fechar', { duration: 3000 });
@@ -228,19 +303,56 @@ export class FlyerCreateComponent implements OnInit {
     }
 
     this.loading.set(true);
+
+    const mapMockOfferId = (id: string): string => {
+      if (id === 'o1') return '55555555-5555-5555-5555-555555555551';
+      if (id === 'o2') return '55555555-5555-5555-5555-555555555552';
+      if (id === 'o5') return '55555555-5555-5555-5555-555555555553';
+      
+      if (id && id.startsWith('o')) {
+        const numStr = id.substring(1);
+        const num = parseInt(numStr, 10);
+        if (!isNaN(num)) {
+          const padded = num.toString().padStart(12, '0');
+          return `55555555-5555-5555-5555-${padded}`;
+        }
+      }
+      return id;
+    };
+
     const itens: EncarteItem[] = this.ofertasSelecionadas().map((o, index) => ({
-      ofertaId: o.id,
+      ofertaId: mapMockOfferId(o.id),
       ordemExibicao: index,
       destaque: false
     }));
 
     const val = this.form.value;
+
+    let sanitizeTemaId: string | undefined = undefined;
+    if (val.temaId && val.temaId !== 'null' && val.temaId !== 'undefined' && val.temaId !== '') {
+      if (val.temaId === 't1') {
+        sanitizeTemaId = '33333333-3333-3333-3333-333333333331';
+      } else if (val.temaId === 't4') {
+        sanitizeTemaId = '33333333-3333-3333-3333-333333333332';
+      } else if (val.temaId === 't2') {
+        sanitizeTemaId = '33333333-3333-3333-3333-333333333333';
+      } else if (val.temaId === 't3') {
+        sanitizeTemaId = '33333333-3333-3333-3333-333333333334';
+      } else {
+        sanitizeTemaId = val.temaId;
+      }
+    }
+
+    const supermercadoId = (this.supermarket()?.id && this.supermarket()?.id !== 'mock-id' && this.supermarket()?.id !== 'm1')
+      ? this.supermarket()!.id
+      : '22222222-2222-2222-2222-222222222222';
+
     const request: EncarteDigitalRequest = {
       titulo: val.titulo,
-      temaId: val.temaId || undefined,
+      temaId: sanitizeTemaId,
       dataInicio: val.dataInicio ? `${val.dataInicio}T00:00:00` : '',
       dataFim: val.dataFim ? `${val.dataFim}T23:59:59` : '',
-      supermercadoId: this.supermarket()?.id || 'mock-id',
+      supermercadoId: supermercadoId,
       itens: itens
     };
 
@@ -253,29 +365,12 @@ export class FlyerCreateComponent implements OnInit {
         this.snackBar.open(`Encarte ${this.encarteId() ? 'atualizado' : 'criado'} com sucesso!`, 'Fechar', { duration: 3000 });
         this.router.navigate(['/manager/flyers']);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.snackBar.open('Erro ao salvar encarte. (Ambiente Mock: Simulação de sucesso)', 'OK', { duration: 3000 });
-        // Simula sucesso em ambiente de desenvolvimento se falhar
-        setTimeout(() => this.router.navigate(['/manager/flyers']), 2000);
+        console.error('Erro ao salvar encarte:', err);
+        const errorMsg = err?.error?.message || err?.message || 'Erro de comunicação com o servidor.';
+        this.snackBar.open(`Erro ao salvar encarte: ${errorMsg}`, 'Fechar', { duration: 5000 });
       }
     });
-  }
-
-  get previewStyle() {
-    const theme = this.currentTheme();
-    const market = this.supermarket();
-    const isDark = theme?.id === 't4'; // Black Friday
-    
-    return {
-      'background-image': theme?.urlBackgroundDecorativo 
-        ? `linear-gradient(${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}, ${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)'}), url(${theme.urlBackgroundDecorativo})` 
-        : 'none',
-      'background-size': 'cover',
-      'background-position': 'center',
-      'background-color': theme?.corFundoHex || '#ffffff',
-      'border-top': `12px solid ${market?.corPrimariaHex || '#16a34a'}`,
-      'color': isDark ? '#ffffff' : '#1f2937'
-    };
   }
 }

@@ -1,0 +1,361 @@
+openapi: 3.0.3
+info:
+  title: SmartMarket Concierge Service API
+  version: 2.0.0
+  description: |
+    Contrato do módulo `concierge` para o MVP do SmartMarket (v2.0).
+    
+    Responsável por:
+    - Gerenciamento de solicitações de digitalização assistida enviadas por gestores (RF-05.6)
+    - Fila de atendimento inteligente ordenada por score de prioridade para os atendentes
+    - Controle de Locks de atendimento exclusivos para evitar colisão entre atendentes
+    - Fluxo completo de aprovação, rejeição e réplicas/retries com novos arquivos
+servers:
+  - url: /api/v1
+tags:
+  - name: Concierge
+    description: Operações assistidas de digitalização e conciliação de tabloides
+
+paths:
+
+  /concierge/solicitacoes:
+    post:
+      tags: [Concierge]
+      summary: Criar nova solicitação de digitalização (Gestor)
+      description: |
+        O Gestor envia uma listagem em imagem ou PDF para ser digitalizada pela equipe do concierge.
+        Inicialmente entra na fila com status PENDENTE e tem o score de prioridade calculado.
+      operationId: criarSolicitacao
+      parameters:
+        - name: supermercadoId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: titulo
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 120
+            example: Especial de Inauguração
+        - name: observacoes
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 500
+        - name: complexidade
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+            maximum: 5
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Arquivo da listagem original de ofertas (PDF ou Imagem)
+      responses:
+        '201':
+          description: Solicitação de concierge criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitacaoConcierge'
+        '403':
+          description: Acesso negado ou limite de plano excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno ao armazenar anexo no MinIO
+
+  /concierge/solicitacoes/fila:
+    get:
+      tags: [Concierge]
+      summary: Listar fila de atendimento (Atendente)
+      description: Retorna a fila ativa de solicitações ordenada decrescentemente por score de prioridade e SLA.
+      operationId: listarFila
+      responses:
+        '200':
+          description: Fila de atendimento carregada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConciergeQueueResponse'
+
+  /concierge/solicitacoes/{id}/assumir:
+    patch:
+      tags: [Concierge]
+      summary: Assumir atendimento da solicitação (Atendente)
+      description: Coloca um bloqueio (lock) exclusivo na solicitação para o atendente logado.
+      operationId: assumirSolicitacao
+      parameters:
+        - $ref: '#/components/parameters/SolicitacaoIdPath'
+        - name: atendenteId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Solicitação assumida com sucesso (status EM_PROCESSAMENTO)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitacaoConcierge'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflito - Solicitação já está sendo processada por outro atendente
+
+  /concierge/solicitacoes/{id}/concluir:
+    patch:
+      tags: [Concierge]
+      summary: Concluir processamento e enviar para aprovação (Atendente)
+      description: Vincula o encarte digital criado no catálogo e despacha para revisão do gestor.
+      operationId: concluirAtendimento
+      parameters:
+        - $ref: '#/components/parameters/SolicitacaoIdPath'
+        - name: atendenteId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: observacoes
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: encarteId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Atendimento concluído (status AGUARDANDO_APROVACAO)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitacaoConcierge'
+
+  /concierge/solicitacoes/{id}/aprovar:
+    patch:
+      tags: [Concierge]
+      summary: Aprovar tabloide digitalizado (Gestor)
+      description: O gestor aprova o encarte digital gerado pelo atendente, ativando-o na vitrine de ofertas.
+      operationId: aprovarSolicitacao
+      parameters:
+        - $ref: '#/components/parameters/SolicitacaoIdPath'
+        - name: gestorId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Solicitação aprovada com sucesso (status APROVADO)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitacaoConcierge'
+
+  /concierge/solicitacoes/{id}/rejeitar:
+    patch:
+      tags: [Concierge]
+      summary: Rejeitar tabloide digitalizado (Gestor)
+      description: O gestor aponta erros e solicita ajustes na digitalização do encarte.
+      operationId: rejeitarSolicitacao
+      parameters:
+        - $ref: '#/components/parameters/SolicitacaoIdPath'
+        - name: gestorId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: observacoes
+          in: query
+          required: true
+          description: Feedback informando os ajustes necessários
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Solicitação rejeitada (status REJEITADO)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitacaoConcierge'
+
+  /concierge/solicitacoes/{id}/replicar:
+    post:
+      tags: [Concierge]
+      summary: Enviar réplica de chamado rejeitado (Gestor)
+      description: Permite ao gestor contestar ou reenviar um novo arquivo após a rejeição. Retorna a solicitação para a fila (PENDENTE).
+      operationId: replicarSolicitacao
+      parameters:
+        - $ref: '#/components/parameters/SolicitacaoIdPath'
+        - name: gestorId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: observacoes
+          in: query
+          required: true
+          description: Justificativa/dados adicionais para o reprocessamento
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Nova listagem ou documento de ofertas complementar (Opcional)
+      responses:
+        '200':
+          description: Réplica aceita e solicitação reintroduzida na fila (status PENDENTE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitacaoConcierge'
+        '409':
+          description: Apenas chamados no status REJEITADO podem receber réplicas
+
+components:
+  responses:
+    NotFound:
+      description: Solicitação não encontrada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  parameters:
+    SolicitacaoIdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+
+    ConciergeStatus:
+      type: string
+      enum: [PENDENTE, EM_PROCESSAMENTO, AGUARDANDO_APROVACAO, APROVADO, REJEITADO, PUBLICADO]
+      example: PENDENTE
+
+    SolicitacaoConcierge:
+      type: object
+      required: [id, supermercadoId, titulo, status, slaDefinidoHoras, prioridadeScore, complexidade, planoCliente, dataCriacao, urlArquivoOriginal]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermercadoId:
+          type: string
+          format: uuid
+        atendenteId:
+          type: string
+          format: uuid
+          nullable: true
+        titulo:
+          type: string
+        status:
+          $ref: '#/components/schemas/ConciergeStatus'
+        slaDefinidoHoras:
+          type: integer
+        prioridadeScore:
+          type: number
+          format: decimal
+          example: 85.50
+        complexidade:
+          type: integer
+        planoCliente:
+          type: string
+          example: PREMIUM
+        dataCriacao:
+          type: string
+          format: date-time
+        dataInicioProcessamento:
+          type: string
+          format: date-time
+          nullable: true
+        dataConclusao:
+          type: string
+          format: date-time
+          nullable: true
+        lockAt:
+          type: string
+          format: date-time
+          nullable: true
+        urlArquivoOriginal:
+          type: string
+          format: uri
+        observacoes:
+          type: string
+          nullable: true
+        encarteId:
+          type: string
+          format: uuid
+          nullable: true
+
+    ConciergeQueueResponse:
+      allOf:
+        - $ref: '#/components/schemas/SolicitacaoConcierge'
+        - type: object
+          required: [faixaPrioridade, tempoEmFilaMinutos, tempoRestanteSlaMinutos]
+          properties:
+            faixaPrioridade:
+              type: string
+              enum: [BAIXA, NORMAL, URGENTE]
+            tempoEmFilaMinutos:
+              type: integer
+            tempoRestanteSlaMinutos:
+              type: integer
+
+    ErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time

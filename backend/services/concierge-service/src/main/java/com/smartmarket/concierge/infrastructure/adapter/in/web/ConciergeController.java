@@ -1,6 +1,7 @@
 package com.smartmarket.concierge.infrastructure.adapter.in.web;
 
 import com.smartmarket.concierge.application.usecase.CriarSolicitacaoUseCase;
+import com.smartmarket.concierge.application.usecase.ReplicarSolicitacaoUseCase;
 import com.smartmarket.concierge.domain.model.SolicitacaoConcierge;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,19 +25,22 @@ public class ConciergeController {
     private final com.smartmarket.concierge.application.usecase.ConcluirProcessamentoUseCase concluirProcessamentoUseCase;
     private final com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase;
     private final com.smartmarket.concierge.application.usecase.RejeitarSolicitacaoUseCase rejeitarSolicitacaoUseCase;
+    private final ReplicarSolicitacaoUseCase replicarSolicitacaoUseCase;
 
     public ConciergeController(CriarSolicitacaoUseCase criarSolicitacaoUseCase,
                                com.smartmarket.concierge.application.usecase.ConsultarFilaAtendimentoUseCase consultarFilaAtendimentoUseCase,
                                com.smartmarket.concierge.application.usecase.AssumirSolicitacaoUseCase assumirSolicitacaoUseCase,
                                com.smartmarket.concierge.application.usecase.ConcluirProcessamentoUseCase concluirProcessamentoUseCase,
                                com.smartmarket.concierge.application.usecase.AprovarSolicitacaoUseCase aprovarSolicitacaoUseCase,
-                               com.smartmarket.concierge.application.usecase.RejeitarSolicitacaoUseCase rejeitarSolicitacaoUseCase) {
+                               com.smartmarket.concierge.application.usecase.RejeitarSolicitacaoUseCase rejeitarSolicitacaoUseCase,
+                               ReplicarSolicitacaoUseCase replicarSolicitacaoUseCase) {
         this.criarSolicitacaoUseCase = criarSolicitacaoUseCase;
         this.consultarFilaAtendimentoUseCase = consultarFilaAtendimentoUseCase;
         this.assumirSolicitacaoUseCase = assumirSolicitacaoUseCase;
         this.concluirProcessamentoUseCase = concluirProcessamentoUseCase;
         this.aprovarSolicitacaoUseCase = aprovarSolicitacaoUseCase;
         this.rejeitarSolicitacaoUseCase = rejeitarSolicitacaoUseCase;
+        this.replicarSolicitacaoUseCase = replicarSolicitacaoUseCase;
     }
 
     @GetMapping("/fila")
@@ -84,6 +88,48 @@ public class ConciergeController {
             @RequestParam(name = "gestorId") UUID gestorId,
             @RequestParam(name = "observacoes") String observacoes) {
         return ResponseEntity.ok(rejeitarSolicitacaoUseCase.execute(solicitacaoId, gestorId, observacoes));
+    }
+
+    @PostMapping(value = "/{id}/replicar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Supermercado envia uma réplica para a digitalização rejeitada")
+    public ResponseEntity<?> replicar(
+            @PathVariable(name = "id") UUID solicitacaoId,
+            @RequestParam(name = "gestorId") UUID gestorId,
+            @RequestParam(name = "observacoes") String observacoes,
+            @RequestPart(name = "file", required = false) MultipartFile file) {
+        try {
+            String fileName = null;
+            java.io.InputStream inputStream = null;
+            String contentType = null;
+            Long size = null;
+
+            if (file != null && !file.isEmpty()) {
+                fileName = file.getOriginalFilename();
+                inputStream = file.getInputStream();
+                contentType = file.getContentType();
+                size = file.getSize();
+            }
+
+            SolicitacaoConcierge solicitacao = replicarSolicitacaoUseCase.execute(
+                    solicitacaoId,
+                    gestorId,
+                    observacoes,
+                    fileName,
+                    inputStream,
+                    contentType,
+                    size
+            );
+
+            return ResponseEntity.ok(solicitacao);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        }
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

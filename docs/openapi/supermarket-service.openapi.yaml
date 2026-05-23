@@ -6,34 +6,24 @@ info:
     Contrato do módulo `supermarket` para o MVP do SmartMarket (v2.0).
     
     Responsável por:
-    - Cadastro e aprovação de supermercados (RF-02.1)
+    - Cadastro, listagem e aprovação de supermercados (RF-02.1)
     - Personalização Whitelabel: logomarca, cor primária e secundária (RF-02.2, RF-02.3)
     - Configuração de geolocalização da loja (RF-02.4)
     - QR Code único por loja (RF-07)
     - Vitrine pública: busca por proximidade e CEP/bairro (RF-06)
-    
-    > **Planos e assinaturas (billing) são pós-MVP.** Ver `billing-service.openapi.yaml`.
 servers:
   - url: /api/v1
 tags:
-  - name: Supermarkets
-    description: CRUD e aprovação de supermercados (Admin)
-  - name: Whitelabel
-    description: Personalização visual da loja (Gestor)
+  - name: Supermercados
+    description: CRUD, Whitelabel e aprovação de supermercados
   - name: Public
     description: Endpoints públicos — não requerem autenticação (RF-01.4)
-  - name: QRCode
-    description: QR Code único da loja (RF-07)
 
 paths:
 
-  # ---------------------------------------------------------------------------
-  # ADMIN — Gestão de Supermercados
-  # ---------------------------------------------------------------------------
-
-  /supermarkets:
+  /supermercados:
     get:
-      tags: [Supermarkets]
+      tags: [Supermercados]
       summary: Listar supermercados (Admin)
       description: Retorna lista paginada de todos os supermercados cadastrados.
       operationId: listSupermarkets
@@ -42,11 +32,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
-        - name: status
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/SupermarketStatus'
       responses:
         '200':
           description: Lista paginada de supermercados
@@ -56,7 +41,7 @@ paths:
                 $ref: '#/components/schemas/PagedSupermarketResponse'
 
     post:
-      tags: [Supermarkets]
+      tags: [Supermercados]
       summary: Cadastrar supermercado (Admin)
       description: Cria um novo supermercado com status PENDENTE. O Admin deve aprová-lo via PATCH /status.
       operationId: createSupermarket
@@ -67,24 +52,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSupermarketRequest'
+              $ref: '#/components/schemas/SupermercadoRequest'
       responses:
         '201':
           description: Supermercado criado com status PENDENTE
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupermarketResponse'
-        '409':
-          description: CNPJ já cadastrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SupermercadoResponse'
 
-  /supermarkets/{id}:
+  /supermercados/{id}:
     get:
-      tags: [Supermarkets]
+      tags: [Supermercados]
       summary: Consultar supermercado por ID
       operationId: getSupermarketById
       security:
@@ -97,7 +76,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupermarketResponse'
+                $ref: '#/components/schemas/SupermercadoResponse'
         '404':
           description: Supermercado não encontrado
           content:
@@ -105,42 +84,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /supermarkets/{id}/status:
-    patch:
-      tags: [Supermarkets]
-      summary: Aprovar ou bloquear supermercado (Admin)
-      description: Atualiza o status do supermercado (RF-02.1). Apenas ADMIN.
-      operationId: updateSupermarketStatus
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/SupermarketIdPath'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateSupermarketStatusRequest'
-      responses:
-        '200':
-          description: Status atualizado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SupermarketResponse'
-
-  # ---------------------------------------------------------------------------
-  # GESTOR — Whitelabel e Configurações da Loja
-  # ---------------------------------------------------------------------------
-
-  /supermarkets/{id}/whitelabel:
     put:
-      tags: [Whitelabel]
-      summary: Atualizar identidade visual da loja (Gestor)
-      description: |
-        Permite ao Gestor configurar a paleta de cores (RF-02.3) e endereço/coordenadas (RF-02.4).
-        O upload da logomarca é feito separadamente via `/supermarkets/{id}/logo` (multipart).
-      operationId: updateWhitelabel
+      tags: [Supermercados]
+      summary: Atualizar supermercado / Whitelabel (Gestor)
+      description: Permite ao gestor atualizar os dados gerais, cores do design system whitelabel e coordenadas GPS da loja.
+      operationId: updateSupermarket
       security:
         - bearerAuth: []
       parameters:
@@ -150,28 +98,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateWhitelabelRequest'
+              $ref: '#/components/schemas/SupermercadoRequest'
       responses:
         '200':
-          description: Identidade visual atualizada
+          description: Supermercado atualizado com sucesso
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupermarketResponse'
+                $ref: '#/components/schemas/SupermercadoResponse'
+        '400':
+          description: Payload ou parâmetros de validação inválidos
         '404':
           description: Supermercado não encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
-  /supermarkets/{id}/logo:
+  /supermercados/{id}/upload-logomarca:
     post:
-      tags: [Whitelabel]
+      tags: [Supermercados]
       summary: Upload da logomarca da loja (Gestor)
-      description: |
-        Faz upload da logomarca para o MinIO (bucket `smartmarket-brands`).
-        Retorna a URL pública da imagem (RF-02.2).
+      description: Faz upload da logomarca para o MinIO (bucket `smartmarket-brands`) e atualiza a URL no cadastro.
       operationId: uploadLogo
       security:
         - bearerAuth: []
@@ -188,56 +132,90 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: Arquivo de imagem (PNG, JPG, SVG). Tamanho máximo 2MB.
+                  description: Arquivo de imagem (PNG, JPG, SVG). Máximo 2MB.
       responses:
         '200':
-          description: Logo enviada com sucesso
+          description: Logomarca enviada e vinculada com sucesso
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LogoUploadResponse'
+                $ref: '#/components/schemas/SupermercadoResponse'
         '400':
-          description: Arquivo inválido ou excede limite de tamanho
+          description: Arquivo inválido ou vazio
+
+  /supermercados/gestor/{gestorId}:
+    get:
+      tags: [Supermercados]
+      summary: Buscar supermercados administrados por um gestor específico
+      operationId: listSupermarketsByGestor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: gestorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de supermercados vinculados ao gestor
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupermercadoResponse'
 
-  # ---------------------------------------------------------------------------
-  # GESTOR — QR Code da Loja (RF-07)
-  # ---------------------------------------------------------------------------
+  /supermercados/{id}/status:
+    patch:
+      tags: [Supermercados]
+      summary: Aprovar ou alterar status do supermercado (Admin)
+      description: Atualiza o status do supermercado (Aprovação, Bloqueio, Desativação).
+      operationId: updateSupermarketStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SupermarketIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupermarketStatusRequest'
+      responses:
+        '200':
+          description: Status atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupermercadoResponse'
 
-  /supermarkets/{id}/qrcode:
+  /supermercados/{id}/qrcode:
     get:
-      tags: [QRCode]
-      summary: Obter QR Code da loja (Gestor)
-      description: |
-        Retorna os dados do QR Code único e permanente da loja, pronto para impressão (RF-07.1).
-        O QR Code aponta para o encarte digital ativo e inclui parâmetro UTM (RF-07.4).
-      operationId: getSupermarketQrCode
+      tags: [Supermercados]
+      summary: Obter URL permanente do QR Code da loja
+      description: Retorna a URL do QR Code gerado que aponta para o encarte ativo Whitelabel com parâmetros UTM.
+      operationId: getQRCode
       security:
         - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/SupermarketIdPath'
       responses:
         '200':
-          description: QR Code gerado
+          description: Link do QR Code obtido com sucesso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/QrCodeResponse'
 
-  # ---------------------------------------------------------------------------
-  # PÚBLICO — Vitrine e Geolocalização (RF-06)
-  # ---------------------------------------------------------------------------
+  # ── ENDPOINTS PÚBLICOS (Vitrine / Geolocalização) ──────────────────────────
 
-  /public/supermarkets/nearby:
+  /supermercados/public/nearby:
     get:
       tags: [Public]
       summary: Buscar supermercados próximos por GPS (público)
-      description: |
-        Retorna supermercados dentro do raio padrão de 3 km a partir das coordenadas GPS fornecidas (RF-06.1, RF-06.2).
-        **Não requer autenticação** (RF-01.4).
+      description: Retorna supermercados ativos dentro do raio em metros a partir das coordenadas fornecidas (Fórmula de Haversine).
       operationId: listNearbySupermarkets
       parameters:
         - name: latitude
@@ -246,80 +224,62 @@ paths:
           schema:
             type: number
             format: double
-            minimum: -90
-            maximum: 90
         - name: longitude
           in: query
           required: true
           schema:
             type: number
             format: double
-            minimum: -180
-            maximum: 180
         - name: radiusMeters
           in: query
           required: false
-          description: Raio de busca. Padrão de 3 km conforme RF-06.2.
           schema:
             type: integer
-            minimum: 100
-            maximum: 50000
             default: 3000
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/Size'
       responses:
         '200':
           description: Supermercados próximos encontrados
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedPublicSupermarketResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupermercadoResponse'
 
-  /public/supermarkets/by-location:
+  /supermercados/public/by-location:
     get:
       tags: [Public]
       summary: Buscar supermercados por CEP ou bairro (público)
-      description: |
-        Permite busca manual de supermercados quando o usuário nega permissão de GPS (RF-06.3).
-        Aceita CEP (8 dígitos) ou nome de bairro. **Não requer autenticação**.
+      description: Fallback para quando o usuário desativa ou nega a permissão de geolocalização.
       operationId: listSupermarketsByLocation
       parameters:
         - name: cep
           in: query
           required: false
-          description: CEP com 8 dígitos (sem hífen)
           schema:
             type: string
-            pattern: '^\d{8}$'
         - name: bairro
           in: query
           required: false
-          description: Nome do bairro (busca parcial, min 3 caracteres)
           schema:
             type: string
-            minLength: 3
-            maxLength: 80
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/Size'
       responses:
         '200':
-          description: Supermercados encontrados na localidade
+          description: Supermercados encontrados para a localização informada
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedPublicSupermarketResponse'
+                $ref: '#/components/schemas/PagedSupermarketResponse'
         '400':
           description: Pelo menos um parâmetro (cep ou bairro) deve ser informado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
-  /public/supermarkets/{id}:
+  /supermercados/public/{id}:
     get:
       tags: [Public]
-      summary: Consultar perfil público do supermercado
-      description: Retorna dados públicos do supermercado incluindo identidade visual (whitelabel) para renderização da vitrine (RF-05.3).
+      summary: Consultar perfil público Whitelabel do supermercado
+      description: Retorna dados e cores institucionais do supermercado ativo. Apenas supermercados com status ATIVO podem ser acessados publicamente.
       operationId: getPublicSupermarket
       parameters:
         - $ref: '#/components/parameters/SupermarketIdPath'
@@ -329,13 +289,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PublicSupermarketResponse'
+                $ref: '#/components/schemas/SupermercadoResponse'
         '404':
           description: Supermercado não encontrado ou inativo
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -370,151 +326,115 @@ components:
 
   schemas:
 
-    SupermarketStatus:
+    SupermercadoStatus:
       type: string
-      description: |
-        - PENDENTE: Aguardando aprovação do Admin (RF-02.1)
-        - ATIVO: Aprovado e visível na vitrine pública
-        - INATIVO: Desativado pelo Gestor ou Admin
-        - BLOQUEADO: Bloqueado por violação de termos
       enum: [PENDENTE, ATIVO, INATIVO, BLOQUEADO]
+      example: ATIVO
 
-    CreateSupermarketRequest:
+    SupermercadoRequest:
       type: object
-      required: [tradeName, cnpj, address, latitude, longitude]
+      required: [nomeFantasia, cnpj, endereco, latitude, longitude]
       properties:
-        tradeName:
+        nomeFantasia:
           type: string
           minLength: 3
           maxLength: 120
         cnpj:
           type: string
-          description: CNPJ com 14 dígitos (sem formatação)
           pattern: '^\d{14}$'
-        address:
+        endereco:
           type: string
-          maxLength: 255
         latitude:
           type: number
           format: double
         longitude:
           type: number
           format: double
+        raioAtuacao:
+          type: integer
+          default: 3000
+        gestorId:
+          type: string
+          format: uuid
+        urlLogomarca:
+          type: string
+        corPrimariaHex:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: '#16a34a'
+        corSecundariaHex:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          example: '#0284c7'
+        email:
+          type: string
+          format: email
+        telefone:
+          type: string
+        cep:
+          type: string
+        cidade:
+          type: string
+        estado:
+          type: string
+
+    SupermercadoResponse:
+      type: object
+      required: [id, nomeFantasia, cnpj, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nomeFantasia:
+          type: string
+        cnpj:
+          type: string
+        status:
+          $ref: '#/components/schemas/SupermercadoStatus'
+        endereco:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        raioAtuacao:
+          type: integer
+        gestorId:
+          type: string
+          format: uuid
+        urlLogomarca:
+          type: string
+        corPrimariaHex:
+          type: string
+        corSecundariaHex:
+          type: string
+        email:
+          type: string
+        telefone:
+          type: string
+        cep:
+          type: string
+        cidade:
+          type: string
+        estado:
+          type: string
+        criadoEm:
+          type: string
+          format: date-time
+        atualizadoEm:
+          type: string
+          format: date-time
 
     UpdateSupermarketStatusRequest:
       type: object
       required: [status]
       properties:
         status:
-          $ref: '#/components/schemas/SupermarketStatus'
+          $ref: '#/components/schemas/SupermercadoStatus'
         reason:
           type: string
-          maxLength: 255
-
-    UpdateWhitelabelRequest:
-      type: object
-      description: Configurações de identidade visual e localização da loja (RF-02.3, RF-02.4)
-      properties:
-        primaryColorHex:
-          type: string
-          description: Cor primária em hexadecimal (ex. #16a34a)
-          pattern: '^#[0-9A-Fa-f]{6}$'
-          example: '#16a34a'
-        secondaryColorHex:
-          type: string
-          description: Cor secundária em hexadecimal
-          pattern: '^#[0-9A-Fa-f]{6}$'
-          example: '#0284c7'
-        address:
-          type: string
-          maxLength: 255
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-
-    SupermarketResponse:
-      type: object
-      required: [id, tradeName, cnpj, status]
-      properties:
-        id:
-          type: string
-          format: uuid
-        tradeName:
-          type: string
-        cnpj:
-          type: string
-        status:
-          $ref: '#/components/schemas/SupermarketStatus'
-        address:
-          type: string
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        logoUrl:
-          type: string
-          format: uri
-          description: URL pública da logomarca no MinIO (bucket smartmarket-brands)
-        primaryColorHex:
-          type: string
-          example: '#16a34a'
-        secondaryColorHex:
-          type: string
-          example: '#0284c7'
-        createdAt:
-          type: string
-          format: date-time
-
-    PublicSupermarketResponse:
-      type: object
-      description: Visão pública do supermercado — usada na vitrine e na renderização do encarte (RF-05.3)
-      required: [id, tradeName, status]
-      properties:
-        id:
-          type: string
-          format: uuid
-        tradeName:
-          type: string
-        address:
-          type: string
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        logoUrl:
-          type: string
-          format: uri
-        primaryColorHex:
-          type: string
-        secondaryColorHex:
-          type: string
-
-    NearbyPublicSupermarketResponse:
-      description: Supermercado com distância calculada (RF-06.2)
-      allOf:
-        - $ref: '#/components/schemas/PublicSupermarketResponse'
-        - type: object
-          required: [distanceMeters]
-          properties:
-            distanceMeters:
-              type: integer
-              description: Distância em metros a partir das coordenadas fornecidas
-
-    LogoUploadResponse:
-      type: object
-      required: [logoUrl]
-      properties:
-        logoUrl:
-          type: string
-          format: uri
-          description: URL pública da logomarca no MinIO
 
     QrCodeResponse:
       type: object
@@ -525,12 +445,8 @@ components:
           format: uuid
         qrCodeUrl:
           type: string
-          format: uri
-          description: URL da imagem PNG do QR Code para download e impressão (RF-07.1)
         targetUrl:
           type: string
-          format: uri
-          description: URL de destino do QR Code com parâmetro UTM (RF-07.4). Ex. /loja/uuid?utm_source=totem
         utmSource:
           type: string
           example: totem
@@ -554,17 +470,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/SupermarketResponse'
-        page:
-          $ref: '#/components/schemas/PageMetadata'
-
-    PagedPublicSupermarketResponse:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/NearbyPublicSupermarketResponse'
+            $ref: '#/components/schemas/SupermercadoResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
 

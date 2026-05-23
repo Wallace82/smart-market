@@ -237,6 +237,13 @@ export class FlyerViewerComponent implements OnInit {
     this.loading.set(false);
   }
 
+  hexToRgba(hex: string, alpha: number): string {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result 
+      ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+      : `rgba(0, 0, 0, ${alpha})`;
+  }
+
   get viewerStyle() {
     const t = this.tema();
     const type = this.themeType();
@@ -262,6 +269,12 @@ export class FlyerViewerComponent implements OnInit {
     if (t?.urlBackgroundDecorativo) {
       const isDark = type === 'blackfriday';
       bgImage = `linear-gradient(${isDark ? 'rgba(5,5,5,0.93)' : 'rgba(255,255,255,0.90)'}, ${isDark ? 'rgba(5,5,5,0.93)' : 'rgba(255,255,255,0.90)'}), url(${t.urlBackgroundDecorativo})`;
+    } else if (!t && this.supermarket()) {
+      const market = this.supermarket()!;
+      const primary = market.corPrimariaHex || '#16a34a';
+      const secondary = market.corSecundariaHex || '#0284c7';
+      bgImage = `linear-gradient(135deg, ${this.hexToRgba(primary, 0.08)} 0%, ${this.hexToRgba(secondary, 0.04)} 50%, #ffffff 100%)`;
+      bgColor = '#ffffff';
     }
 
     return {

@@ -181,13 +181,18 @@
                 }
 
                 <!-- Header do Encarte Preview -->
-                <div class="p-8 pt-12 text-center relative z-10"
-                     [style.background-color]="supermarket()?.corPrimariaHex || '#16a34a'">
-                  <div class="w-20 h-20 bg-white rounded-2xl p-2 mx-auto mb-4 shadow-lg transform -rotate-3 border-2 border-white flex items-center justify-center">
+                <div class="p-8 pt-12 text-center relative z-10 transition-all duration-500"
+                     [ngStyle]="headerStyle">
+                  <div [class]="!currentTheme()
+                       ? 'w-24 h-24 bg-white rounded-[1.25rem] p-2.5 mx-auto mb-4 shadow-[0_0_25px_rgba(255,255,255,0.55)] border-2 border-white flex items-center justify-center transform -rotate-3 transition-all duration-300 hover:scale-105'
+                       : 'w-20 h-20 bg-white rounded-2xl p-2 mx-auto mb-4 shadow-lg transform -rotate-3 border-2 border-white flex items-center justify-center transition-all duration-300 hover:scale-105'">
                     @if (supermarket()?.urlLogomarca) {
                       <img [src]="supermarket()!.urlLogomarca" alt="Logo" class="w-full h-full object-contain">
                     } @else {
-                      <mat-icon class="text-primary w-full h-full flex items-center justify-center text-4xl">store</mat-icon>
+                      <span class="text-3xl font-black uppercase tracking-tight text-center"
+                            [style.color]="supermarket()?.corPrimariaHex || '#16a34a'">
+                        {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
+                      </span>
                     }
                   </div>
                   <h2 class="text-white text-xl font-black uppercase tracking-tight leading-none drop-shadow-md">

@@ -27,7 +27,7 @@ jobs:
           mvn clean package -DskipTests
 
       - name: Upload backend build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-jars
           path: backend/**/target/*.jar
@@ -58,9 +58,9 @@ jobs:
           npm run build
 
       - name: Upload frontend build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: frontend-dist
+          name: frontend-build
           path: frontend/smartmarket-web/dist
           retention-days: 5
 
@@ -90,7 +90,7 @@ jobs:
           npm run test -- --run || true
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
           path: frontend/smartmarket-web/coverage
@@ -122,7 +122,7 @@ jobs:
           mvn jacoco:report || true
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: backend/**/target/site/jacoco

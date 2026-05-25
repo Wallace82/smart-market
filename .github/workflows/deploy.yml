@@ -1,0 +1,78 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: [Build and Push to Docker Hub]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - auth-service
+          - supermarket-service
+          - product-service
+          - billing-service
+          - concierge-service
+          - client-service
+          - notification-service
+          - recommendation-service
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Pull image from Docker Hub - ${{ matrix.service }}
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/smartmarket-${{ matrix.service }}:latest
+
+      - name: Stop and remove old container - ${{ matrix.service }}
+        run: |
+          docker stop smartmarket-${{ matrix.service }} || true
+          docker rm smartmarket-${{ matrix.service }} || true
+
+      - name: Run new container - ${{ matrix.service }}
+        run: |
+          docker run -d \
+            --name smartmarket-${{ matrix.service }} \
+            --restart unless-stopped \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            -e DB_URL=${{ secrets.DB_URL }} \
+            -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            -e SPRING_REDIS_HOST=${{ secrets.REDIS_HOST }} \
+            -e MINIO_URL=${{ secrets.MINIO_URL }} \
+            ${{ secrets.DOCKER_USERNAME }}/smartmarket-${{ matrix.service }}:latest
+
+  deploy-frontend:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Pull Frontend image from Docker Hub
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/smartmarket-frontend:latest
+
+      - name: Stop and remove old frontend container
+        run: |
+          docker stop smartmarket-frontend || true
+          docker rm smartmarket-frontend || true
+
+      - name: Run new frontend container
+        run: |
+          docker run -d \
+            --name smartmarket-frontend \
+            --restart unless-stopped \
+            -p 80:80 \
+            -p 443:443 \
+            -e API_URL=${{ secrets.API_URL }} \
+            ${{ secrets.DOCKER_USERNAME }}/smartmarket-frontend:latest
+
+      - name: Health check
+        run: |
+          sleep 10
+          docker logs smartmarket-frontend || true

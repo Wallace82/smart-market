@@ -176,6 +176,15 @@ services:
       minio:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ../../frontend/smartmarket-web
+    container_name: smartmarket-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+
 volumes:
   smartmarket_postgres_data:
   smartmarket_minio_data:

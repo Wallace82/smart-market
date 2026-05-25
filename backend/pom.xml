@@ -15,11 +15,15 @@
         See backend/services/posmvp/ or REQUIREMENTS.md section 12 for backlog.
     -->
     <modules>
+        <module>api-gateway</module>
         <module>services/auth-service</module>
         <module>services/supermarket-service</module>
         <module>services/product-service</module>
         <module>services/billing-service</module>
         <module>services/concierge-service</module>
+        <module>services/client-service</module>
+        <module>services/notification-service</module>
+        <module>services/recommendation-service</module>
     </modules>
 
     <properties>

@@ -75,7 +75,7 @@ jobs:
 
       - name: 📚 Install Dependencies
         working-directory: ./frontend/smartmarket-web
-        run: npm ci
+        run: npm install
 
       - name: 🔨 Build Frontend
         working-directory: ./frontend/smartmarket-web

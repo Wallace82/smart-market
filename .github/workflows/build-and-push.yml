@@ -50,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend/smartmarket-web
-          npm ci
+          npm install
 
       - name: Build Angular Application
         run: |
@@ -82,7 +82,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend/smartmarket-web
-          npm ci
+          npm install
 
       - name: Run Frontend Tests
         run: |

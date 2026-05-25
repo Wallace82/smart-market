@@ -1,0 +1,291 @@
+name: Build and Deploy SmartMarket Services
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # ========== API GATEWAY BUILD & PUSH ==========
+  build-api-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build API Gateway JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl api-gateway
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push API Gateway Docker image
+        run: |
+          cd backend/api-gateway
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-api-gateway .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-api-gateway
+
+  # ========== AUTH SERVICE BUILD & PUSH ==========
+  build-auth-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Auth Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/auth-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Auth Service Docker image
+        run: |
+          cd backend/services/auth-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-auth-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-auth-service
+
+  # ========== SUPERMARKET SERVICE BUILD & PUSH ==========
+  build-supermarket-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Supermarket Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/supermarket-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Supermarket Service Docker image
+        run: |
+          cd backend/services/supermarket-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-supermarket-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-supermarket-service
+
+  # ========== PRODUCT SERVICE BUILD & PUSH ==========
+  build-product-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Product Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/product-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Product Service Docker image
+        run: |
+          cd backend/services/product-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-product-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-product-service
+
+  # ========== BILLING SERVICE BUILD & PUSH ==========
+  build-billing-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Billing Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/billing-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Billing Service Docker image
+        run: |
+          cd backend/services/billing-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-billing-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-billing-service
+
+  # ========== CONCIERGE SERVICE BUILD & PUSH ==========
+  build-concierge-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Concierge Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/concierge-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Concierge Service Docker image
+        run: |
+          cd backend/services/concierge-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-concierge-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-concierge-service
+
+  # ========== CLIENT SERVICE BUILD & PUSH ==========
+  build-client-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Client Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/client-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Client Service Docker image
+        run: |
+          cd backend/services/client-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-client-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-client-service
+
+  # ========== NOTIFICATION SERVICE BUILD & PUSH ==========
+  build-notification-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Notification Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/notification-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Notification Service Docker image
+        run: |
+          cd backend/services/notification-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-notification-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-notification-service
+
+  # ========== RECOMMENDATION SERVICE BUILD & PUSH ==========
+  build-recommendation-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Build Recommendation Service JAR
+        run: |
+          cd backend
+          mvn clean package -DskipTests -pl services/recommendation-service
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Recommendation Service Docker image
+        run: |
+          cd backend/services/recommendation-service
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-recommendation-service .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-recommendation-service
+
+  # ========== FRONTEND BUILD & PUSH ==========
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/smartmarket-web/package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          cd frontend/smartmarket-web
+          npm ci
+
+      - name: Build Angular Application
+        run: |
+          cd frontend/smartmarket-web
+          npm run build
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p '${{secrets.DOCKER_PASSWORD}}'
+
+      - name: Build and Push Frontend Docker image
+        run: |
+          cd frontend/smartmarket-web
+          docker build -t ${{secrets.DOCKER_USERNAME}}/smartmarket-frontend .
+          docker push ${{secrets.DOCKER_USERNAME}}/smartmarket-frontend

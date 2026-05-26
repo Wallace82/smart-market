@@ -58,7 +58,11 @@ public class ProdutoBaseController {
     @GetMapping
     public ResponseEntity<List<ProdutoBase>> listarTodos(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size) {
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "search", required = false) String search) {
+        if (search != null && !search.trim().isEmpty()) {
+            return ResponseEntity.ok(listarProdutoBaseUseCase.buscarPorNome(search));
+        }
         List<ProdutoBase> produtos = listarProdutoBaseUseCase.execute(page, size);
         return ResponseEntity.ok(produtos);
     }

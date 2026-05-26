@@ -18,6 +18,9 @@ public class ProdutoBaseEntity {
     private String descricao;
     private String marca;
 
+    @Column(name = "ean")
+    private String ean;
+
     @Column(name = "marca_id")
     private UUID marcaId;
 
@@ -33,6 +36,9 @@ public class ProdutoBaseEntity {
 
     @Column(name = "categoria_id")
     private UUID categoriaId;
+
+    @Column(name = "categoria")
+    private String categoria;
 
     @Column(nullable = false)
     private boolean ativo = true;
@@ -64,6 +70,8 @@ public class ProdutoBaseEntity {
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }
+    public String getEan() { return ean; }
+    public void setEan(String ean) { this.ean = ean; }
     public UnidadeMedida getUnidadeMedida() { return unidadeMedida; }
     public void setUnidadeMedida(UnidadeMedida unidadeMedida) { this.unidadeMedida = unidadeMedida; }
     public Double getPesoVolume() { return pesoVolume; }
@@ -72,6 +80,8 @@ public class ProdutoBaseEntity {
     public void setUrlImagem(String urlImagem) { this.urlImagem = urlImagem; }
     public UUID getCategoriaId() { return categoriaId; }
     public void setCategoriaId(UUID categoriaId) { this.categoriaId = categoriaId; }
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }

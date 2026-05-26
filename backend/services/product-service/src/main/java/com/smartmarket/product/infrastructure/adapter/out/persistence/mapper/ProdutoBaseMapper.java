@@ -16,6 +16,8 @@ public class ProdutoBaseMapper {
         domain.setNome(entity.getNome());
         domain.setDescricao(entity.getDescricao());
         domain.setMarca(entity.getMarca());
+        domain.setEan(entity.getEan());
+        domain.setCategoria(entity.getCategoria());
         domain.setMarcaId(entity.getMarcaId());
         domain.setUnidadeMedida(entity.getUnidadeMedida());
         domain.setPesoVolume(entity.getPesoVolume());
@@ -36,6 +38,8 @@ public class ProdutoBaseMapper {
         entity.setNome(domain.getNome());
         entity.setDescricao(domain.getDescricao());
         entity.setMarca(domain.getMarca());
+        entity.setEan(domain.getEan());
+        entity.setCategoria(domain.getCategoria());
         entity.setMarcaId(domain.getMarcaId());
         entity.setUnidadeMedida(domain.getUnidadeMedida());
         entity.setPesoVolume(domain.getPesoVolume());

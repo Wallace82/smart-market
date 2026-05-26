@@ -89,10 +89,19 @@
              class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all font-semibold text-slate-800 placeholder-slate-400 shadow-sm" />
     </div>
 
-    <!-- Filter Button -->
-    <button class="bg-white border border-slate-100 hover:bg-slate-50 text-slate-700 font-bold rounded-2xl px-5 py-3.5 text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm h-[50px] w-full sm:w-auto">
-      <mat-icon class="!text-[20px] !w-5 !h-5 text-slate-500">filter_list</mat-icon> Filtrar Categoria
-    </button>
+    <!-- Filter Button / Select -->
+    <div class="relative w-full sm:w-auto">
+      <select 
+        [ngModel]="selectedCategory()" 
+        (ngModelChange)="selectedCategory.set($event)"
+        class="appearance-none bg-white border border-slate-100 hover:bg-slate-50 text-slate-700 font-bold rounded-2xl pl-5 pr-10 py-3.5 text-sm cursor-pointer transition-colors shadow-sm h-[50px] w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <option value="">Todas as Categorias</option>
+        @for (cat of categorias(); track cat) {
+          <option [value]="cat">{{ cat }}</option>
+        }
+      </select>
+      <mat-icon class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</mat-icon>
+    </div>
   </div>
 
   <!-- Table Container -->
@@ -102,7 +111,7 @@
       <span class="text-slate-500 font-bold text-sm tracking-wide animate-pulse">Carregando catálogo global...</span>
     </div>
   } @else {
-    @if (products().length === 0) {
+    @if (filteredProducts().length === 0) {
       <div class="bg-slate-50 rounded-3xl p-16 text-center border-2 border-dashed border-slate-200">
         <mat-icon class="!text-5xl !w-12 !h-12 text-slate-350 mb-3">inventory</mat-icon>
         <h3 class="text-lg font-black text-slate-850">Nenhum produto cadastrado</h3>
@@ -124,7 +133,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              @for (product of products(); track product.id) {
+              @for (product of filteredProducts(); track product.id) {
                 <tr class="hover:bg-slate-50/40 transition-colors group">
                   
                   <!-- Produto Cell -->
@@ -217,7 +226,7 @@
         <!-- Pagination controls -->
         <div class="bg-slate-50/70 px-8 py-4 border-t border-slate-100 flex items-center justify-between">
           <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">
-            Mostrando <span class="text-slate-900 font-black">1</span> a <span class="text-slate-900 font-black">{{ products().length }}</span> de <span class="text-slate-900 font-black">{{ totalElements() }}</span> registros
+            Mostrando <span class="text-slate-900 font-black">1</span> a <span class="text-slate-900 font-black">{{ filteredProducts().length }}</span> de <span class="text-slate-900 font-black">{{ totalElements() }}</span> registros
           </p>
           <div class="flex items-center gap-1.5">
             <button (click)="changePage(page() - 1)" [disabled]="page() === 0" class="w-9 h-9 rounded-xl border border-slate-150 bg-white text-slate-500 flex items-center justify-center hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">

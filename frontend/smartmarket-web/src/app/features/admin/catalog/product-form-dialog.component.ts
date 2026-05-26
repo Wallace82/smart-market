@@ -676,12 +676,49 @@ import { MarcaService } from '@core/services/marca.service';
     }
 
     /* ---- Responsive ---- */
-    @media (max-width: 480px) {
+
+    /* Telas médias: reduz a coluna esquerda */
+    @media (max-width: 780px) {
+      .pfd-layout-two-col {
+        grid-template-columns: 180px 1fr;
+        gap: 20px;
+      }
+      .pfd-col-left .pfd-image-preview { width: 130px; height: 130px; }
+      .pfd-col-left .pfd-image-preview.has-image { width: 150px; height: 150px; }
+    }
+
+    /* Telas pequenas: colapsa para 1 coluna */
+    @media (max-width: 600px) {
       .pfd-header { padding: 16px 16px 14px; }
-      .pfd-body { padding: 16px; max-height: calc(100vh - 160px); }
+      .pfd-body { padding: 14px 16px; max-height: calc(100vh - 150px); }
       .pfd-footer { padding: 12px 16px 16px; }
-      .pfd-row { flex-direction: column; }
-      .pfd-field-half, .pfd-field-quarter { flex: 1 1 100%; min-width: unset; }
+
+      .pfd-layout-two-col {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .pfd-col-left {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+        padding-top: 0;
+      }
+
+      .pfd-col-left .pfd-status-card {
+        flex: 1;
+        flex-direction: row;
+        text-align: left;
+      }
+
+      .pfd-col-left .pfd-status-info { align-items: flex-start; }
+      .pfd-col-left .pfd-toggle-wrap { justify-content: flex-end; }
+
+      .pfd-row { flex-wrap: wrap; }
+      .pfd-field-half { flex: 1 1 calc(50% - 6px); }
+      .pfd-field-fixed-100 { flex: 0 0 90px; width: 90px; }
+
       .pfd-btn-save, .pfd-btn-cancel { flex: 1; justify-content: center; }
     }
   `],
@@ -705,46 +742,48 @@ export class ProductFormDialogComponent implements OnInit {
   public isLoading = signal<boolean>(true);
   public selectedFile: File | null = null;
 
+  // Fallback para exibição visual quando API não responde.
+  // IDs são null para que ao salvar não envie UUIDs inválidos.
   private readonly FALLBACK_MARCAS: MarcaResponse[] = [
-    { id: 'b01', nome: 'Coca-Cola', ativo: true },
-    { id: 'b02', nome: 'Nestlé', ativo: true },
-    { id: 'b03', nome: 'Ambev', ativo: true },
-    { id: 'b04', nome: 'Unilever', ativo: true },
-    { id: 'b05', nome: 'P&G', ativo: true },
-    { id: 'b06', nome: 'Tio João', ativo: true },
-    { id: 'b07', nome: 'Bauducco', ativo: true },
-    { id: 'b08', nome: 'Sadia', ativo: true },
-    { id: 'b09', nome: 'Perdigão', ativo: true },
-    { id: 'b10', nome: 'Seara', ativo: true },
-    { id: 'b11', nome: 'Danone', ativo: true },
-    { id: 'b12', nome: 'Lacta', ativo: true },
-    { id: 'b13', nome: 'Garoto', ativo: true },
-    { id: 'b14', nome: 'Piracanjuba', ativo: true },
-    { id: 'b15', nome: 'Qualy', ativo: true },
-    { id: 'b16', nome: 'Omo', ativo: true },
-    { id: 'b17', nome: 'Colgate', ativo: true },
-    { id: 'b18', nome: 'Ypê', ativo: true },
-    { id: 'b19', nome: '3 Corações', ativo: true },
-    { id: 'b20', nome: 'Pilão', ativo: true },
-    { id: 'b21', nome: 'Renata', ativo: true },
-    { id: 'b22', nome: 'Camil', ativo: true },
-    { id: 'b23', nome: 'Rexona', ativo: true },
-    { id: 'b24', nome: 'Dove', ativo: true },
+    { id: '', nome: 'Coca-Cola', ativo: true },
+    { id: '', nome: 'Nestlé', ativo: true },
+    { id: '', nome: 'Ambev', ativo: true },
+    { id: '', nome: 'Unilever', ativo: true },
+    { id: '', nome: 'P&G', ativo: true },
+    { id: '', nome: 'Tio João', ativo: true },
+    { id: '', nome: 'Bauducco', ativo: true },
+    { id: '', nome: 'Sadia', ativo: true },
+    { id: '', nome: 'Perdigão', ativo: true },
+    { id: '', nome: 'Seara', ativo: true },
+    { id: '', nome: 'Danone', ativo: true },
+    { id: '', nome: 'Lacta', ativo: true },
+    { id: '', nome: 'Garoto', ativo: true },
+    { id: '', nome: 'Piracanjuba', ativo: true },
+    { id: '', nome: 'Qualy', ativo: true },
+    { id: '', nome: 'Omo', ativo: true },
+    { id: '', nome: 'Colgate', ativo: true },
+    { id: '', nome: 'Ypê', ativo: true },
+    { id: '', nome: '3 Corações', ativo: true },
+    { id: '', nome: 'Pilão', ativo: true },
+    { id: '', nome: 'Renata', ativo: true },
+    { id: '', nome: 'Camil', ativo: true },
+    { id: '', nome: 'Rexona', ativo: true },
+    { id: '', nome: 'Dove', ativo: true },
   ];
 
   private readonly FALLBACK_CATEGORIAS: CategoriaResponse[] = [
-    { id: 'c01', nome: 'Geral', ativo: true },
-    { id: 'c02', nome: 'Alimentos', ativo: true },
-    { id: 'c03', nome: 'Bebidas', ativo: true },
-    { id: 'c04', nome: 'Limpeza', ativo: true },
-    { id: 'c05', nome: 'Higiene e Beleza', ativo: true },
-    { id: 'c06', nome: 'Laticínios', ativo: true },
-    { id: 'c07', nome: 'Padaria', ativo: true },
-    { id: 'c08', nome: 'Frios e Embutidos', ativo: true },
-    { id: 'c09', nome: 'Hortifruti', ativo: true },
-    { id: 'c10', nome: 'Carnes', ativo: true },
-    { id: 'c11', nome: 'Congelados', ativo: true },
-    { id: 'c12', nome: 'Pet Shop', ativo: true },
+    { id: '', nome: 'Geral', ativo: true },
+    { id: '', nome: 'Alimentos', ativo: true },
+    { id: '', nome: 'Bebidas', ativo: true },
+    { id: '', nome: 'Limpeza', ativo: true },
+    { id: '', nome: 'Higiene e Beleza', ativo: true },
+    { id: '', nome: 'Laticínios', ativo: true },
+    { id: '', nome: 'Padaria', ativo: true },
+    { id: '', nome: 'Frios e Embutidos', ativo: true },
+    { id: '', nome: 'Hortifruti', ativo: true },
+    { id: '', nome: 'Carnes', ativo: true },
+    { id: '', nome: 'Congelados', ativo: true },
+    { id: '', nome: 'Pet Shop', ativo: true },
   ];
 
   constructor() {
@@ -831,8 +870,28 @@ export class ProductFormDialogComponent implements OnInit {
 
   onSave(): void {
     if (this.productForm.valid) {
+      const raw = this.productForm.value;
+
+      // Sanitiza o payload antes de enviar ao backend:
+      // - Strings vazias viram null (UUID inválido causaria 400)
+      // - pesoVolume garante ser número ou null
+      const uuidOrNull = (val: string | null | undefined): string | null =>
+        val && val.trim().length > 10 ? val.trim() : null;
+
+      const payload = {
+        id:            raw.id || null,
+        nome:          raw.nome?.trim() || null,
+        descricao:     raw.descricao?.trim() || null,
+        marcaId:       uuidOrNull(raw.marcaId),
+        ean:           raw.ean?.trim() || null,
+        unidadeMedida: raw.unidadeMedida || 'UN',
+        pesoVolume:    raw.pesoVolume != null ? Number(raw.pesoVolume) : null,
+        categoriaId:   uuidOrNull(raw.categoriaId),
+        ativo:         raw.ativo !== false,
+      };
+
       this.dialogRef.close({
-        produto: this.productForm.value,
+        produto: payload,
         imagem: this.selectedFile
       });
     } else {

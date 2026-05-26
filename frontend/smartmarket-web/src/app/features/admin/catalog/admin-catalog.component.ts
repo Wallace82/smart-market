@@ -28,13 +28,22 @@ export class AdminCatalogComponent implements OnInit {
   public products = signal<ProductBaseResponse[]>([]);
   public loading = signal(true);
   public searchTerm = signal('');
+  public selectedCategory = signal('');
   public page = signal(0);
   public totalElements = signal(0);
+  
+  public categorias = signal<string[]>(['Alimentos', 'Bebidas', 'Limpeza', 'Higiene', 'Carnes', 'Hortifruti']);
   
   // Stats Computadas para Painel de Indicadores
   public totalActive = computed(() => this.products().filter(p => p.ativo).length);
   public totalInactive = computed(() => this.products().filter(p => !p.ativo).length);
   public totalStoreUse = computed(() => this.products().reduce((acc, p) => acc + (p.usoGlobalCount || 0), 0));
+  
+  public filteredProducts = computed(() => {
+    const cat = this.selectedCategory();
+    if (!cat) return this.products();
+    return this.products().filter(p => p.categoria === cat);
+  });
 
   ngOnInit() {
     this.loadProducts();

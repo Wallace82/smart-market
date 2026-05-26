@@ -9,6 +9,8 @@ public class ProdutoBase {
     private String nome;
     private String descricao;
     private String marca;
+    private String ean;
+    private String categoria;
     private UnidadeMedida unidadeMedida;
     private Double pesoVolume;
     private String urlImagem;
@@ -40,6 +42,10 @@ public class ProdutoBase {
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }
+    public String getEan() { return ean; }
+    public void setEan(String ean) { this.ean = ean; }
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
     public UnidadeMedida getUnidadeMedida() { return unidadeMedida; }
     public void setUnidadeMedida(UnidadeMedida unidadeMedida) { this.unidadeMedida = unidadeMedida; }
     public Double getPesoVolume() { return pesoVolume; }

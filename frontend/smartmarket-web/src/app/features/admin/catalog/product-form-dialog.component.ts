@@ -222,8 +222,8 @@ import { MarcaService } from '@core/services/marca.service';
       border-radius: 20px;
       overflow: hidden;
       width: 100%;
-      max-width: 560px;
-      min-width: 320px;
+      max-width: 1120px;
+      min-width: 360px;
     }
 
     /* ---- Header ---- */
@@ -407,6 +407,63 @@ import { MarcaService } from '@core/services/marca.service';
 
     .pfd-file-hidden { display: none; }
 
+    /* ---- 2-column layout ---- */
+    .pfd-layout-two-col {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 28px;
+      align-items: start;
+      width: 100%;
+    }
+
+    .pfd-col-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding-top: 8px;
+    }
+
+    .pfd-col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    /* ---- Image section in left col ---- */
+    .pfd-col-left .pfd-image-section {
+      width: 100%;
+      align-items: center;
+    }
+
+    .pfd-col-left .pfd-image-preview {
+      width: 160px;
+      height: 160px;
+    }
+
+    .pfd-col-left .pfd-image-preview.has-image {
+      width: 180px;
+      height: 180px;
+    }
+
+    /* Status card fill left col width */
+    .pfd-col-left .pfd-status-card {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .pfd-col-left .pfd-status-info {
+      align-items: center;
+    }
+
+    .pfd-col-left .pfd-toggle-wrap {
+      justify-content: center;
+    }
+
     /* ---- Form field rows ---- */
     .pfd-field-full {
       width: 100%;
@@ -416,12 +473,22 @@ import { MarcaService } from '@core/services/marca.service';
       display: flex;
       gap: 12px;
       width: 100%;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .pfd-field-half {
-      flex: 1 1 calc(50% - 6px);
-      min-width: 140px;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .pfd-field-grow {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .pfd-field-fixed-100 {
+      flex: 0 0 105px;
+      width: 105px;
     }
 
     .pfd-field-quarter {
@@ -432,14 +499,18 @@ import { MarcaService } from '@core/services/marca.service';
     /* Make mat-form-field fill parent */
     ::ng-deep .pfd-field-full .mat-mdc-form-field,
     ::ng-deep .pfd-field-half .mat-mdc-form-field,
-    ::ng-deep .pfd-field-quarter .mat-mdc-form-field {
+    ::ng-deep .pfd-field-quarter .mat-mdc-form-field,
+    ::ng-deep .pfd-field-grow .mat-mdc-form-field,
+    ::ng-deep .pfd-field-fixed-100 .mat-mdc-form-field {
       width: 100%;
     }
 
     /* Override mat-form-field to use full width */
     .pfd-field-full,
     .pfd-field-half,
-    .pfd-field-quarter {
+    .pfd-field-quarter,
+    .pfd-field-grow,
+    .pfd-field-fixed-100 {
       display: block;
     }
 

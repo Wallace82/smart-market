@@ -3,6 +3,7 @@ package com.smartmarket.product.application.usecase;
 import com.smartmarket.product.domain.model.ProdutoBase;
 import com.smartmarket.product.application.port.out.ProdutoBaseDomainRepository;
 import com.smartmarket.product.infrastructure.adapter.out.storage.ImageStorageService;
+import com.smartmarket.product.infrastructure.adapter.out.persistence.MarcaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,10 +15,14 @@ public class AtualizarProdutoBaseUseCase {
 
     private final ProdutoBaseDomainRepository produtoRepository;
     private final ImageStorageService imageStorageService;
+    private final MarcaRepository marcaRepository;
 
-    public AtualizarProdutoBaseUseCase(ProdutoBaseDomainRepository produtoRepository, ImageStorageService imageStorageService) {
+    public AtualizarProdutoBaseUseCase(ProdutoBaseDomainRepository produtoRepository, 
+                                       ImageStorageService imageStorageService,
+                                       MarcaRepository marcaRepository) {
         this.produtoRepository = produtoRepository;
         this.imageStorageService = imageStorageService;
+        this.marcaRepository = marcaRepository;
     }
 
     public ProdutoBase execute(UUID id, ProdutoBase dadosNovos, MultipartFile imagem) {
@@ -25,13 +30,22 @@ public class AtualizarProdutoBaseUseCase {
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com ID: " + id));
 
         existente.setNome(dadosNovos.getNome());
-        existente.setMarca(dadosNovos.getMarca());
         existente.setDescricao(dadosNovos.getDescricao());
         existente.setUnidadeMedida(dadosNovos.getUnidadeMedida());
         existente.setPesoVolume(dadosNovos.getPesoVolume());
         existente.setCategoriaId(dadosNovos.getCategoriaId());
         existente.setAtivo(dadosNovos.isAtivo());
         existente.setAtualizadoEm(LocalDateTime.now());
+
+        // Update brand id and resolve name
+        existente.setMarcaId(dadosNovos.getMarcaId());
+        if (dadosNovos.getMarcaId() != null) {
+            marcaRepository.findById(dadosNovos.getMarcaId()).ifPresent(marca -> {
+                existente.setMarca(marca.getNome());
+            });
+        } else {
+            existente.setMarca(dadosNovos.getMarca());
+        }
 
         if (imagem != null && !imagem.isEmpty()) {
             String extension = extrairExtensao(imagem.getOriginalFilename());

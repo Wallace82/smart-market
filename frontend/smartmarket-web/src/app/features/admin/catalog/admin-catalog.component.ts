@@ -30,6 +30,11 @@ export class AdminCatalogComponent implements OnInit {
   public searchTerm = signal('');
   public page = signal(0);
   public totalElements = signal(0);
+  
+  // Stats Computadas para Painel de Indicadores
+  public totalActive = computed(() => this.products().filter(p => p.ativo).length);
+  public totalInactive = computed(() => this.products().filter(p => !p.ativo).length);
+  public totalStoreUse = computed(() => this.products().reduce((acc, p) => acc + (p.usoGlobalCount || 0), 0));
 
   ngOnInit() {
     this.loadProducts();
@@ -63,7 +68,10 @@ export class AdminCatalogComponent implements OnInit {
 
   public openProductDialog(product?: ProductBaseResponse) {
     const dialogRef = this.dialog.open(ProductFormDialogComponent, {
-      width: '600px',
+      width: '1120px',
+      maxWidth: '96vw',
+      minWidth: '360px',
+      panelClass: 'product-dialog-panel',
       data: product
     });
 

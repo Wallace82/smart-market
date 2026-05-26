@@ -30,7 +30,7 @@ spring:
         - id: product-service
           uri: ${PRODUCT_SERVICE_URL:http://localhost:8083}
           predicates:
-            - Path=/api/v1/produtos-base/**, /api/v1/ofertas/**, /api/v1/categorias/**, /api/v1/encartes/**, /api/v1/temas-encarte/**
+            - Path=/api/v1/produtos-base/**, /api/v1/ofertas/**, /api/v1/categorias/**, /api/v1/encartes/**, /api/v1/temas-encarte/**, /api/v1/marcas/**
 
         # Rota para o billing-service
         - id: billing-service
@@ -43,6 +43,12 @@ spring:
           uri: ${CONCIERGE_SERVICE_URL:http://localhost:8085}
           predicates:
             - Path=/api/v1/concierge/**
+
+        # Rota para o client-service (preferências e locais do cliente)
+        - id: client-service
+          uri: ${CLIENT_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/v1/clientes/**
 
       globalcors:
         cors-configurations:

@@ -46,6 +46,7 @@ public class AtualizarOfertaUseCase {
         existente.setDataFimPromocao(dadosAtualizados.getDataFimPromocao());
         
         existente.setAtivo(dadosAtualizados.isAtivo());
+        existente.setSuperOferta(dadosAtualizados.isSuperOferta());
         existente.setAtualizadoEm(LocalDateTime.now());
  
         return ofertaRepository.save(existente);

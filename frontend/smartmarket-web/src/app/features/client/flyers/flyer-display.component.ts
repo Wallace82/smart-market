@@ -25,6 +25,23 @@ export class FlyerDisplayComponent implements OnInit {
   tema = signal<TemaEncarteResponse | null>(null);
   detalhesOfertas = signal<OfertaSupermercado[]>([]);
   
+  themeType = computed(() => {
+    const name = this.tema()?.nome?.toLowerCase() || '';
+    if (name) {
+      if (name.includes('mãe') || name.includes('mae')) return 'mothersday';
+      if (name.includes('páscoa') || name.includes('pascoa')) return 'easter';
+      if (name.includes('natal') || name.includes('fim de ano')) return 'christmas';
+      if (name.includes('black') || name.includes('sexta')) return 'blackfriday';
+      return 'default';
+    }
+    const title = this.encarte()?.titulo?.toLowerCase() || '';
+    if (title.includes('mãe') || title.includes('mae')) return 'mothersday';
+    if (title.includes('páscoa') || title.includes('pascoa')) return 'easter';
+    if (title.includes('natal') || title.includes('fim de ano')) return 'christmas';
+    if (title.includes('black') || title.includes('sexta')) return 'blackfriday';
+    return 'default';
+  });
+  
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -68,7 +85,25 @@ export class FlyerDisplayComponent implements OnInit {
               );
               
               forkJoin(ofertasRequests).subscribe((detalhes: any[]) => {
-                this.detalhesOfertas.set(detalhes.filter((d: any) => d !== null) as OfertaSupermercado[]);
+                const list = detalhes.filter((d: any) => d !== null) as OfertaSupermercado[];
+                
+                // Algoritmo de Mistura para Destaques (Estilo Encarte Real)
+                const supers = list.filter(o => o.superOferta);
+                const normals = list.filter(o => !o.superOferta);
+                const misturadas: OfertaSupermercado[] = [];
+                let superIdx = 0;
+                let normalIdx = 0;
+                
+                while (superIdx < supers.length || normalIdx < normals.length) {
+                  if (superIdx < supers.length) {
+                    misturadas.push(supers[superIdx++]);
+                  }
+                  for (let i = 0; i < 3 && normalIdx < normals.length; i++) {
+                    misturadas.push(normals[normalIdx++]);
+                  }
+                }
+                
+                this.detalhesOfertas.set(misturadas);
                 this.loading.set(false);
               });
             } else {

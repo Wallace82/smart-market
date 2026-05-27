@@ -103,52 +103,108 @@
     }
 
     <!-- Grid de Ofertas -->
-    <main class="max-w-6xl mx-auto px-6 pb-20 mt-4">
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <main class="max-w-6xl mx-auto px-6 pb-2">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 grid-flow-row-dense">
 
         @for (oferta of detalhesOfertas(); track oferta.id) {
-          <div class="group relative bg-white rounded-[2rem] p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden border-2 border-transparent"
-               [style.hover.border-color]="brandPrimary">
-
-            <!-- Imagem do Produto -->
-            <div class="h-48 w-full flex items-center justify-center bg-gray-50 rounded-2xl mb-4 overflow-hidden relative">
-              @if (oferta.urlImagem) {
-                <img [src]="oferta.urlImagem" [alt]="oferta.nomeProduto"
-                     class="max-h-40 object-contain group-hover:scale-110 transition-transform duration-500">
-              } @else {
-                <mat-icon class="text-gray-300 text-6xl h-auto w-auto">image</mat-icon>
-              }
-            </div>
-
-            <!-- Informação do Produto -->
-            <h3 class="text-sm font-bold text-gray-800 leading-tight mb-2 h-10 flex items-center uppercase overflow-hidden">
-              {{ oferta.nomeProduto }}
-            </h3>
-
-            <div class="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-tighter">
-              {{ oferta.unidadeMedida }}
-            </div>
-
-            <!-- Selo de Preço (Estilo Tabloide) -->
-            <div class="relative mt-auto w-full pt-6">
-              <div class="absolute top-0 left-1/2 -translate-x-1/2 text-[10px] font-black text-gray-400 uppercase italic">
-                Por apenas
+          @if (oferta.superOferta) {
+            <!-- SUPER OFERTA (Estilo Vivendas: Mesma dimensão, cor de destaque amarela) -->
+            <div class="group relative rounded-[2rem] p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden w-full bg-gradient-to-b from-[#fbcf15] to-[#f59e0b] border-4 border-[#eab308] shadow-amber-500/20 scale-[1.01]">
+              
+              <!-- Super Oferta Top Badge -->
+              <div class="absolute top-4 left-4 z-20 shrink-0">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-950 text-[#fbcf15] border border-zinc-800 shadow-md animate-pulse">
+                  🌟 Destaque
+                </span>
               </div>
-              <div class="flex items-start justify-center text-red-600 font-black">
-                <span class="text-sm mt-1 mr-0.5">R$</span>
-                <span class="text-4xl tracking-tighter">{{ oferta.preco | number:'1.2-2' | slice:0:-3 }}</span>
-                <span class="text-xl mt-1">,{{ oferta.preco | number:'1.2-2' | slice:-2 }}</span>
-              </div>
-            </div>
 
-            <!-- Botão de Ação (Lista de Compras) -->
-            <button class="mt-6 w-full py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-colors duration-300 shadow-lg"
-                    [style.background-color]="brandPrimary"
-                    [style.color]="brandSecondary">
-              <mat-icon class="text-sm mr-1 h-auto w-auto">add_shopping_cart</mat-icon>
-              Adicionar
-            </button>
-          </div>
+              <!-- 1. TÍTULO DO PRODUTO NO TOPO (Estilo Vivendas) -->
+              <div class="w-full text-center pt-2 px-1 mb-2">
+                <span class="text-[8px] font-black uppercase tracking-widest text-[#1b431e]/60 block mb-0.5">Oferta Especial</span>
+                <h3 class="text-sm font-black uppercase tracking-tight leading-tight text-[#1b431e] m-0 line-clamp-2 h-10 flex items-center justify-center">
+                  {{ oferta.nomeProduto }}
+                </h3>
+              </div>
+
+              <!-- 2. IMAGEM DO PRODUTO NO MEIO (Tamanho igual ao normal) -->
+              <div class="h-48 w-full flex items-center justify-center bg-transparent rounded-2xl mb-4 overflow-hidden relative">
+                @if (oferta.urlImagem) {
+                  <img [src]="oferta.urlImagem" [alt]="oferta.nomeProduto"
+                       class="max-h-40 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500">
+                } @else {
+                  <mat-icon class="text-[#1b431e]/20 text-6xl h-auto w-auto flex items-center justify-center">image</mat-icon>
+                }
+              </div>
+
+              <!-- 3. SELO DE PREÇO NO RODAPÉ (Estilo Vivendas: Bloco verde horizontal premium com logo à esquerda) -->
+              <div class="w-full bg-[#1b431e] rounded-2xl py-2 px-3 flex items-center justify-between shadow-lg border border-white/10 mt-auto">
+                <!-- Círculo com inicial do mercado -->
+                <div class="w-9 h-9 rounded-full bg-[#fbcf15] text-[#1b431e] font-black flex items-center justify-center shrink-0 shadow-md text-xs uppercase">
+                  {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
+                </div>
+                <!-- Preço em destaque em amarelo -->
+                <div class="flex-grow flex items-center justify-end gap-1 text-white pr-1">
+                  <span class="text-[9px] font-black text-[#fbcf15] leading-none uppercase">R$</span>
+                  <div class="flex items-baseline font-black leading-none">
+                    <span class="text-2xl md:text-3xl tracking-tighter text-[#fbcf15]">{{ oferta.preco | number:'1.2-2' | slice:0:-3 }}</span>
+                    <span class="text-sm text-white">,{{ oferta.preco | number:'1.2-2' | slice:-2 }}</span>
+                  </div>
+                  <span class="text-[10px] font-bold uppercase text-white/80 ml-0.5">/{{ oferta.unidadeMedida }}</span>
+                </div>
+              </div>
+
+              <!-- 4. BOTÃO DE AÇÃO -->
+              <button class="mt-4 w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 shadow-md border-0 cursor-pointer flex items-center justify-center gap-1.5 bg-slate-950 text-[#fbcf15] hover:bg-slate-900">
+                <mat-icon class="text-xs mr-0.5 h-auto w-auto flex items-center justify-center">add_shopping_cart</mat-icon>
+                Adicionar
+              </button>
+
+            </div>
+          } @else {
+            <!-- OFERTA NORMAL -->
+            <div class="group relative rounded-[2rem] p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden border-2 border-transparent w-full bg-white text-gray-800"
+                 [style.hover.border-color]="brandPrimary">
+
+              <!-- Imagem do Produto -->
+              <div class="h-48 w-full flex items-center justify-center bg-gray-50 rounded-2xl mb-4 overflow-hidden relative">
+                @if (oferta.urlImagem) {
+                  <img [src]="oferta.urlImagem" [alt]="oferta.nomeProduto"
+                       class="max-h-40 object-contain group-hover:scale-110 transition-transform duration-500">
+                } @else {
+                  <mat-icon class="text-gray-300 text-6xl h-auto w-auto flex items-center justify-center">image</mat-icon>
+                }
+              </div>
+
+              <!-- Informação do Produto -->
+              <div class="w-full">
+                <h3 class="text-sm font-bold leading-tight mb-2 h-10 flex items-center justify-center uppercase overflow-hidden text-gray-800">
+                  {{ oferta.nomeProduto }}
+                </h3>
+              </div>
+
+              <!-- Selo de Preço Normal -->
+              <div class="relative mt-auto w-full pt-6">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 text-[10px] font-black text-gray-400 uppercase italic">
+                  Por apenas
+                </div>
+                <div class="flex items-start justify-center text-red-600 font-black">
+                  <span class="text-sm mt-1 mr-0.5">R$</span>
+                  <span class="text-4xl tracking-tighter">{{ oferta.preco | number:'1.2-2' | slice:0:-3 }}</span>
+                  <span class="text-xl mt-1">,{{ oferta.preco | number:'1.2-2' | slice:-2 }}</span>
+                </div>
+              </div>
+
+              <!-- Botão de Ação (Lista de Compras) -->
+              <button class="mt-6 w-full py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-colors duration-300 shadow-lg border-0 cursor-pointer flex items-center justify-center gap-1.5"
+                      [ngStyle]="{
+                        'background-color': brandPrimary,
+                        'color': brandSecondary
+                      }">
+                <mat-icon class="text-sm mr-1 h-auto w-auto flex items-center justify-center">add_shopping_cart</mat-icon>
+                Adicionar
+              </button>
+            </div>
+          }
         }
 
       </div>

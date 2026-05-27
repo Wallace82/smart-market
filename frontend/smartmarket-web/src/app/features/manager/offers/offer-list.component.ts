@@ -24,6 +24,7 @@ export interface Offer {
   status: 'Ativa' | 'Programada' | 'Expirada';
   validUntil: string;
   imageUrl: string;
+  superOferta?: boolean;
 }
  
 @Component({
@@ -109,7 +110,8 @@ export class OfferListComponent implements OnInit {
                   discountPrice: discount.toFixed(2).replace('.', ','),
                   status: status,
                   validUntil: o.dataFimPromocao ? new Date(o.dataFimPromocao).toLocaleDateString('pt-BR') : 'Sem Validade',
-                  imageUrl: o.urlImagem || 'assets/images/cache/arroz.jpg'
+                  imageUrl: o.urlImagem || 'assets/images/cache/arroz.jpg',
+                  superOferta: o.superOferta
                 };
               });
  

@@ -462,140 +462,200 @@
       </div>
 
       <!-- Tabloid Grid -->
-      <div *ngIf="ofertas().length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div *ngIf="ofertas().length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 grid-flow-row-dense">
         
         <!-- Card de Oferta -->
-        <div *ngFor="let oferta of ofertas()" 
-             class="bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 border-b-4 relative flex flex-col group overflow-hidden"
-             [ngClass]="{
-               'mothers-card border-b-rose-500': themeType() === 'mothersday',
-               'border-b-amber-700 border-amber-900/5': themeType() === 'easter',
-               'border-b-emerald-600': themeType() === 'christmas',
-               'bf-card border-b-amber-500': themeType() === 'blackfriday',
-               'border-b-[var(--color-primary)] border-gray-100': themeType() === 'default'
-             }"
-             [style.border-bottom-color]="themeType() === 'default' ? brandPrimary() : null">
+        <ng-container *ngFor="let oferta of ofertas()">
           
-          <!-- Seasonal Snowy Cap overlay on images for Christmas -->
-          <div *ngIf="themeType() === 'christmas'" class="snow-cap"></div>
-
-          <!-- Price Tag Badge (Custom overlays per seasonal theme) -->
-          <div class="absolute -right-1.5 -top-1.5 w-20 h-20 z-20 pointer-events-none transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+          <!-- SUPER OFERTA (Estilo Vivendas: Mesma dimensão, cor de destaque amarela) -->
+          <div *ngIf="oferta.superOferta"
+               class="rounded-[2rem] p-5 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 flex flex-col items-center text-center overflow-hidden w-full bg-gradient-to-b from-[#fbcf15] to-[#f59e0b] border-4 border-[#eab308] shadow-amber-500/20 scale-[1.01] group relative">
             
-            <!-- Mother's Day Price Splash -->
-            <div *ngIf="themeType() === 'mothersday'" 
-                 class="absolute inset-0 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full shadow-lg border-2 border-amber-300 flex flex-col items-center justify-center rotate-6">
-              <span class="text-[9px] font-black text-amber-200 leading-none uppercase">R$</span>
-              <span class="text-xl font-black text-white leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
-              <span class="text-[8px] font-bold text-rose-100 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            <!-- Super Oferta Top Badge -->
+            <div class="absolute top-4 left-4 z-20 shrink-0">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-950 text-[#fbcf15] border border-zinc-800 shadow-md animate-pulse">
+                🌟 Destaque
+              </span>
             </div>
 
-            <!-- Easter Price Splash -->
-            <div *ngIf="themeType() === 'easter'" 
-                 class="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-300 easter-egg-price shadow-lg border-2 border-amber-800 flex flex-col items-center justify-center rotate-12">
-              <span class="text-[9px] font-black text-amber-900 leading-none uppercase">R$</span>
-              <span class="text-xl font-black text-amber-950 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
-              <span class="text-[8px] font-bold text-amber-900 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            <!-- 1. TÍTULO DO PRODUTO NO TOPO (Estilo Vivendas) -->
+            <div class="w-full text-center pt-2 px-1 mb-2">
+              <span class="text-[8px] font-black uppercase tracking-widest text-[#1b431e]/60 block mb-0.5">Oferta Especial</span>
+              <h3 class="text-sm font-black uppercase tracking-tight leading-tight text-[#1b431e] m-0 line-clamp-2 h-10 flex items-center justify-center">
+                {{ oferta.nomeProduto }}
+              </h3>
             </div>
 
-            <!-- Christmas Price Splash -->
-            <div *ngIf="themeType() === 'christmas'" 
-                 class="absolute inset-0 bg-gradient-to-br from-red-600 to-rose-700 rounded-full shadow-lg border-2 border-yellow-400 flex flex-col items-center justify-center -rotate-6">
-              <span class="text-[9px] font-black text-yellow-300 leading-none uppercase">R$</span>
-              <span class="text-xl font-black text-white leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
-              <span class="text-[8px] font-bold text-red-100 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            <!-- 2. IMAGEM DO PRODUTO NO MEIO (Tamanho igual ao normal) -->
+            <div class="h-48 w-full flex items-center justify-center bg-transparent rounded-2xl mb-4 overflow-hidden relative">
+              <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" [alt]="oferta.nomeProduto"
+                   class="max-h-40 object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500">
+              <mat-icon *ngIf="!oferta.urlImagem" class="text-[#1b431e]/20 text-6xl h-auto w-auto flex items-center justify-center">image</mat-icon>
             </div>
 
-            <!-- Black Friday Price Splash -->
-            <div *ngIf="themeType() === 'blackfriday'" 
-                 class="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl shadow-xl border-2 border-black flex flex-col items-center justify-center rotate-6">
-              <span class="text-[9px] font-black text-black leading-none uppercase">R$</span>
-              <span class="text-xl font-black text-black leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
-              <span class="text-[8px] font-bold text-zinc-900 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+            <!-- 3. SELO DE PREÇO NO RODAPÉ (Estilo Vivendas: Bloco verde horizontal premium com logo à esquerda) -->
+            <div class="w-full bg-[#1b431e] rounded-2xl py-2 px-3 flex items-center justify-between shadow-lg border border-white/10 mt-auto">
+              <!-- Círculo com inicial do mercado -->
+              <div class="w-9 h-9 rounded-full bg-[#fbcf15] text-[#1b431e] font-black flex items-center justify-center shrink-0 shadow-md text-xs uppercase">
+                {{ supermarket()?.nomeFantasia?.charAt(0) || 'S' }}
+              </div>
+              <!-- Preço em destaque em amarelo -->
+              <div class="flex-grow flex items-center justify-end gap-1 text-white pr-1">
+                <span class="text-[9px] font-black text-[#fbcf15] leading-none uppercase">R$</span>
+                <div class="flex items-baseline font-black leading-none">
+                  <span class="text-2xl md:text-3xl tracking-tighter text-[#fbcf15]">{{ oferta.preco | number:'1.2-2' | slice:0:-3 }}</span>
+                  <span class="text-sm text-white">,{{ oferta.preco | number:'1.2-2' | slice:-2 }}</span>
+                </div>
+                <span class="text-[10px] font-bold uppercase text-white/80 ml-0.5">/{{ oferta.unidadeMedida }}</span>
+              </div>
             </div>
 
-            <!-- Default Price Splash -->
-            <div *ngIf="themeType() === 'default'" 
-                 class="absolute inset-0 bg-yellow-400 rounded-full shadow-md border-2 flex flex-col items-center justify-center rotate-12"
-                 [style.border-color]="brandPrimary()">
-              <span class="text-[9px] font-black text-red-700 leading-none uppercase">R$</span>
-              <span class="text-xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
-              <span class="text-[8px] font-bold text-red-800 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
-            </div>
-
-          </div>
-
-          <!-- Product Image Wrapper (Enhanced with pure white backgrounds for dark modes/Black Friday visibility) -->
-          <div class="aspect-square w-full p-4 flex items-center justify-center relative overflow-hidden transition-colors"
-               [ngClass]="{
-                 'bg-rose-50/50': themeType() === 'mothersday',
-                 'bg-amber-100/20': themeType() === 'easter',
-                 'bg-white rounded-t-3xl': themeType() === 'blackfriday',
-                 'bg-gray-50': themeType() !== 'blackfriday' && themeType() !== 'mothersday' && themeType() !== 'easter'
-               }">
-            <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" 
-                 class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                 [ngClass]="{
-                   'mix-blend-multiply': themeType() !== 'blackfriday',
-                   'mix-blend-normal': themeType() === 'blackfriday'
-                 }">
-            <mat-icon *ngIf="!oferta.urlImagem" class="text-gray-200 text-6xl">image</mat-icon>
-            
-            <!-- Category Badge -->
-            <div class="absolute bottom-3 left-3 px-2.5 py-0.5 text-[9px] font-black rounded uppercase tracking-wider backdrop-blur-sm shadow-sm"
-                 [ngClass]="{
-                   'bg-rose-500 text-white': themeType() === 'mothersday',
-                   'bg-amber-700 text-white': themeType() === 'easter',
-                   'bg-emerald-600 text-white': themeType() === 'christmas',
-                   'bg-amber-500 text-black': themeType() === 'blackfriday',
-                   'bg-black/60 text-white': themeType() === 'default'
-                 }"
-                 [style.background-color]="themeType() === 'default' ? brandPrimary() : null">
-              {{ themeType() === 'blackfriday' ? 'Super Oferta' : 'Oferta' }}
-            </div>
-          </div>
-
-          <!-- Product Info -->
-          <div class="p-4 flex-1 flex flex-col justify-between"
-               [ngClass]="{'bg-zinc-950 text-white': themeType() === 'blackfriday'}">
-            <h3 class="text-xs sm:text-sm font-extrabold leading-snug mb-3 line-clamp-2 h-9"
-                 [ngClass]="{
-                   'text-rose-900 font-serif-classic normal-case': themeType() === 'mothersday',
-                   'text-zinc-800': themeType() !== 'blackfriday' && themeType() !== 'mothersday',
-                   'text-gray-100': themeType() === 'blackfriday'
-                 }">
-              {{ oferta.nomeProduto }}
-            </h3>
-            
-            <!-- CTA Favorite Button -->
+            <!-- 4. BOTÃO DE FAVORITO -->
             <button (click)="toggleFavorito(oferta.id)"
-                    class="w-full py-2.5 font-black text-[10px] uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm animate-pulse-subtle"
+                    class="w-full py-3 font-black text-[10px] uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-md border-0 cursor-pointer mt-4"
                     [ngClass]="{
-                      'bg-rose-100 hover:bg-rose-600 text-rose-800 hover:text-white': themeType() === 'mothersday' && !isFavorito(oferta.id),
-                      'bg-rose-500 text-white shadow-rose-200': themeType() === 'mothersday' && isFavorito(oferta.id),
-                      
-                      'bg-amber-100 hover:bg-amber-700 text-amber-900 hover:text-white': themeType() === 'easter' && !isFavorito(oferta.id),
-                      'bg-amber-600 text-white shadow-amber-200': themeType() === 'easter' && isFavorito(oferta.id),
-                      
-                      'bg-emerald-100 hover:bg-emerald-600 text-emerald-800 hover:text-white': themeType() === 'christmas' && !isFavorito(oferta.id),
-                      'bg-emerald-600 text-white shadow-emerald-200': themeType() === 'christmas' && isFavorito(oferta.id),
-                      
-                      'bg-zinc-900 hover:bg-zinc-800 border border-amber-500/25 text-amber-400': themeType() === 'blackfriday' && !isFavorito(oferta.id),
-                      'bg-amber-500 text-black font-black shadow-amber-500/25': themeType() === 'blackfriday' && isFavorito(oferta.id),
-                      
-                      'bg-gray-100 hover:bg-gray-200 text-gray-700': themeType() === 'default' && !isFavorito(oferta.id),
-                      'bg-[var(--color-primary)] text-white shadow-md': themeType() === 'default' && isFavorito(oferta.id)
-                    }"
-                    [style.background-color]="themeType() === 'default' && !isFavorito(oferta.id) ? hexToRgba(brandPrimary(), 0.08) : (themeType() === 'default' && isFavorito(oferta.id) ? brandPrimary() : null)"
-                    [style.color]="themeType() === 'default' && !isFavorito(oferta.id) ? brandPrimary() : null"
-                    [style.border-color]="themeType() === 'default' && !isFavorito(oferta.id) ? hexToRgba(brandPrimary(), 0.15) : null">
+                      'bg-slate-950 text-[#fbcf15] hover:bg-slate-900 border border-zinc-800': !isFavorito(oferta.id),
+                      'bg-[#fbcf15] text-slate-950 font-black shadow-lg border border-[#eab308]': isFavorito(oferta.id)
+                    }">
               <mat-icon class="!text-xs !w-3.5 !h-3.5 flex items-center justify-center">
                 {{ isFavorito(oferta.id) ? 'favorite' : 'favorite_border' }}
               </mat-icon>
               {{ isFavorito(oferta.id) ? 'Favoritado' : 'Favoritar' }}
             </button>
+
           </div>
-        </div>
+
+          <!-- OFERTA NORMAL -->
+          <div *ngIf="!oferta.superOferta"
+               class="rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 relative flex flex-col group overflow-hidden w-full border-2 border-transparent"
+               [ngClass]="{
+                 'bg-white text-gray-800 border-b-4': true,
+                 'mothers-card border-b-rose-500': themeType() === 'mothersday',
+                 'border-b-amber-700 border-amber-900/5': themeType() === 'easter',
+                 'border-b-emerald-600': themeType() === 'christmas',
+                 'bf-card border-b-amber-500': themeType() === 'blackfriday',
+                 'border-b-[var(--color-primary)] border-gray-100': themeType() === 'default'
+               }"
+               [style.border-bottom-color]="themeType() === 'default' ? brandPrimary() : null">
+            
+            <!-- Seasonal Snowy Cap overlay on images for Christmas -->
+            <div *ngIf="themeType() === 'christmas'" class="snow-cap"></div>
+
+            <!-- Price Tag Badge -->
+            <div class="absolute -right-1.5 -top-1.5 w-20 h-20 z-20 pointer-events-none transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+              
+              <!-- Mother's Day Price Splash -->
+              <div *ngIf="themeType() === 'mothersday'" 
+                   class="absolute inset-0 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full shadow-lg border-2 border-amber-300 flex flex-col items-center justify-center rotate-6">
+                <span class="text-[9px] font-black text-amber-200 leading-none uppercase">R$</span>
+                <span class="text-xl font-black text-white leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                <span class="text-[8px] font-bold text-rose-100 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+              </div>
+
+              <!-- Easter Price Splash -->
+              <div *ngIf="themeType() === 'easter'" 
+                   class="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-300 easter-egg-price shadow-lg border-2 border-amber-800 flex flex-col items-center justify-center rotate-12">
+                <span class="text-[9px] font-black text-amber-900 leading-none uppercase">R$</span>
+                <span class="text-xl font-black text-amber-950 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                <span class="text-[8px] font-bold text-amber-900 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+              </div>
+
+              <!-- Christmas Price Splash -->
+              <div *ngIf="themeType() === 'christmas'" 
+                   class="absolute inset-0 bg-gradient-to-br from-red-600 to-rose-700 rounded-full shadow-lg border-2 border-yellow-400 flex flex-col items-center justify-center -rotate-6">
+                <span class="text-[9px] font-black text-yellow-300 leading-none uppercase">R$</span>
+                <span class="text-xl font-black text-white leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                <span class="text-[8px] font-bold text-red-100 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+              </div>
+
+              <!-- Black Friday Price Splash -->
+              <div *ngIf="themeType() === 'blackfriday'" 
+                   class="absolute inset-0 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl shadow-xl border-2 border-black flex flex-col items-center justify-center rotate-6">
+                <span class="text-[9px] font-black text-black leading-none uppercase">R$</span>
+                <span class="text-xl font-black text-black leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                <span class="text-[8px] font-bold text-zinc-900 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+              </div>
+
+              <!-- Default Price Splash -->
+              <div *ngIf="themeType() === 'default'" 
+                   class="absolute inset-0 bg-yellow-400 rounded-full shadow-md border-2 flex flex-col items-center justify-center rotate-12"
+                   [style.border-color]="brandPrimary()">
+                <span class="text-[9px] font-black text-red-700 leading-none uppercase">R$</span>
+                <span class="text-xl font-black text-red-600 leading-none tracking-tighter">{{ oferta.preco | number:'1.2-2' }}</span>
+                <span class="text-[8px] font-bold text-red-800 uppercase leading-none mt-0.5">{{ oferta.unidadeMedida }}</span>
+              </div>
+
+            </div>
+
+            <!-- Product Image Wrapper -->
+            <div class="aspect-square w-full p-4 flex items-center justify-center relative overflow-hidden transition-colors"
+                 [ngClass]="{
+                   'bg-rose-50/50': themeType() === 'mothersday',
+                   'bg-amber-100/20': themeType() === 'easter',
+                   'bg-white rounded-t-3xl': themeType() === 'blackfriday',
+                   'bg-gray-50': themeType() !== 'blackfriday' && themeType() !== 'mothersday' && themeType() !== 'easter'
+                 }">
+              <img *ngIf="oferta.urlImagem" [src]="oferta.urlImagem" 
+                   class="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105">
+              <mat-icon *ngIf="!oferta.urlImagem" class="text-gray-200 text-6xl h-auto w-auto flex items-center justify-center">image</mat-icon>
+              
+              <!-- Category Badge -->
+              <div class="absolute bottom-3 left-3 px-2.5 py-0.5 text-[9px] font-black rounded uppercase tracking-wider backdrop-blur-sm shadow-sm"
+                   [ngClass]="{
+                     'bg-rose-500 text-white': themeType() === 'mothersday',
+                     'bg-amber-700 text-white': themeType() === 'easter',
+                     'bg-emerald-600 text-white': themeType() === 'christmas',
+                     'bg-amber-500 text-black': themeType() === 'blackfriday',
+                     'bg-black/60 text-white': themeType() === 'default'
+                   }"
+                   [style.background-color]="themeType() === 'default' ? brandPrimary() : null">
+                {{ themeType() === 'blackfriday' ? 'Super Oferta' : 'Oferta' }}
+              </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="p-4 flex-1 flex flex-col justify-between w-full"
+                 [ngClass]="{
+                   'bg-zinc-950 text-white': themeType() === 'blackfriday',
+                   'bg-transparent': themeType() !== 'blackfriday'
+                 }">
+              <h3 class="text-xs sm:text-sm font-extrabold leading-snug mb-3 line-clamp-2 h-9"
+                   [ngClass]="{
+                     'text-rose-900 font-serif-classic normal-case': themeType() === 'mothersday',
+                     'text-zinc-800': themeType() !== 'blackfriday' && themeType() !== 'mothersday',
+                     'text-gray-100': themeType() === 'blackfriday'
+                   }">
+                {{ oferta.nomeProduto }}
+              </h3>
+              
+              <!-- CTA Favorite Button -->
+              <button (click)="toggleFavorito(oferta.id)"
+                      class="w-full py-2.5 font-black text-[10px] uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm border-0 cursor-pointer mt-6"
+                      [ngClass]="{
+                        'bg-rose-100 text-rose-800 hover:bg-rose-600 hover:text-white': themeType() === 'mothersday' && !isFavorito(oferta.id),
+                        'bg-rose-500 text-white shadow-rose-200': themeType() === 'mothersday' && isFavorito(oferta.id),
+                        
+                        'bg-amber-100 text-amber-900 hover:bg-amber-700 hover:text-white': themeType() === 'easter' && !isFavorito(oferta.id),
+                        'bg-amber-600 text-white shadow-amber-200': themeType() === 'easter' && isFavorito(oferta.id),
+                        
+                        'bg-emerald-100 text-emerald-800 hover:bg-emerald-600 hover:text-white': themeType() === 'christmas' && !isFavorito(oferta.id),
+                        'bg-emerald-600 text-white shadow-emerald-200': themeType() === 'christmas' && isFavorito(oferta.id),
+                        
+                        'bg-zinc-900 border border-amber-500/25 text-amber-400 hover:bg-zinc-800': themeType() === 'blackfriday' && !isFavorito(oferta.id),
+                        'bg-amber-500 text-black font-black shadow-amber-500/25': themeType() === 'blackfriday' && isFavorito(oferta.id),
+                        
+                        'bg-gray-100 text-gray-700 hover:bg-gray-200': themeType() === 'default' && !isFavorito(oferta.id),
+                        'bg-[var(--color-primary)] text-white shadow-md': themeType() === 'default' && isFavorito(oferta.id)
+                      }">
+                <mat-icon class="!text-xs !w-3.5 !h-3.5 flex items-center justify-center">
+                  {{ isFavorito(oferta.id) ? 'favorite' : 'favorite_border' }}
+                </mat-icon>
+                {{ isFavorito(oferta.id) ? 'Favoritado' : 'Favoritar' }}
+              </button>
+            </div>
+          </div>
+
+        </ng-container>
       </div>
     </main>
 

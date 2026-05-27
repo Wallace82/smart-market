@@ -34,6 +34,9 @@ public class OfertaSupermercadoEntity {
     @Column(nullable = false)
     private boolean ativo = true;
 
+    @Column(name = "super_oferta", nullable = false)
+    private boolean superOferta = false;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
@@ -73,5 +76,6 @@ public class OfertaSupermercadoEntity {
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
+    public boolean isSuperOferta() { return superOferta; }
+    public void setSuperOferta(boolean superOferta) { this.superOferta = superOferta; }
 }
-

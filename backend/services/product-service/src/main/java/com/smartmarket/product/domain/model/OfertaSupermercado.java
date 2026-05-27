@@ -16,9 +16,11 @@ public class OfertaSupermercado {
     private boolean ativo;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
+    private boolean superOferta;
 
     public OfertaSupermercado() {
         this.ativo = true;
+        this.superOferta = false;
     }
 
     public boolean isPromocaoValida(LocalDateTime dataReferencia) {
@@ -52,6 +54,8 @@ public class OfertaSupermercado {
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
     public LocalDateTime getAtualizadoEm() { return atualizadoEm; }
     public void setAtualizadoEm(LocalDateTime atualizadoEm) { this.atualizadoEm = atualizadoEm; }
+    public boolean isSuperOferta() { return superOferta; }
+    public void setSuperOferta(boolean superOferta) { this.superOferta = superOferta; }
 
     @Override
     public boolean equals(Object o) {

@@ -66,12 +66,15 @@ export class OfferFormDialogComponent implements OnInit {
     let dataInicioPromocao = new Date().toISOString().split('T')[0];
     let dataFimPromocao = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
  
+    let superOferta = false;
+ 
     const offer = this.dialogData?.offer;
     if (offer) {
       this.isEditMode.set(true);
       this.originalOfferActive = offer.ativo !== undefined ? offer.ativo : true;
       precoAtual = offer.precoAtual?.toString() || offer.preco?.toString() || '';
       precoPromocional = offer.precoPromocional?.toString() || offer.preco?.toString() || '';
+      superOferta = offer.superOferta !== undefined ? offer.superOferta : false;
       
       if (offer.dataInicioPromocao) {
         dataInicioPromocao = offer.dataInicioPromocao.split('T')[0];
@@ -90,7 +93,8 @@ export class OfferFormDialogComponent implements OnInit {
       precoAtual: [precoAtual, [Validators.required, Validators.min(0.01)]],
       precoPromocional: [precoPromocional, [Validators.required, Validators.min(0.01)]],
       dataInicioPromocao: [dataInicioPromocao, [Validators.required]],
-      dataFimPromocao: [dataFimPromocao, [Validators.required]]
+      dataFimPromocao: [dataFimPromocao, [Validators.required]],
+      superOferta: [superOferta]
     });
   }
  
@@ -158,7 +162,8 @@ export class OfferFormDialogComponent implements OnInit {
         precoPromocional: formVal.precoPromocional,
         dataInicioPromocao: `${formVal.dataInicioPromocao}T00:00:00`,
         dataFimPromocao: `${formVal.dataFimPromocao}T23:59:59`,
-        ativo: this.originalOfferActive
+        ativo: this.originalOfferActive,
+        superOferta: formVal.superOferta
       };
       this.dialogRef.close(result);
     }

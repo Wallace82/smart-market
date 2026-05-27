@@ -28,6 +28,7 @@ public class OfertaMapper {
         domain.setAtivo(entity.isAtivo());
         domain.setCriadoEm(entity.getCriadoEm());
         domain.setAtualizadoEm(entity.getAtualizadoEm());
+        domain.setSuperOferta(entity.isSuperOferta());
         return domain;
     }
 
@@ -46,6 +47,7 @@ public class OfertaMapper {
         entity.setAtivo(domain.isAtivo());
         entity.setCriadoEm(domain.getCriadoEm());
         entity.setAtualizadoEm(domain.getAtualizadoEm());
+        entity.setSuperOferta(domain.isSuperOferta());
         return entity;
     }
 }

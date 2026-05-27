@@ -1,0 +1,1 @@
+ALTER TABLE ofertas_supermercado ADD COLUMN super_oferta BOOLEAN NOT NULL DEFAULT FALSE;

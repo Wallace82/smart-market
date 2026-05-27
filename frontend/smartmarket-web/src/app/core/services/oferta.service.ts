@@ -11,6 +11,7 @@ export interface OfertaSupermercado {
   unidadeMedida: string;
   urlImagem?: string;
   ativo: boolean;
+  superOferta?: boolean;
  
   // Rich backend representation
   produtoBase?: {
@@ -53,6 +54,7 @@ export class OfertaService {
     precoPromocional: number;
     dataInicioPromocao: string;
     dataFimPromocao: string;
+    superOferta?: boolean;
   }): Observable<OfertaSupermercado> {
     return this.http.post<any>(
       `${this.apiUrl}/supermercado/${supermercadoId}/produto/${produtoBaseId}`,
@@ -66,6 +68,7 @@ export class OfertaService {
     dataInicioPromocao: string;
     dataFimPromocao: string;
     ativo: boolean;
+    superOferta?: boolean;
   }): Observable<OfertaSupermercado> {
     return this.http.put<any>(
       `${this.apiUrl}/${id}/produto/${produtoBaseId}`,
@@ -87,7 +90,8 @@ export class OfertaService {
       preco: precoEfetivo || 0.0,
       urlImagem: o.urlImagem || o.produtoBase?.urlImagem || '',
       unidadeMedida: o.unidadeMedida || o.produtoBase?.unidadeMedida || 'UN',
-      ativo: o.ativo !== undefined ? o.ativo : true
+      ativo: o.ativo !== undefined ? o.ativo : true,
+      superOferta: o.superOferta !== undefined ? o.superOferta : false
     };
   }
 }

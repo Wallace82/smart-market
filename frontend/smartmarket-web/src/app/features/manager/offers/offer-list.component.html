@@ -88,6 +88,11 @@
                       }
                     </div>
                     <span class="font-bold text-gray-900 text-sm">{{ offer.productName }}</span>
+                    @if (offer.superOferta) {
+                      <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-700 border border-amber-500/30 shadow-sm shrink-0">
+                        ⭐ Super
+                      </span>
+                    }
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 font-semibold">{{ offer.category }}</td>

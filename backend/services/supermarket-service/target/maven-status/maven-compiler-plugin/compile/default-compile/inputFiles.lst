@@ -23,6 +23,7 @@ C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\ja
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\usecase\CadastrarSupermercadoUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\adapter\out\persistence\adapter\CampanhaRepositoryAdapter.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\adapter\out\persistence\FilialRepository.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\usecase\IncrementarConversoesUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\usecase\DeletarCampanhaUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\adapter\out\persistence\adapter\SupermercadoRepositoryAdapter.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\adapter\out\persistence\mapper\SupermercadoMapper.java
@@ -43,6 +44,7 @@ C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\ja
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\domain\service\BrandImageStorageService.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\dto\FilialResponse.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\infrastructure\adapter\out\persistence\mapper\FilialMapper.java
+C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\usecase\IncrementarDisparosUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\domain\model\Supermercado.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\dto\PagedSupermarketResponse.java
 C:\Users\Foton\git\smart-market\backend\services\supermarket-service\src\main\java\com\smartmarket\supermarket\application\dto\CreatePlanRequest.java

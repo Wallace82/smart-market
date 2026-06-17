@@ -18,11 +18,13 @@ com\smartmarket\supermarket\domain\model\SupermercadoStatus.class
 com\smartmarket\supermarket\application\usecase\CadastrarSupermercadoUseCase.class
 com\smartmarket\supermarket\infrastructure\adapter\out\persistence\SupermercadoRepository.class
 com\smartmarket\supermarket\application\usecase\CadastrarFilialUseCase.class
+com\smartmarket\supermarket\application\usecase\IncrementarDisparosUseCase.class
 com\smartmarket\supermarket\domain\service\BrandImageStorageService.class
 com\smartmarket\supermarket\application\dto\SupermercadoResponse.class
 com\smartmarket\supermarket\infrastructure\storage\minio\MinioConfig.class
 com\smartmarket\supermarket\infrastructure\adapter\in\web\FilialController.class
 com\smartmarket\supermarket\domain\model\Campanha.class
+com\smartmarket\supermarket\application\usecase\IncrementarConversoesUseCase.class
 com\smartmarket\supermarket\application\port\out\FilialDomainRepository.class
 com\smartmarket\supermarket\infrastructure\adapter\in\web\HealthController.class
 com\smartmarket\supermarket\application\dto\UpdateSupermarketStatusRequest.class

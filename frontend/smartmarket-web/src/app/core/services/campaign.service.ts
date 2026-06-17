@@ -25,4 +25,12 @@ export class CampaignService {
   deletar(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  registrarDisparo(id: string): Observable<Campaign> {
+    return this.http.patch<Campaign>(`${this.apiUrl}/${id}/disparo`, {});
+  }
+
+  registrarConversao(id: string): Observable<Campaign> {
+    return this.http.patch<Campaign>(`${this.apiUrl}/${id}/conversao`, {});
+  }
 }

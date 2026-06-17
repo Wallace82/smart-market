@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.smartmarket.supermarket.application.usecase.IncrementarDisparosUseCase;
+import com.smartmarket.supermarket.application.usecase.IncrementarConversoesUseCase;
+
 @RestController
 @RequestMapping("/api/v1/campanhas")
 public class CampanhaController {
@@ -23,15 +26,21 @@ public class CampanhaController {
     private final ListarCampanhasPorSupermercadoUseCase listarCampanhasPorSupermercadoUseCase;
     private final AlterarStatusCampanhaUseCase alterarStatusCampanhaUseCase;
     private final DeletarCampanhaUseCase deletarCampanhaUseCase;
+    private final IncrementarDisparosUseCase incrementarDisparosUseCase;
+    private final IncrementarConversoesUseCase incrementarConversoesUseCase;
 
     public CampanhaController(CadastrarCampanhaUseCase cadastrarCampanhaUseCase,
                               ListarCampanhasPorSupermercadoUseCase listarCampanhasPorSupermercadoUseCase,
                               AlterarStatusCampanhaUseCase alterarStatusCampanhaUseCase,
-                              DeletarCampanhaUseCase deletarCampanhaUseCase) {
+                              DeletarCampanhaUseCase deletarCampanhaUseCase,
+                              IncrementarDisparosUseCase incrementarDisparosUseCase,
+                              IncrementarConversoesUseCase incrementarConversoesUseCase) {
         this.cadastrarCampanhaUseCase = cadastrarCampanhaUseCase;
         this.listarCampanhasPorSupermercadoUseCase = listarCampanhasPorSupermercadoUseCase;
         this.alterarStatusCampanhaUseCase = alterarStatusCampanhaUseCase;
         this.deletarCampanhaUseCase = deletarCampanhaUseCase;
+        this.incrementarDisparosUseCase = incrementarDisparosUseCase;
+        this.incrementarConversoesUseCase = incrementarConversoesUseCase;
     }
 
     private Campanha toDomain(CampanhaRequest request) {
@@ -66,7 +75,7 @@ public class CampanhaController {
     }
 
     @GetMapping("/supermercado/{supermercadoId}")
-    public ResponseEntity<List<CampanhaResponse>> listarPorSupermercado(@PathVariable UUID supermercadoId) {
+    public ResponseEntity<List<CampanhaResponse>> listarPorSupermercado(@PathVariable("supermercadoId") UUID supermercadoId) {
         List<Campanha> campanhas = listarCampanhasPorSupermercadoUseCase.execute(supermercadoId);
         List<CampanhaResponse> responses = campanhas.stream()
                 .map(this::fromDomain)
@@ -75,13 +84,25 @@ public class CampanhaController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<CampanhaResponse> alterarStatus(@PathVariable UUID id, @RequestBody CampanhaRequest request) {
+    public ResponseEntity<CampanhaResponse> alterarStatus(@PathVariable("id") UUID id, @RequestBody CampanhaRequest request) {
         Campanha atualizada = alterarStatusCampanhaUseCase.execute(id, request.getStatus());
         return ResponseEntity.ok(fromDomain(atualizada));
     }
 
+    @PatchMapping("/{id}/disparo")
+    public ResponseEntity<CampanhaResponse> registrarDisparo(@PathVariable("id") UUID id) {
+        Campanha atualizada = incrementarDisparosUseCase.execute(id);
+        return ResponseEntity.ok(fromDomain(atualizada));
+    }
+
+    @PatchMapping("/{id}/conversao")
+    public ResponseEntity<CampanhaResponse> registrarConversao(@PathVariable("id") UUID id) {
+        Campanha atualizada = incrementarConversoesUseCase.execute(id);
+        return ResponseEntity.ok(fromDomain(atualizada));
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletar(@PathVariable("id") UUID id) {
         deletarCampanhaUseCase.execute(id);
         return ResponseEntity.noContent().build();
     }

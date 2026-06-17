@@ -24,7 +24,7 @@ spring:
         - id: supermarket-service
           uri: ${SUPERMARKET_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/api/v1/supermercados/**, /api/v1/plans/**, /api/v1/campanhas/**
+            - Path=/api/v1/supermercados/**, /api/v1/plans/**, /api/v1/campanhas, /api/v1/campanhas/**
 
         # Rota para o product-service
         - id: product-service

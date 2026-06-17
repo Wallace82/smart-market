@@ -2,10 +2,10 @@
   <!-- Cabeçalho -->
   <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard da Loja</h1>
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Dashboard da Loja - {{ supermarketName() }}</h1>
       <p class="text-gray-500">Acompanhe o engajamento dos seus encartes e conversão de tráfego físico.</p>
     </div>
-    <button mat-flat-button class="!bg-green-600 !text-white !rounded-lg hover:!bg-green-700 shadow-sm !py-6">
+    <button (click)="novaCampanha()" mat-flat-button class="!bg-green-600 !text-white !rounded-lg hover:!bg-green-700 shadow-sm !py-6">
       <mat-icon class="mr-2">campaign</mat-icon> Nova Campanha Push
     </button>
   </div>
@@ -31,10 +31,89 @@
       }
     </div>
 
+    <!-- SEÇÃO: Engajamento do Cliente -->
+    <div class="space-y-4">
+      <div class="border-b border-gray-100 pb-2">
+        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <mat-icon class="text-green-600">analytics</mat-icon>
+          Métricas de Engajamento do Cliente
+        </h2>
+        <p class="text-xs text-gray-500">Acompanhe as interações, favoritadas, buscas e leituras de QR Code dos clientes finais.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <!-- Visualizações QR Code -->
+        <div class="bg-gradient-to-br from-amber-50/50 to-white p-6 rounded-2xl shadow-sm border border-amber-100/60 hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-amber-500/10 text-amber-600 rounded-xl">
+              <mat-icon class="!w-6 !h-6 flex items-center justify-center">qr_code</mat-icon>
+            </div>
+            <span class="text-[10px] font-black uppercase bg-amber-500/10 text-amber-700 px-2 py-0.5 rounded-full">Totem Físico</span>
+          </div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Leituras de QR Code</p>
+          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ totalQrViews() }}</h3>
+          <p class="text-[11px] text-slate-500 mt-1">Escaneamentos do totem da loja</p>
+        </div>
+
+        <!-- Cliques em Promoções -->
+        <div class="bg-gradient-to-br from-green-50/50 to-white p-6 rounded-2xl shadow-sm border border-green-100/60 hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-green-500/10 text-green-600 rounded-xl">
+              <mat-icon class="!w-6 !h-6 flex items-center justify-center">ads_click</mat-icon>
+            </div>
+            <span class="text-[10px] font-black uppercase bg-green-500/10 text-green-700 px-2 py-0.5 rounded-full">CTR Vitrine</span>
+          </div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Cliques em Ofertas</p>
+          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ totalPromoClicks() }}</h3>
+          <p class="text-[11px] text-slate-500 mt-1">Cliques para detalhar promoções</p>
+        </div>
+
+        <!-- Favoritadas -->
+        <div class="bg-gradient-to-br from-rose-50/50 to-white p-6 rounded-2xl shadow-sm border border-rose-100/60 hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-rose-500/10 text-rose-600 rounded-xl">
+              <mat-icon class="!w-6 !h-6 flex items-center justify-center">favorite</mat-icon>
+            </div>
+            <span class="text-[10px] font-black uppercase bg-rose-500/10 text-rose-700 px-2 py-0.5 rounded-full">Relevância</span>
+          </div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Promoções Favoritadas</p>
+          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ totalFavorites() }}</h3>
+          <p class="text-[11px] text-slate-500 mt-1">Salvas na lista dos clientes</p>
+        </div>
+
+        <!-- Buscas Realizadas -->
+        <div class="bg-gradient-to-br from-blue-50/50 to-white p-6 rounded-2xl shadow-sm border border-blue-100/60 hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-blue-500/10 text-blue-600 rounded-xl">
+              <mat-icon class="!w-6 !h-6 flex items-center justify-center">search</mat-icon>
+            </div>
+            <span class="text-[10px] font-black uppercase bg-blue-500/10 text-blue-700 px-2 py-0.5 rounded-full">Intenção</span>
+          </div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Buscas Realizadas</p>
+          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ totalSearches() }}</h3>
+          <p class="text-[11px] text-slate-500 mt-1">Consultas digitadas na vitrine</p>
+        </div>
+
+        <!-- Clientes no Raio 3km -->
+        <div class="bg-gradient-to-br from-purple-50/50 to-white p-6 rounded-2xl shadow-sm border border-purple-100/60 hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-4">
+            <div class="p-2.5 bg-purple-500/10 text-purple-600 rounded-xl">
+              <mat-icon class="!w-6 !h-6 flex items-center justify-center">radar</mat-icon>
+            </div>
+            <span class="text-[10px] font-black uppercase bg-purple-500/10 text-purple-700 px-2 py-0.5 rounded-full">Proximidade</span>
+          </div>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Clientes no Raio (3km)</p>
+          <h3 class="text-2xl font-black text-gray-900 mt-1">{{ clientesNoRaio() }}</h3>
+          <p class="text-[11px] text-slate-500 mt-1">Potenciais clientes ao alcance</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos e Tabelas Avançadas -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Gráfico de Conversão Phygital -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 flex flex-col">
-        <h2 class="text-lg font-bold text-gray-900 mb-6">Conversão: Notificações vs Visitas à Loja</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-6">Conversão: Notificações vs Visitas à Loja (Semanal)</h2>
         
         <div class="h-64 flex items-end gap-2 sm:gap-6 justify-between px-2 pt-8">
           @for (data of chartData(); track data.day) {
@@ -66,25 +145,103 @@
         <div class="space-y-4 flex-1">
           
           <!-- Whitelabel -->
-          <div class="flex items-center justify-between p-4 bg-green-50/50 rounded-xl border border-green-100">
+          <div class="flex items-center justify-between p-4 rounded-xl border"
+               [ngClass]="isWhitelabelConfigured() ? 'bg-green-50/50 border-green-100' : 'bg-amber-50/50 border-amber-100'">
             <div class="flex items-center gap-3">
-              <mat-icon class="!text-green-600">check_circle</mat-icon>
-              <div><p class="text-sm font-bold text-green-900">Identidade Visual</p><p class="text-xs text-green-700">Logo e Cores configuradas</p></div>
+              @if (isWhitelabelConfigured()) {
+                <mat-icon class="!text-green-600">check_circle</mat-icon>
+                <div>
+                  <p class="text-sm font-bold text-green-900">Identidade Visual</p>
+                  <p class="text-xs text-green-700">Logo e Cores configuradas</p>
+                </div>
+              } @else {
+                <mat-icon class="!text-amber-600">warning</mat-icon>
+                <div>
+                  <p class="text-sm font-bold text-amber-900">Identidade Visual</p>
+                  <p class="text-xs text-amber-700">Ajustar logo e cores primárias</p>
+                </div>
+              }
             </div>
-            <button mat-icon-button class="!text-green-600"><mat-icon>edit</mat-icon></button>
+            <button mat-icon-button (click)="irParaConfiguracoes()" [ngClass]="isWhitelabelConfigured() ? '!text-green-600' : '!text-amber-600'">
+              <mat-icon>edit</mat-icon>
+            </button>
           </div>
 
           <!-- QR Code Físico (Nova Funcionalidade de Totem) -->
           <div class="flex items-center justify-between p-4 bg-orange-50/50 rounded-xl border border-orange-100">
             <div class="flex items-center gap-3">
               <mat-icon class="!text-orange-600">qr_code_scanner</mat-icon>
-              <div><p class="text-sm font-bold text-orange-900">Totem Inteligente</p><p class="text-xs text-orange-700">Aguardando impressão</p></div>
+              <div>
+                <p class="text-sm font-bold text-orange-900">Totem Inteligente</p>
+                <p class="text-xs text-orange-700">QR Code público pronto</p>
+              </div>
             </div>
-            <button mat-icon-button class="!text-orange-600" title="Baixar PDF do Totem"><mat-icon>download</mat-icon></button>
+            <button (click)="baixarQRCode()" mat-icon-button class="!text-orange-600" title="Visualizar QR Code público">
+              <mat-icon>open_in_new</mat-icon>
+            </button>
           </div>
 
         </div>
-        <button mat-button class="!w-full !mt-6 !text-gray-600 font-medium">Configurações Avançadas</button>
+        <button (click)="irParaConfiguracoes()" mat-button class="!w-full !mt-6 !text-gray-600 font-medium">Configurações Avançadas</button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO: Top Rankings e Buscas Clientes -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Promoções Mais Relevantes -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <mat-icon class="text-rose-500">star</mat-icon>
+          Top Promoções Engajadas
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/50 border-b border-gray-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <th class="px-4 py-3">Produto</th>
+                <th class="px-4 py-3 text-right">Cliques</th>
+                <th class="px-4 py-3 text-right">Favoritado</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 text-sm">
+              @for (product of topProducts(); track product.name) {
+                <tr class="hover:bg-slate-50/30 transition-colors">
+                  <td class="px-4 py-3 font-semibold text-gray-800">{{ product.name }}</td>
+                  <td class="px-4 py-3 text-right font-medium text-slate-700">{{ product.clicks }}</td>
+                  <td class="px-4 py-3 text-right font-bold text-rose-600">{{ product.favorites }} x</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Buscas mais Frequentes -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <mat-icon class="text-blue-500">search</mat-icon>
+          Buscas Realizadas na Vitrine
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/50 border-b border-gray-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <th class="px-4 py-3">Termo Pesquisado</th>
+                <th class="px-4 py-3">Categoria Sugerida</th>
+                <th class="px-4 py-3 text-right">Volume de Buscas</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 text-sm">
+              @for (search of topSearches(); track search.query) {
+                <tr class="hover:bg-slate-50/30 transition-colors">
+                  <td class="px-4 py-3"><span class="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg font-bold text-xs">"{{ search.query }}"</span></td>
+                  <td class="px-4 py-3 text-slate-500">{{ search.category }}</td>
+                  <td class="px-4 py-3 text-right font-black text-gray-900">{{ search.count }} searches</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   }

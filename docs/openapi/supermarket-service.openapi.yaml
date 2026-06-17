@@ -293,6 +293,106 @@ paths:
         '404':
           description: Supermercado não encontrado ou inativo
 
+  /campanhas:
+    post:
+      tags: [Supermercados]
+      summary: Cadastrar campanha de Push Geofence (Gestor)
+      description: Cria uma nova campanha geolocalizada para o supermercado.
+      operationId: createCampaign
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampanhaRequest'
+      responses:
+        '201':
+          description: Campanha cadastrada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResponse'
+
+  /campanhas/supermercado/{supermercadoId}:
+    get:
+      tags: [Supermercados]
+      summary: Listar campanhas por supermercado (Gestor)
+      description: Retorna todas as campanhas vinculadas ao supermercado.
+      operationId: listCampaignsBySupermarket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: supermercadoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de campanhas encontradas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CampanhaResponse'
+
+  /campanhas/{id}/status:
+    patch:
+      tags: [Supermercados]
+      summary: Alterar status da campanha (Gestor)
+      description: Altera o status da campanha (Ativa, Pausada, Concluída).
+      operationId: updateCampaignStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [Ativa, Pausada, Concluída]
+      responses:
+        '200':
+          description: Status atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampanhaResponse'
+
+  /campanhas/{id}:
+    delete:
+      tags: [Supermercados]
+      summary: Deletar campanha (Gestor)
+      description: Exclui permanentemente uma campanha.
+      operationId: deleteCampaign
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Campanha deletada com sucesso
+
 components:
   securitySchemes:
     bearerAuth:
@@ -473,6 +573,48 @@ components:
             $ref: '#/components/schemas/SupermercadoResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
+
+    CampanhaRequest:
+      type: object
+      required: [supermercadoId, nome, segmento, raio]
+      properties:
+        supermercadoId:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        segmento:
+          type: string
+        raio:
+          type: string
+        status:
+          type: string
+
+    CampanhaResponse:
+      type: object
+      required: [id, supermercadoId, nome, segmento, raio, status, pushesEnviados, conversoes]
+      properties:
+        id:
+          type: string
+          format: uuid
+        supermercadoId:
+          type: string
+          format: uuid
+        nome:
+          type: string
+        segmento:
+          type: string
+        raio:
+          type: string
+        status:
+          type: string
+        pushesEnviados:
+          type: integer
+        conversoes:
+          type: integer
+        criadoEm:
+          type: string
+          format: date-time
 
     ErrorResponse:
       type: object

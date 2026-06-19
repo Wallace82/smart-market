@@ -4,6 +4,7 @@ import com.smartmarket.product.application.usecase.CriarOfertaUseCase;
 import com.smartmarket.product.application.usecase.ListarOfertasUseCase;
 import com.smartmarket.product.application.usecase.AtualizarOfertaUseCase;
 import com.smartmarket.product.application.usecase.ExcluirOfertaUseCase;
+import com.smartmarket.product.application.usecase.ObterOfertaUseCase;
 import com.smartmarket.product.domain.model.OfertaSupermercado;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +20,19 @@ public class OfertaController {
     private final ListarOfertasUseCase listarOfertasUseCase;
     private final AtualizarOfertaUseCase atualizarOfertaUseCase;
     private final ExcluirOfertaUseCase excluirOfertaUseCase;
+    private final ObterOfertaUseCase obterOfertaUseCase;
  
     public OfertaController(
             CriarOfertaUseCase criarOfertaUseCase, 
             ListarOfertasUseCase listarOfertasUseCase,
             AtualizarOfertaUseCase atualizarOfertaUseCase,
-            ExcluirOfertaUseCase excluirOfertaUseCase) {
+            ExcluirOfertaUseCase excluirOfertaUseCase,
+            ObterOfertaUseCase obterOfertaUseCase) {
         this.criarOfertaUseCase = criarOfertaUseCase;
         this.listarOfertasUseCase = listarOfertasUseCase;
         this.atualizarOfertaUseCase = atualizarOfertaUseCase;
         this.excluirOfertaUseCase = excluirOfertaUseCase;
+        this.obterOfertaUseCase = obterOfertaUseCase;
     }
  
     @PostMapping("/supermercado/{supermercadoId}/produto/{produtoBaseId}")
@@ -74,5 +78,12 @@ public class OfertaController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OfertaSupermercado> obterPorId(@PathVariable("id") UUID id) {
+        return obterOfertaUseCase.execute(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

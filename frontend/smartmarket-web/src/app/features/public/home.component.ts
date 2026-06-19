@@ -104,34 +104,35 @@ export class HomeComponent implements OnInit {
 
     forkJoin(requests).subscribe(results => {
       const allCampaigns = results.flat();
-      const activeCampaigns = allCampaigns.filter(c => c.status === 'Ativa');
+      const activeCampaigns = allCampaigns.filter(c => c.status === 'Ativa' || c.status === 'ATIVA');
       
       activeCampaigns.forEach(camp => {
-        if (this.notifiedCampaignIds.has(camp.id)) {
+        const campId = camp.id;
+        if (!campId) {
           return;
         }
 
-        this.notifiedCampaignIds.add(camp.id);
+        if (this.notifiedCampaignIds.has(campId)) {
+          return;
+        }
 
-        // Registrar disparo (push enviado) no backend
-        this.campaignService.registrarDisparo(camp.id).subscribe();
+        this.notifiedCampaignIds.add(campId);
 
         // 1. Mostrar notificação nativa do navegador
         if ('Notification' in window && Notification.permission === 'granted') {
           const notification = new Notification(`SmartMarket - ${camp.supermarketName}`, {
-            body: `${camp.nome}\nToque para ver promoções exclusivas!`,
+            body: `${camp.title}\nToque para ver promoções exclusivas!`,
             requireInteraction: true
           });
           notification.onclick = () => {
             window.focus();
-            this.campaignService.registrarConversao(camp.id).subscribe();
             this.router.navigate(['/supermarket', camp.supermarketId]);
           };
         }
 
         // 2. Mostrar Snackbar interativo no layout web (como Web Push Simulation)
         const snackRef = this.snackBar.open(
-          `🔔 Push: [${camp.supermarketName}] ${camp.nome}`,
+          `🔔 Push: [${camp.supermarketName}] ${camp.title}`,
           'VER OFERTAS',
           {
             duration: 10000,
@@ -142,7 +143,6 @@ export class HomeComponent implements OnInit {
         );
 
         snackRef.onAction().subscribe(() => {
-          this.campaignService.registrarConversao(camp.id).subscribe();
           this.router.navigate(['/supermarket', camp.supermarketId]);
         });
       });

@@ -1,4 +1,8 @@
 services:
+  api-gateway:
+    environment:
+      CORS_ALLOWED_ORIGINS: http://localhost:4200,http://localhost,${NGROK_URL}
+
   auth-service:
     environment:
       SPRING_PROFILES_ACTIVE: local
@@ -16,6 +20,7 @@ services:
       DB_PASSWORD: smartmarket
       SPRING_REDIS_HOST: redis
       MINIO_URL: http://smartmarket-minio:9000
+      MINIO_PUBLIC_URL_PREFIX_BRANDS: ${NGROK_URL}/smartmarket-brands/
 
   product-service:
     environment:
@@ -25,3 +30,14 @@ services:
       DB_PASSWORD: smartmarket
       SPRING_REDIS_HOST: redis
       MINIO_URL: http://smartmarket-minio:9000
+      MINIO_PUBLIC_URL_PREFIX: ${NGROK_URL}/smartmarket-products/
+      MINIO_PUBLIC_URL_PREFIX_THEMES: ${NGROK_URL}/smartmarket-themes/
+
+  notification-service:
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DB_URL: jdbc:postgresql://postgres:5432/smartmarket
+      DB_USERNAME: smartmarket
+      DB_PASSWORD: smartmarket
+      SPRING_REDIS_HOST: redis
+

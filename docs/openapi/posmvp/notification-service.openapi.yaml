@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: SmartMarket Notification Service API
-  version: 2.0.0
+  version: 3.0.0
   description: |
     # ⚠️ BACKLOG PÓS-MVP
 
@@ -10,23 +10,52 @@ info:
 
     Funcionalidades cobertas:
     - Campanhas de Push Notification por geofencing
+    - Vínculo de campanha a um Produto específico ou a um Encarte (Tabloide)
+    - Deep Link automático no push: produto → `/offers/:id` | encarte → `/flyer/:id`
+    - Deduplicação de mensagens por cliente (mesma mensagem não é enviada duas vezes ao mesmo usuário)
     - Frequency Capping (limite de pushes por loja/dia)
     - Histórico de entregas e status
     - Fallback SMS/WhatsApp
 
+    ## Regras de Vínculo de Campanha (CampaignTarget)
+
+    Ao criar uma campanha, o campo `target` é **opcional**. Quando informado:
+
+    | `target.type` | Comportamento no Push | Deep Link gerado |
+    |---|---|---|
+    | `PRODUCT` | O texto da notificação inclui automaticamente o nome e preço promocional do produto | `/offers/{target.referenceId}` |
+    | `FLYER` | O texto da notificação inclui o título do encarte | `/flyer/{target.referenceId}` |
+
+    Se `target` for omitido, a campanha é genérica sem deep link.
+
+    ## Regra de Deduplicação
+
+    Antes de entregar qualquer notificação a um cliente, o sistema verifica se
+    aquele cliente já recebeu uma mensagem com o mesmo **conteúdo** (hash SHA-256
+    de `campaignId` + `clientId` + `message`) **dentro do período de vigência da campanha**.
+    Se o registro já existir com status `ENVIADA`, a entrega é bloqueada com
+    `blockReason: DUPLICATE_MESSAGE`.
+
     > Tracking em background, geofencing e notificações push por proximidade estão
-    > **explicitamente fora do escopo MVP** (ver RF-06 e RF-08 em REQUIREMENTS.md).
+    > **explicitamente fora do escopo MVP** (ver RF-10 em REQUIREMENTS.md).
 servers:
   - url: /api/v1
 tags:
   - name: Campaigns
+    description: Criação e gerenciamento de campanhas de push notification
   - name: Geofence
+    description: Avaliação de disparo por proximidade geográfica
   - name: Notifications
+    description: Histórico e status de entregas individuais
 paths:
   /campaigns:
     post:
       tags: [Campaigns]
-      summary: Criar campanha de notificacao
+      summary: Criar campanha de notificação
+      description: |
+        Cria uma campanha de push notification. O campo `target` é opcional e permite
+        vincular a campanha a um **Produto** ou a um **Encarte**, gerando deep link automático
+        no push recebido pelo cliente.
       operationId: createCampaign
       security:
         - bearerAuth: []
@@ -36,13 +65,55 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateCampaignRequest'
+            examples:
+              campanha_generica:
+                summary: Campanha genérica sem vínculo
+                value:
+                  supermarketId: "a1b2c3d4-0000-0000-0000-000000000001"
+                  title: "🔥 Promoções do dia!"
+                  message: "Confira as ofertas imperdíveis da semana no Supermercado Bom Preço."
+                  radiusMeters: 3000
+                  dailyLimitPerClient: 2
+              campanha_produto:
+                summary: Campanha vinculada a um Produto
+                value:
+                  supermarketId: "a1b2c3d4-0000-0000-0000-000000000001"
+                  title: "🥩 Oferta Especial"
+                  message: "Picanha Bovina por apenas R$ 49,90/kg. Clique para ver!"
+                  radiusMeters: 2000
+                  dailyLimitPerClient: 1
+                  target:
+                    type: PRODUCT
+                    referenceId: "p1b2c3d4-0000-0000-0000-000000000042"
+              campanha_encarte:
+                summary: Campanha vinculada a um Encarte
+                value:
+                  supermarketId: "a1b2c3d4-0000-0000-0000-000000000001"
+                  title: "📰 Encarte de Fim de Ano!"
+                  message: "Veja o tabloide completo de fim de ano com mais de 50 ofertas."
+                  radiusMeters: 5000
+                  dailyLimitPerClient: 1
+                  target:
+                    type: FLYER
+                    referenceId: "f1b2c3d4-0000-0000-0000-000000000099"
       responses:
         '201':
-          description: Campanha criada
+          description: Campanha criada com sucesso.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CampaignResponse'
+        '400':
+          description: Payload inválido ou `target.referenceId` não encontrado para o tipo informado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
     get:
       tags: [Campaigns]
       summary: Listar campanhas por supermercado
@@ -65,6 +136,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PagedCampaignResponse'
+
+  /campaigns/{id}:
+    get:
+      tags: [Campaigns]
+      summary: Obter detalhes de uma campanha
+      operationId: getCampaignById
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CampaignIdPath'
+      responses:
+        '200':
+          description: Campanha encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+        '404':
+          description: Campanha não encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /campaigns/{id}/status:
     patch:
       tags: [Campaigns]
@@ -87,10 +182,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CampaignResponse'
+
   /geofence/evaluate:
     post:
       tags: [Geofence]
-      summary: Avaliar disparo de notificacao por geofencing
+      summary: Avaliar disparo de notificação por geofencing
+      description: |
+        Recebe a posição atual de um cliente e avalia quais campanhas ativas
+        do supermercado mais próximo devem disparar push notification.
+
+        O sistema aplica automaticamente:
+        1. Filtro de raio (`radiusMeters`) de cada campanha ativa.
+        2. **Frequency Capping**: bloqueia se o cliente já atingiu `dailyLimitPerClient` no dia.
+        3. **Deduplicação**: bloqueia se o cliente já recebeu a mesma mensagem nesta campanha.
+
+        A entrega é sempre processada de forma assíncrona via fila interna.
       operationId: evaluateGeofence
       security:
         - bearerAuth: []
@@ -102,15 +208,22 @@ paths:
               $ref: '#/components/schemas/GeofenceEvaluateRequest'
       responses:
         '202':
-          description: Avaliacao recebida; entrega processada assincronamente
+          description: Avaliação recebida; entrega processada assincronamente.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeofenceEvaluateResponse'
+
   /notifications/history:
     get:
       tags: [Notifications]
-      summary: Historico de notificacoes
+      summary: Histórico de notificações
+      description: |
+        Retorna histórico paginado de entregas com filtros por campanha, cliente e status.
+        O campo `blockReason` indica o motivo do bloqueio quando `status = BLOQUEADA`:
+        - `FREQUENCY_CAP_EXCEEDED`: limite diário por cliente atingido.
+        - `DUPLICATE_MESSAGE`: esta mensagem já foi enviada para este cliente nesta campanha.
+        - `CONSENT_REVOKED`: cliente revogou o `consentPush`.
       operationId: listNotificationHistory
       security:
         - bearerAuth: []
@@ -141,12 +254,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PagedDeliveryResponse'
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  responses:
+    UnauthorizedError:
+      description: Token de acesso ausente ou inválido.
+    ForbiddenError:
+      description: Usuário autenticado não possui permissão (role) para acessar este recurso.
+
   parameters:
     CampaignIdPath:
       name: id
@@ -170,13 +291,69 @@ components:
         minimum: 1
         maximum: 100
         default: 20
+
   schemas:
+
+    # ──────────────────────────────────────────────────
+    # Enumerações
+    # ──────────────────────────────────────────────────
     CampaignStatus:
       type: string
       enum: [ATIVA, PAUSADA]
+      description: Estado operacional da campanha.
+
+    CampaignTargetType:
+      type: string
+      enum: [PRODUCT, FLYER]
+      description: |
+        Tipo de entidade vinculada ao push notification.
+        - `PRODUCT`: o push exibe o nome e preço promocional do produto e o deep link aponta para `/offers/{referenceId}`.
+        - `FLYER`: o push exibe o título do encarte e o deep link aponta para `/flyer/{referenceId}`.
+
     NotificationDeliveryStatus:
       type: string
       enum: [PENDENTE, ENVIADA, FALHA, BLOQUEADA]
+      description: Status da tentativa de entrega individual ao cliente.
+
+    NotificationBlockReason:
+      type: string
+      enum: [FREQUENCY_CAP_EXCEEDED, DUPLICATE_MESSAGE, CONSENT_REVOKED]
+      description: |
+        Motivo do bloqueio quando `status = BLOQUEADA`:
+        - `FREQUENCY_CAP_EXCEEDED`: cliente já atingiu `dailyLimitPerClient` no dia corrente.
+        - `DUPLICATE_MESSAGE`: cliente já recebeu esta mesma mensagem nesta campanha (deduplicação por hash SHA-256 de campaignId + clientId + message).
+        - `CONSENT_REVOKED`: cliente revogou o consentimento de push (`consentPush = false`).
+
+    # ──────────────────────────────────────────────────
+    # Vínculo de Campanha (Target)
+    # ──────────────────────────────────────────────────
+    CampaignTarget:
+      type: object
+      required: [type, referenceId]
+      description: |
+        Define o vínculo opcional da campanha a uma entidade do sistema.
+        Quando presente, o push gerado inclui deep link direto ao item vinculado.
+      properties:
+        type:
+          $ref: '#/components/schemas/CampaignTargetType'
+        referenceId:
+          type: string
+          format: uuid
+          description: |
+            UUID da entidade vinculada. Deve existir e estar ativa no momento da criação:
+            - Se `type = PRODUCT`: UUID de uma oferta ativa do supermercado (offer.id).
+            - Se `type = FLYER`: UUID de um encarte com status ATIVO (flyer.id).
+        deepLink:
+          type: string
+          readOnly: true
+          description: |
+            URL relativa de destino gerada automaticamente pelo sistema.
+            Exemplos: `/offers/uuid-da-oferta` ou `/flyer/uuid-do-encarte`.
+          example: "/flyer/f1b2c3d4-0000-0000-0000-000000000099"
+
+    # ──────────────────────────────────────────────────
+    # Campanha
+    # ──────────────────────────────────────────────────
     CreateCampaignRequest:
       type: object
       required: [supermarketId, title, message, radiusMeters, dailyLimitPerClient]
@@ -184,31 +361,45 @@ components:
         supermarketId:
           type: string
           format: uuid
+          description: UUID do supermercado dono da campanha.
         title:
           type: string
           minLength: 3
           maxLength: 120
+          description: Título exibido no push notification.
         message:
           type: string
           minLength: 3
           maxLength: 500
+          description: |
+            Corpo da mensagem do push. Quando `target.type = PRODUCT`, o sistema
+            PODE enriquecer automaticamente com o nome e preço promocional do produto
+            ao final do texto, se o campo estiver vazio ou genérico.
         radiusMeters:
           type: integer
           minimum: 100
           maximum: 50000
+          description: Raio de disparo em metros a partir da loja.
+          example: 3000
         dailyLimitPerClient:
           type: integer
           minimum: 1
           maximum: 20
+          description: Número máximo de pushes desta campanha que um mesmo cliente pode receber por dia.
+          example: 1
+        target:
+          $ref: '#/components/schemas/CampaignTarget'
+
     UpdateCampaignStatusRequest:
       type: object
       required: [status]
       properties:
         status:
           $ref: '#/components/schemas/CampaignStatus'
+
     CampaignResponse:
       type: object
-      required: [id, supermarketId, title, message, radiusMeters, dailyLimitPerClient, status]
+      required: [id, supermarketId, title, message, radiusMeters, dailyLimitPerClient, status, createdAt]
       properties:
         id:
           type: string
@@ -226,9 +417,20 @@ components:
           type: integer
         status:
           $ref: '#/components/schemas/CampaignStatus'
+        target:
+          $ref: '#/components/schemas/CampaignTarget'
+          nullable: true
+          description: Vínculo com produto ou encarte. Null para campanhas genéricas.
         createdAt:
           type: string
           format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ──────────────────────────────────────────────────
+    # Geofence
+    # ──────────────────────────────────────────────────
     GeofenceEvaluateRequest:
       type: object
       required: [clientId, latitude, longitude, eventAt]
@@ -245,6 +447,7 @@ components:
         eventAt:
           type: string
           format: date-time
+
     GeofenceEvaluateResponse:
       type: object
       required: [accepted]
@@ -253,6 +456,10 @@ components:
           type: boolean
         traceId:
           type: string
+
+    # ──────────────────────────────────────────────────
+    # Entrega de Notificação
+    # ──────────────────────────────────────────────────
     NotificationDeliveryResponse:
       type: object
       required: [id, campaignId, clientId, status, sentAt]
@@ -272,7 +479,17 @@ components:
           type: string
           format: date-time
         blockReason:
+          $ref: '#/components/schemas/NotificationBlockReason'
+          nullable: true
+          description: Preenchido apenas quando `status = BLOQUEADA`.
+        deepLink:
           type: string
+          nullable: true
+          description: Deep link incluído no push enviado ao cliente (ex. `/flyer/uuid` ou `/offers/uuid`). Null para campanhas genéricas.
+
+    # ──────────────────────────────────────────────────
+    # Paginação
+    # ──────────────────────────────────────────────────
     PageMetadata:
       type: object
       properties:
@@ -285,6 +502,7 @@ components:
           format: int64
         totalPages:
           type: integer
+
     PagedCampaignResponse:
       type: object
       properties:
@@ -294,6 +512,7 @@ components:
             $ref: '#/components/schemas/CampaignResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
+
     PagedDeliveryResponse:
       type: object
       properties:
@@ -303,6 +522,7 @@ components:
             $ref: '#/components/schemas/NotificationDeliveryResponse'
         page:
           $ref: '#/components/schemas/PageMetadata'
+
     ErrorResponse:
       type: object
       required: [code, message, traceId, timestamp]

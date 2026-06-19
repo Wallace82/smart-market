@@ -133,12 +133,14 @@ services:
       PRODUCT_SERVICE_URL: http://smartmarket-product-service:8083
       BILLING_SERVICE_URL: http://smartmarket-billing-service:8084
       CONCIERGE_SERVICE_URL: http://smartmarket-concierge-service:8085
+      NOTIFICATION_SERVICE_URL: http://smartmarket-notification-service:8087
     depends_on:
       - auth-service
       - supermarket-service
       - product-service
       - billing-service
       - concierge-service
+      - notification-service
 
   billing-service:
     build:
@@ -175,6 +177,25 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+
+  notification-service:
+    build:
+      context: ../../backend/services/notification-service
+    container_name: smartmarket-notification-service
+    ports:
+      - "8087:8087"
+    environment:
+      DB_HOST: smartmarket-postgres
+      DB_PORT: 5432
+      DB_NAME: smartmarket
+      DB_USER: smartmarket
+      DB_PASSWORD: smartmarket
+      SUPERMARKET_SERVICE_URL: http://smartmarket-supermarket-service:8082
+      PRODUCT_SERVICE_URL: http://smartmarket-product-service:8083
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 
   frontend:
     build:

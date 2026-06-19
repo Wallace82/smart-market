@@ -100,9 +100,9 @@ export class ManagerDashboardComponent implements OnInit {
         const totalCampaigns = campanhas.length;
         const totalFiliais = filiais.length;
 
-        // Sum pushes and conversions
-        const totalPushes = campanhas.reduce((acc, c) => acc + (c.pushesEnviados || 0), 0);
-        const totalConversions = campanhas.reduce((acc, c) => acc + (c.conversoes || 0), 0);
+        // Sum pushes and conversions (handled by notification-service delivery log in production)
+        const totalPushes = 0;
+        const totalConversions = 0;
 
         this.metrics.set([
           { title: 'Encartes Ativos', value: activeFlyers.toString(), icon: 'auto_stories', colorClass: 'text-blue-500' },

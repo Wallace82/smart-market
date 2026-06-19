@@ -50,6 +50,12 @@ spring:
           predicates:
             - Path=/api/v1/clientes/**
 
+        # Rota para o notification-service (push, geofencing e histórico)
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/v1/geofence/**, /api/v1/notifications/**, /api/v1/campaigns, /api/v1/campaigns/**
+
       globalcors:
         cors-configurations:
           '[/**]':

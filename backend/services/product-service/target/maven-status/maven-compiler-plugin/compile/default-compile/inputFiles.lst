@@ -6,6 +6,7 @@ C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\c
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\ListarTemasEncarteUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\UploadTemaAssetUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\config\SecurityConfig.java
+C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\ObterOfertaUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\out\persistence\mapper\EncarteDigitalMapper.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\application\usecase\CriarEncarteDigitalUseCase.java
 C:\Users\Foton\git\smart-market\backend\services\product-service\src\main\java\com\smartmarket\product\infrastructure\adapter\in\web\MarcaController.java

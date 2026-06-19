@@ -1,19 +1,27 @@
+export interface CampaignTarget {
+  type: 'PRODUCT' | 'FLYER' | 'NONE';
+  referenceId: string | null;
+  deepLink?: string;
+}
+
 export interface Campaign {
   id?: string;
-  supermercadoId: string;
-  nome: string;
-  segmento: string;
-  raio: string;
-  status: 'Ativa' | 'Pausada' | 'Concluída';
-  pushesEnviados?: number;
-  conversoes?: number;
-  criadoEm?: string;
+  supermarketId: string;
+  title: string;
+  message: string;
+  radiusMeters: number;
+  dailyLimitPerClient: number;
+  status: 'ATIVA' | 'PAUSADA' | 'CONCLUIDA' | 'Ativa' | 'Pausada' | 'Concluída';
+  target?: CampaignTarget | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CampaignRequest {
-  supermercadoId: string;
-  nome: string;
-  segmento: string;
-  raio: string;
-  status: 'Ativa' | 'Pausada' | 'Concluída';
+  supermarketId: string;
+  title: string;
+  message: string;
+  radiusMeters: number;
+  dailyLimitPerClient: number;
+  target?: CampaignTarget | null;
 }

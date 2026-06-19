@@ -5,6 +5,7 @@ com\smartmarket\product\application\port\out\ProdutoBaseDomainRepository.class
 com\smartmarket\product\application\usecase\AlterarStatusEncarteDigitalUseCase.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\mapper\TemaEncarteMapper.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\MarcaEntity$MarcaEntityBuilder.class
+com\smartmarket\product\application\usecase\ObterOfertaUseCase.class
 com\smartmarket\product\ProductServiceApplication.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\adapter\OfertaSupermercadoRepositoryAdapter.class
 com\smartmarket\product\infrastructure\adapter\out\persistence\CategoriaEntity.class
